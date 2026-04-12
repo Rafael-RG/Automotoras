@@ -19,3 +19,18 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+
+# .NET / Azure Functions backend
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+backend/**/local.settings.json
+backend/**/.vs/
+backend/**/publish/
+
+# Publish profiles
+*.pubxml
+*.pubxml.user
+
+# Azure Functions
+backend/**/bin/publish/
