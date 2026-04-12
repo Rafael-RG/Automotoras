@@ -15,7 +15,8 @@ var host = new HostBuilder()
                 policy
                     .WithOrigins(
                         "http://localhost:3000",
-                        "https://orangered-deer-311677.hostingersite.com"
+                        "https://orangered-deer-311677.hostingersite.com",
+                        "https://redautos.com.uy"
                     )
                     .AllowAnyMethod()
                     .AllowAnyHeader();
@@ -34,6 +35,7 @@ var host = new HostBuilder()
         services.AddSingleton<DealershipStorageService>();
         services.AddSingleton<BlobStorageService>();
         services.AddSingleton<SubscriptionService>();
+        services.AddSingleton<EmailService>();
     })
     .Build();
 

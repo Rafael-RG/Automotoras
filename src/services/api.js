@@ -132,3 +132,20 @@ export const loginDealership = (email, password) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   }).then(handleResponse);
+
+export const verifyEmail = (token) =>
+  fetch(`${BASE_URL}/auth/verify-email?token=${encodeURIComponent(token)}`).then(handleResponse);
+
+export const forgotPassword = (email) =>
+  fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  }).then(handleResponse);
+
+export const resetPassword = (token, newPassword) =>
+  fetch(`${BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  }).then(handleResponse);

@@ -16,6 +16,8 @@ const RegisterScreen = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -39,14 +41,14 @@ const RegisterScreen = () => {
 
     setLoading(true);
     try {
-      const data = await registerDealership({
+      await registerDealership({
         name: form.name,
         email: form.email,
         password: form.password,
         phone: form.phone,
       });
-      localStorage.setItem('adminDealershipId', data.dealershipId);
-      navigate('/admin');
+      setRegisteredEmail(form.email);
+      setRegistered(true);
     } catch (err) {
       let msg = err.message || 'Error al registrarse.';
       try { msg = JSON.parse(msg).error ?? msg; } catch {}
@@ -55,6 +57,40 @@ const RegisterScreen = () => {
       setLoading(false);
     }
   };
+
+  // Pantalla de éxito post-registro
+  if (registered) {
+    return (
+      <div className="min-h-screen bg-[#0E0E0F] flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center mb-10">
+            <img src={logoSrc} alt="RedAutos" className="h-20 w-auto object-contain mb-6" />
+          </div>
+          <div className="bg-[#131314] border border-[#353436] rounded-sm p-8 text-center space-y-5">
+            <div className="w-16 h-16 bg-green-500/10 border border-green-500/30 rounded-full flex items-center justify-center mx-auto">
+              <span className="material-symbols-outlined text-green-400 !text-3xl">mark_email_read</span>
+            </div>
+            <h2 className="font-headline text-2xl font-black text-white tracking-tighter">¡Revisá tu email!</h2>
+            <p className="text-[#E5E2E3]/60 text-sm">
+              Enviamos un link de verificación a{' '}
+              <span className="text-white font-semibold">{registeredEmail}</span>.
+            </p>
+            <p className="text-[#E5E2E3]/40 text-xs">
+              Hacé click en el link del email para activar tu cuenta. El link expira en 24 horas.
+            </p>
+            <p className="text-[#E5E2E3]/30 text-xs">¿No llegó? Revisá la carpeta de spam.</p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full bg-primary hover:bg-primary/80 text-white font-black text-[11px] uppercase tracking-[0.25em] py-3.5 rounded-sm transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined !text-sm">login</span>
+              Ir a iniciar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] flex flex-col items-center justify-center px-6">

@@ -9,11 +9,13 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setEmailNotVerified(false);
 
     if (!email || !password) {
       setError('Por favor completá todos los campos.');
@@ -27,8 +29,15 @@ const LoginScreen = () => {
       navigate('/admin');
     } catch (err) {
       let msg = err.message || 'Credenciales incorrectas.';
-      try { msg = JSON.parse(msg).error ?? msg; } catch {}
-      setError(msg);
+      try {
+        const parsed = JSON.parse(msg);
+        msg = parsed.error ?? msg;
+      } catch {}
+      if (msg === 'EMAIL_NOT_VERIFIED') {
+        setEmailNotVerified(true);
+      } else {
+        setError(msg);
+      }
       setLoading(false);
     }
   };
@@ -54,6 +63,16 @@ const LoginScreen = () => {
             <div className="bg-primary/10 border border-primary/30 rounded-sm px-4 py-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary !text-sm">error</span>
               <p className="text-primary text-xs font-semibold">{error}</p>
+            </div>
+          )}
+
+          {emailNotVerified && (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-sm px-4 py-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-yellow-400 !text-sm">mark_email_unread</span>
+                <p className="text-yellow-300 text-xs font-semibold">Email no verificado</p>
+              </div>
+              <p className="text-yellow-200/60 text-xs">Revisá tu bandeja de entrada y hacé click en el link de verificación que te enviamos.</p>
             </div>
           )}
 
@@ -111,6 +130,16 @@ const LoginScreen = () => {
               </>
             )}
           </button>
+
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="text-[#E5E2E3]/30 hover:text-[#E5E2E3]/60 text-xs transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
 
         </form>
 

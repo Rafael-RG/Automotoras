@@ -11,6 +11,9 @@ import LoginScreen from './pages/LoginScreen';
 import PagoExitosoScreen from './pages/PagoExitosoScreen';
 import SobreNosotrosScreen from './pages/SobreNosotrosScreen';
 import PaginaAterrizajeScreen from './pages/PaginaAterrizajeScreen';
+import VerifyEmailScreen from './pages/VerifyEmailScreen';
+import ForgotPasswordScreen from './pages/ForgotPasswordScreen';
+import ResetPasswordScreen from './pages/ResetPasswordScreen';
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
         <Route path="/unirse" element={<PaginaAterrizajeScreen />} />
         <Route path="/privacidad" element={<PrivacyScreen />} />
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/verificar-email" element={<VerifyEmailScreen />} />
+        <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+        <Route path="/reset-password" element={<ResetPasswordScreen />} />
         {/* Fallback routes for other nav items */}
         <Route path="/performance" element={<InventoryScreen />} />
         <Route path="/heritage" element={<InventoryScreen />} />

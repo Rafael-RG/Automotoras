@@ -123,6 +123,7 @@ public class DealershipStorageService
             return (null!, true);
 
         var (hash, salt) = HashPassword(request.Password);
+        var token = GenerateSecureToken();
         var entity = new DealershipEntity
         {
             RowKey = Guid.NewGuid().ToString(),
@@ -135,9 +136,63 @@ public class DealershipStorageService
             Plan = "basic",
             PasswordHash = hash,
             PasswordSalt = salt,
+            IsEmailVerified = false,
+            EmailVerificationToken = token,
+            EmailVerificationTokenExpiry = DateTimeOffset.UtcNow.AddHours(24),
         };
         await _tableClient.AddEntityAsync(entity);
         return (entity, false);
+    }
+
+    public async Task<bool> VerifyEmailTokenAsync(string token)
+    {
+        await foreach (var d in _tableClient.QueryAsync<DealershipEntity>(d =>
+            d.PartitionKey == Pk && d.EmailVerificationToken == token))
+        {
+            if (d.IsEmailVerified) return true; // ya verificado
+            if (d.EmailVerificationTokenExpiry < DateTimeOffset.UtcNow) return false; // expirado
+            d.IsEmailVerified = true;
+            d.EmailVerificationToken = string.Empty;
+            d.EmailVerificationTokenExpiry = null;
+            await _tableClient.UpdateEntityAsync(d, d.ETag);
+            return true;
+        }
+        return false;
+    }
+
+    public async Task<DealershipEntity?> SetPasswordResetTokenAsync(string email)
+    {
+        var entity = await GetByEmailAsync(email);
+        if (entity is null || !entity.IsEmailVerified) return null;
+
+        entity.PasswordResetToken = GenerateSecureToken();
+        entity.PasswordResetTokenExpiry = DateTimeOffset.UtcNow.AddHours(1);
+        await _tableClient.UpdateEntityAsync(entity, entity.ETag);
+        return entity;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+    {
+        await foreach (var d in _tableClient.QueryAsync<DealershipEntity>(d =>
+            d.PartitionKey == Pk && d.PasswordResetToken == token))
+        {
+            if (d.PasswordResetTokenExpiry < DateTimeOffset.UtcNow) return false;
+            var (hash, salt) = HashPassword(newPassword);
+            d.PasswordHash = hash;
+            d.PasswordSalt = salt;
+            d.PasswordResetToken = string.Empty;
+            d.PasswordResetTokenExpiry = null;
+            await _tableClient.UpdateEntityAsync(d, d.ETag);
+            return true;
+        }
+        return false;
+    }
+
+    private static string GenerateSecureToken()
+    {
+        var bytes = new byte[32];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 
     public static bool VerifyPassword(string password, string hash, string salt)

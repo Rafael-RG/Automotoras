@@ -32,4 +32,13 @@ public class DealershipEntity : ITableEntity
     // Auth
     public string PasswordHash { get; set; } = string.Empty;
     public string PasswordSalt { get; set; } = string.Empty;
+
+    // Email verification
+    public bool IsEmailVerified { get; set; } = false;
+    public string EmailVerificationToken { get; set; } = string.Empty;
+    public DateTimeOffset? EmailVerificationTokenExpiry { get; set; }
+
+    // Password reset
+    public string PasswordResetToken { get; set; } = string.Empty;
+    public DateTimeOffset? PasswordResetTokenExpiry { get; set; }
 }

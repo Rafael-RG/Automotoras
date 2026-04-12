@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo.png';
 import {
-  getDealerships, createDealership, updateDealership, uploadDealershipLogo,
+  getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, removeVehicleImage,
   createSubscriptionCheckout, verifySubscription,
 } from '../services/api';
@@ -1545,9 +1545,11 @@ const AdminDashboard = () => {
   const currentDealership = dealerships.find((d) => d.id === selectedId) || null;
 
   const loadDealerships = useCallback(async () => {
+    const storedId = localStorage.getItem('adminDealershipId');
+    if (!storedId) return;
     try {
-      const data = await getDealerships();
-      setDealerships(data);
+      const data = await getDealershipById(storedId);
+      if (data) setDealerships([data]);
     } catch {}
   }, []);
 
