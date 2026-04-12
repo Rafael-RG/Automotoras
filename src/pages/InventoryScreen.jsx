@@ -69,6 +69,7 @@ const InventoryScreen = () => {
   const [yearMax, setYearMax] = useState('');
   const [kmMax, setKmMax] = useState('');
   const [sortBy, setSortBy] = useState('default');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Geolocation + distance filter
   const [dealershipMap, setDealershipMap] = useState({});
@@ -185,11 +186,11 @@ const InventoryScreen = () => {
   return (
     <div className="bg-[#0E0E0F]">
       <TopNavBar />
-      <main className="pt-36 pb-20 px-12 max-w-screen-2xl mx-auto">
+      <main className="pt-20 md:pt-36 pb-20 px-4 md:px-12 max-w-screen-2xl mx-auto">
 
         {/* Hero Slideshow */}
-        <section className="mb-20">
-          <div className="relative overflow-hidden rounded-sm bg-black h-[520px] flex items-center px-16 border border-[#353436]/30 group">
+        <section className="mb-10 md:mb-20">
+          <div className="relative overflow-hidden rounded-sm bg-black h-[220px] sm:h-[360px] md:h-[520px] flex items-center px-5 md:px-16 border border-[#353436]/30 group">
 
             {/* Images — crossfade */}
             {HERO_IMAGES.map((src, idx) => (
@@ -209,7 +210,7 @@ const InventoryScreen = () => {
 
             {/* Text */}
             <div className="relative z-10 max-w-3xl">
-              <h1 className="font-headline text-7xl font-black text-white leading-[1] tracking-tighter">
+              <h1 className="font-headline text-3xl sm:text-5xl md:text-7xl font-black text-white leading-[1] tracking-tighter">
                 Tu próximo auto,<br /><span className="text-primary italic">te está esperando.</span>
               </h1>
             </div>
@@ -261,10 +262,34 @@ const InventoryScreen = () => {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-16">
+        {/* Mobile filter toggle */}
+        <div className="lg:hidden flex items-center justify-between mb-4">
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-[#E5E2E3]/70 hover:text-primary hover:border-primary/50 transition-all"
+          >
+            <span className="material-symbols-outlined !text-sm">tune</span>
+            {showFilters ? 'Ocultar filtros' : 'Filtros'}
+            {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+          </button>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-[#1C1B1F] border border-[#353436] text-[#E5E2E3]/60 text-xs font-bold uppercase tracking-wider px-3 py-2.5 rounded-sm focus:border-primary/50 focus:outline-none"
+          >
+            <option value="default">Ordenar</option>
+            <option value="price-asc">Precio ↑</option>
+            <option value="price-desc">Precio ↓</option>
+            <option value="year-desc">Año más nuevo</option>
+            <option value="year-asc">Año más antiguo</option>
+            <option value="km-asc">Km menor</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-16">
           {/* Sidebar */}
-          <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="sticky top-32 space-y-8">
+          <aside className={`w-full lg:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} lg:block`}>
+            <div className="lg:sticky lg:top-32 space-y-8">
               <div className="flex items-center justify-between">
                 <h3 className="font-headline text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-4">
                   Filtros <span className="h-[1px] w-12 bg-gradient-to-r from-[#353436] to-transparent" />
@@ -428,7 +453,7 @@ const InventoryScreen = () => {
 
           {/* Grid */}
           <div className="flex-1">
-            <div className="flex justify-end items-center mb-10 border-b border-[#353436]/30 pb-6 flex-wrap gap-4">
+            <div className="hidden lg:flex justify-end items-center mb-10 border-b border-[#353436]/30 pb-6 flex-wrap gap-4">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}

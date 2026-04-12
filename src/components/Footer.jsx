@@ -3,7 +3,7 @@ import logoSrc from '../assets/Logo.png';
 
 const Footer = () => (
   <footer className="bg-[#0E0E0F] w-full border-t border-[#353436]/30">
-    <div className="px-12 py-10 w-full max-w-screen-2xl mx-auto">
+    <div className="px-4 md:px-12 py-10 w-full max-w-screen-2xl mx-auto">
 
       {/* Top row */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-10 mb-10">
@@ -17,7 +17,7 @@ const Footer = () => (
         </div>
 
         {/* Links */}
-        <div className="flex gap-16">
+        <div className="flex flex-wrap gap-8 md:gap-16">
           <div className="flex flex-col gap-3">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">Navegación</p>
             <a href="/" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Garage</a>

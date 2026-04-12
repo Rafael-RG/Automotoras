@@ -8,7 +8,7 @@ const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
 const Spec = ({ icon, label, value }) => (
-  <div className="bg-[#131314] border border-[#E5E2E3]/5 p-6 flex flex-col gap-3 rounded-lg">
+  <div className="bg-[#131314] border border-[#E5E2E3]/5 p-4 md:p-6 flex flex-col gap-2 md:gap-3 rounded-lg">
     <span className="material-symbols-outlined text-[#D32F2F] !text-3xl">{icon}</span>
     <div>
       <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#E5E2E3]/40 mb-1 block">{label}</span>
@@ -116,10 +116,10 @@ const ProductDetailScreen = () => {
   return (
     <div className="bg-[#0E0E0F] text-[#E5E2E3]">
       <TopNavBar />
-      <main className="pt-24 pb-20">
+      <main className="pt-20 md:pt-24 pb-20">
 
         {/* Breadcrumb */}
-        <div className="px-8 max-w-screen-2xl mx-auto py-4">
+        <div className="px-4 md:px-8 max-w-screen-2xl mx-auto py-4">
           <div className="flex items-center gap-2 text-[#E5E2E3]/30 text-xs">
             <Link to="/" className="hover:text-[#D32F2F] transition-colors">Inventario</Link>
             <span className="material-symbols-outlined !text-sm">chevron_right</span>
@@ -128,7 +128,7 @@ const ProductDetailScreen = () => {
         </div>
 
         {/* Hero section */}
-        <section className="px-8 max-w-screen-2xl mx-auto mt-6">
+        <section className="px-4 md:px-8 max-w-screen-2xl mx-auto mt-6">
           <div className="flex flex-col lg:flex-row gap-10 items-start">
 
             {/* Left: image gallery */}
@@ -195,17 +195,17 @@ const ProductDetailScreen = () => {
 
             {/* Right: info panel */}
             <div className="lg:w-1/3 w-full">
-              <div className="bg-[#131314] border border-[#E5E2E3]/10 p-8 rounded-xl shadow-2xl sticky top-24">
+              <div className="bg-[#131314] border border-[#E5E2E3]/10 p-4 sm:p-8 rounded-xl shadow-2xl sticky top-24">
                 <span className="text-[#D32F2F] font-headline font-black text-[10px] uppercase tracking-[0.4em] block mb-4">
                   {vehicle.brand}
                 </span>
-                <h1 className="text-4xl font-headline font-black tracking-tighter leading-none mb-2">
+                <h1 className="text-3xl md:text-4xl font-headline font-black tracking-tighter leading-none mb-2">
                   {vehicle.model}
                 </h1>
                 <p className="text-[#E5E2E3]/30 text-sm mb-6">{vehicle.year}</p>
 
                 <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-4xl font-headline font-black text-[#D32F2F]">
+                  <span className="text-3xl md:text-4xl font-headline font-black text-[#D32F2F]">
                     {fmt(vehicle.price)}
                   </span>
                   <span className="text-[#E5E2E3]/30 font-bold text-xs tracking-widest">USD</span>
@@ -265,11 +265,11 @@ const ProductDetailScreen = () => {
         </section>
 
         {/* Specs grid */}
-        <section className="px-8 max-w-screen-2xl mx-auto mt-12">
+        <section className="px-4 md:px-8 max-w-screen-2xl mx-auto mt-12">
           <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#E5E2E3]/40 mb-6">
             Ficha Técnica
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <Spec icon="settings_input_component" label="Transmisión" value={vehicle.transmission} />
             <Spec icon="local_gas_station" label="Combustible" value={vehicle.fuel} />
             <Spec icon="speed" label="Kilometraje" value={`${Number(vehicle.mileage).toLocaleString()} km`} />
@@ -277,7 +277,7 @@ const ProductDetailScreen = () => {
           </div>
 
           {vehicle.description && (
-            <div className="mt-8 bg-[#131314] border border-[#E5E2E3]/5 rounded-lg p-8">
+            <div className="mt-8 bg-[#131314] border border-[#E5E2E3]/5 rounded-lg p-4 md:p-8">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#E5E2E3]/40 mb-4">
                 Descripción
               </h3>
@@ -288,11 +288,11 @@ const ProductDetailScreen = () => {
 
         {/* Dealership card */}
         {dealership && (
-          <section className="px-8 max-w-screen-2xl mx-auto mt-12">
+          <section className="px-4 md:px-8 max-w-screen-2xl mx-auto mt-12">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#E5E2E3]/40 mb-6">
               Vendido por
             </h2>
-            <div className="bg-[#131314] border border-[#E5E2E3]/10 rounded-xl p-6 flex items-center gap-6 hover:border-[#D32F2F]/30 transition-colors">
+            <div className="bg-[#131314] border border-[#E5E2E3]/10 rounded-xl p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 hover:border-[#D32F2F]/30 transition-colors">
               <div className="w-16 h-16 rounded-xl bg-[#0E0E0F] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {dealership.logoUrl ? (
                   <img src={dealership.logoUrl} alt={dealership.name} className="w-full h-full object-cover rounded-xl" />
@@ -307,7 +307,7 @@ const ProductDetailScreen = () => {
                 <p className="text-[#E5E2E3]/40 text-sm mt-1">
                   {dealership.address}, {dealership.city}, {dealership.country}
                 </p>
-                <div className="flex items-center gap-4 mt-2 text-xs text-[#E5E2E3]/30">
+                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#E5E2E3]/30">
                   {dealership.phone && (
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined !text-sm">phone</span>
@@ -322,7 +322,7 @@ const ProductDetailScreen = () => {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2 flex-shrink-0">
+              <div className="flex flex-row sm:flex-col gap-2 flex-shrink-0 w-full sm:w-auto">
                 {whatsappUrl && (
                   <button
                     onClick={handleWhatsApp}
@@ -355,7 +355,7 @@ const ProductDetailScreen = () => {
 
         {/* Related vehicles */}
         {relatedVehicles.length > 0 && (
-          <section className="px-8 max-w-screen-2xl mx-auto mt-12">
+          <section className="px-4 md:px-8 max-w-screen-2xl mx-auto mt-12">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#E5E2E3]/40 mb-6">
               Más vehículos de esta automotora
             </h2>
