@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo.png';
 import {
@@ -1107,10 +1107,34 @@ const STATUS_LABELS = {
 const SubscriptionTab = ({ dealership, onRefresh }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [polling, setPolling] = useState(false);
+  const pollCountRef = useRef(0);
+  const pollTimerRef = useRef(null);
 
   const currentPlan = dealership?.plan || 'basic';
   const currentStatus = dealership?.subscriptionStatus || '';
   const statusInfo = STATUS_LABELS[currentStatus] || null;
+
+  // Auto-poll when pending: check every 4s up to 3 minutes
+  useEffect(() => {
+    if (currentStatus !== 'pending') {
+      setPolling(false);
+      pollCountRef.current = 0;
+      clearInterval(pollTimerRef.current);
+      return;
+    }
+    setPolling(true);
+    pollCountRef.current = 0;
+    pollTimerRef.current = setInterval(async () => {
+      pollCountRef.current += 1;
+      await onRefresh();
+      if (pollCountRef.current >= 45) { // 45 * 4s = 3 min
+        clearInterval(pollTimerRef.current);
+        setPolling(false);
+      }
+    }, 4000);
+    return () => clearInterval(pollTimerRef.current);
+  }, [currentStatus, onRefresh]);
 
   const handleSubscribe = async (planId) => {
     setError('');
@@ -1134,14 +1158,23 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
 
       {/* Current status */}
       {statusInfo && (
-        <div className={`flex items-center gap-3 border rounded-sm px-5 py-3 ${statusInfo.bg}`}>
-          <span className="material-symbols-outlined !text-lg text-current">info</span>
-          <span className={`text-sm font-semibold ${statusInfo.color}`}>
-            Tu suscripción está: <strong>{statusInfo.label}</strong>
+        <div className={`flex flex-wrap items-center gap-3 border rounded-sm px-4 py-3 ${statusInfo.bg}`}>
+          {currentStatus === 'pending' && polling ? (
+            <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          ) : (
+            <span className="material-symbols-outlined !text-lg text-current">info</span>
+          )}
+          <span className={`text-sm font-semibold ${statusInfo.color} flex-1`}>
+            {currentStatus === 'pending' && polling
+              ? 'Verificando tu pago con MercadoPago… puede tardar unos segundos'
+              : <>Tu suscripción está: <strong>{statusInfo.label}</strong></>}
           </span>
           {currentStatus === 'pending' && (
-            <button onClick={onRefresh} className="ml-auto text-xs text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined !text-sm">refresh</span> Actualizar
+            <button
+              onClick={onRefresh}
+              className="text-xs text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors flex items-center gap-1 shrink-0"
+            >
+              <span className="material-symbols-outlined !text-sm">refresh</span> Verificar ahora
             </button>
           )}
         </div>
