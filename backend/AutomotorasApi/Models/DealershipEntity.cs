@@ -28,4 +28,8 @@ public class DealershipEntity : ITableEntity
     public string Plan { get; set; } = "basic";            // "basic" | "pro"
     public string SubscriptionId { get; set; } = string.Empty;
     public string SubscriptionStatus { get; set; } = string.Empty; // "authorized" | "paused" | "cancelled" | "pending"
+
+    // Auth
+    public string PasswordHash { get; set; } = string.Empty;
+    public string PasswordSalt { get; set; } = string.Empty;
 }

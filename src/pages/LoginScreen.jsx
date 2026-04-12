@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo.png';
+import { loginDealership } from '../services/api';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -20,15 +21,16 @@ const LoginScreen = () => {
     }
 
     setLoading(true);
-    // Placeholder: navigate to admin — replace with real auth when ready
-    setTimeout(() => {
-      if (email === 'admin@redautos.com' && password === 'admin') {
-        navigate('/admin');
-      } else {
-        setError('Credenciales incorrectas. Verificá tu email y contraseña.');
-        setLoading(false);
-      }
-    }, 800);
+    try {
+      const data = await loginDealership(email, password);
+      localStorage.setItem('adminDealershipId', data.dealershipId);
+      navigate('/admin');
+    } catch (err) {
+      let msg = err.message || 'Credenciales incorrectas.';
+      try { msg = JSON.parse(msg).error ?? msg; } catch {}
+      setError(msg);
+      setLoading(false);
+    }
   };
 
   return (
@@ -120,6 +122,17 @@ const LoginScreen = () => {
           >
             <span className="material-symbols-outlined !text-sm">arrow_back</span>
             Volver al inicio
+          </button>
+        </div>
+
+        {/* Register link */}
+        <div className="flex justify-center mt-3">
+          <button
+            onClick={() => navigate('/register')}
+            className="text-[#E5E2E3]/30 hover:text-[#E5E2E3]/60 text-xs flex items-center gap-1.5 transition-colors"
+          >
+            <span className="material-symbols-outlined !text-sm">person_add</span>
+            ¿No tenés cuenta? Registrá tu automotora
           </button>
         </div>
 

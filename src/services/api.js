@@ -113,3 +113,19 @@ export const seedData = () =>
 
 export const clearData = () =>
   fetch(`${BASE_URL}/seed/clear`, { method: 'POST' }).then(handleResponse);
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+export const registerDealership = (data) =>
+  fetch(`${BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const loginDealership = (email, password) =>
+  fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  }).then(handleResponse);

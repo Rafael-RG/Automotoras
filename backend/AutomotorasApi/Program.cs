@@ -5,10 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication(worker =>
-    {
-        worker.UseCors();
-    })
+    .ConfigureFunctionsWebApplication()
     .ConfigureServices((context, services) =>
     {
         services.AddCors(options =>

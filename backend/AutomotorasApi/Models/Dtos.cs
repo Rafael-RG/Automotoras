@@ -84,3 +84,8 @@ public record CreateCheckoutRequest(string DealershipId, string Plan, string Bac
 public record CheckoutResponse(string CheckoutUrl);
 public record SubscriptionWebhookPayload(string? Id, string? Type, string? Topic, WebhookData? Data);
 public record WebhookData(string? Id);
+
+// Auth
+public record RegisterRequest(string Name, string Email, string Password, string Phone = "", string Address = "", string City = "", string Country = "");
+public record LoginRequest(string Email, string Password);
+public record AuthResponse(string DealershipId, string Name, string Email, string Plan, string SubscriptionStatus);

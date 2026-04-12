@@ -1,6 +1,7 @@
 using AutomotorasApi.Models;
 using Azure;
 using Azure.Data.Tables;
+using System.Security.Cryptography;
 
 namespace AutomotorasApi.Services;
 
@@ -106,5 +107,56 @@ public class DealershipStorageService
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
         return true;
+    }
+
+    public async Task<DealershipEntity?> GetByEmailAsync(string email)
+    {
+        await foreach (var d in _tableClient.QueryAsync<DealershipEntity>(d => d.PartitionKey == Pk && d.Email == email))
+            return d;
+        return null;
+    }
+
+    public async Task<(DealershipEntity entity, bool emailExists)> RegisterWithCredentialsAsync(RegisterRequest request)
+    {
+        var existing = await GetByEmailAsync(request.Email);
+        if (existing is not null)
+            return (null!, true);
+
+        var (hash, salt) = HashPassword(request.Password);
+        var entity = new DealershipEntity
+        {
+            RowKey = Guid.NewGuid().ToString(),
+            Name = request.Name,
+            Email = request.Email,
+            Phone = request.Phone,
+            Address = request.Address,
+            City = request.City,
+            Country = request.Country,
+            Plan = "basic",
+            PasswordHash = hash,
+            PasswordSalt = salt,
+        };
+        await _tableClient.AddEntityAsync(entity);
+        return (entity, false);
+    }
+
+    public static bool VerifyPassword(string password, string hash, string salt)
+    {
+        var saltBytes = Convert.FromBase64String(salt);
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 100_000, HashAlgorithmName.SHA256);
+        var computed = Convert.ToBase64String(pbkdf2.GetBytes(32));
+        return CryptographicOperations.FixedTimeEquals(
+            System.Text.Encoding.UTF8.GetBytes(computed),
+            System.Text.Encoding.UTF8.GetBytes(hash));
+    }
+
+    private static (string hash, string salt) HashPassword(string password)
+    {
+        var saltBytes = new byte[16];
+        RandomNumberGenerator.Fill(saltBytes);
+        var salt = Convert.ToBase64String(saltBytes);
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 100_000, HashAlgorithmName.SHA256);
+        var hash = Convert.ToBase64String(pbkdf2.GetBytes(32));
+        return (hash, salt);
     }
 }
