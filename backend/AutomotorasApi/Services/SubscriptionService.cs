@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -26,9 +27,9 @@ public class SubscriptionService
     }
 
     /// <summary>
-    /// Creates a MercadoPago preapproval (subscription) and returns the checkout URL.
+    /// Creates a MercadoPago preapproval (subscription) and returns the checkout URL and preapproval ID.
     /// </summary>
-    public async Task<string> CreateCheckoutAsync(
+    public async Task<(string Url, string PreapprovalId)> CreateCheckoutAsync(
         string dealershipId, string plan, string payerEmail, string backUrl)
     {
         if (!Plans.TryGetValue(plan, out var info))
@@ -60,12 +61,44 @@ public class SubscriptionService
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var root = doc.RootElement;
 
-        // Use sandbox_init_point in dev, init_point in prod
-        if (root.TryGetProperty("sandbox_init_point", out var sandbox) && !string.IsNullOrEmpty(sandbox.GetString()))
-            return sandbox.GetString()!;
+        var preapprovalId = root.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
 
-        return root.GetProperty("init_point").GetString()
-            ?? throw new InvalidOperationException("MercadoPago no devolvió una URL de pago.");
+        // Use sandbox_init_point in dev, init_point in prod
+        string checkoutUrl;
+        if (root.TryGetProperty("sandbox_init_point", out var sandbox) && !string.IsNullOrEmpty(sandbox.GetString()))
+            checkoutUrl = sandbox.GetString()!;
+        else
+            checkoutUrl = root.GetProperty("init_point").GetString()
+                ?? throw new InvalidOperationException("MercadoPago no devolvió una URL de pago.");
+
+        return (checkoutUrl, preapprovalId);
+    }
+
+    /// <summary>
+    /// Searches for a preapproval by external_reference (dealershipId|plan).
+    /// Useful when the preapproval ID was not stored at checkout creation.
+    /// </summary>
+    public async Task<(string DealershipId, string Plan, string Status, string SubscriptionId)?> SearchByExternalReferenceAsync(string dealershipId, string plan)
+    {
+        var extRef = Uri.EscapeDataString($"{dealershipId}|{plan}");
+        var response = await _http.GetAsync($"/preapproval/search?external_reference={extRef}");
+        if (!response.IsSuccessStatusCode) return null;
+
+        using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = doc.RootElement;
+
+        if (!root.TryGetProperty("results", out var results)) return null;
+        if (results.GetArrayLength() == 0) return null;
+
+        // Get the most recent preapproval
+        var latest = results.EnumerateArray()
+            .OrderByDescending(r => r.TryGetProperty("date_created", out var d) ? d.GetString() : "")
+            .FirstOrDefault();
+
+        var status = latest.TryGetProperty("status", out var st) ? st.GetString() ?? "" : "";
+        var id = latest.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
+
+        return (dealershipId, plan, status, id);
     }
 
     /// <summary>

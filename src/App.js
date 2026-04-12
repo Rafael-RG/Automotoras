@@ -8,6 +8,7 @@ import RegisterScreen from './pages/RegisterScreen';
 import AdminDashboard from './pages/AdminDashboard';
 import PrivacyScreen from './pages/PrivacyScreen';
 import LoginScreen from './pages/LoginScreen';
+import PagoExitosoScreen from './pages/PagoExitosoScreen';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/product/:brand/:id" element={<ProductDetailScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/pago-exitoso" element={<PagoExitosoScreen />} />
         <Route path="/privacidad" element={<PrivacyScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         {/* Fallback routes for other nav items */}

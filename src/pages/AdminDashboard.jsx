@@ -1142,7 +1142,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
     setError('');
     setLoading(true);
     try {
-      const backUrl = `${window.location.origin}/admin?sub=ok`;
+    const backUrl = `${window.location.origin}/pago-exitoso`;
       const { checkoutUrl } = await createSubscriptionCheckout(dealership.id, planId, backUrl);
       window.location.href = checkoutUrl;
     } catch (err) {

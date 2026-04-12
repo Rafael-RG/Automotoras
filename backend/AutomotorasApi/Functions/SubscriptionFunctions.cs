@@ -78,12 +78,12 @@ public class SubscriptionFunctions(
 
         try
         {
-            var checkoutUrl = await subscriptionService.CreateCheckoutAsync(
+            var (checkoutUrl, preapprovalId) = await subscriptionService.CreateCheckoutAsync(
                 request.DealershipId, request.Plan, payerEmail, backUrl);
 
-            // Mark as pending immediately
+            // Mark as pending and save preapproval ID immediately
             await dealershipService.UpdatePlanAsync(
-                request.DealershipId, request.Plan, "", "pending");
+                request.DealershipId, request.Plan, preapprovalId, "pending");
 
             return new OkObjectResult(new CheckoutResponse(checkoutUrl));
         }
@@ -159,7 +159,20 @@ public class SubscriptionFunctions(
             return new NotFoundObjectResult("Automotora no encontrada.");
 
         if (string.IsNullOrEmpty(dealership.SubscriptionId))
+        {
+            // Fallback: search MP by external_reference
+            var found = await subscriptionService.SearchByExternalReferenceAsync(dealershipId, dealership.Plan);
+            if (found is null)
+                return new OkObjectResult(new { status = dealership.SubscriptionStatus, updated = false });
+
+            var (_, foundPlan, foundStatus, foundId) = found.Value;
+            if (foundStatus != dealership.SubscriptionStatus || !string.IsNullOrEmpty(foundId))
+            {
+                await dealershipService.UpdatePlanAsync(dealershipId, foundPlan, foundId, foundStatus);
+                return new OkObjectResult(new { status = foundStatus, updated = true });
+            }
             return new OkObjectResult(new { status = dealership.SubscriptionStatus, updated = false });
+        }
 
         var info = await subscriptionService.GetPreapprovalStatusAsync(dealership.SubscriptionId);
         if (info is null)
