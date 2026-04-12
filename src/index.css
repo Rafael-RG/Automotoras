@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0E0E0F] font-body text-on-surface antialiased overflow-x-hidden;
+  }
+  
+  ::selection {
+    @apply bg-primary/30;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  
+  .spec-chip {
+    @apply flex items-center gap-1.5 px-0 py-1 text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/80;
+  }
+  
+  .metallic-gradient {
+    background: linear-gradient(135deg, #1c1c1e 0%, #0e0e0f 100%);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar { 
+    width: 4px; 
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track { 
+    background: transparent; 
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: #33353a; 
+    border-radius: 10px; 
+  }
+  
+  .map-overlay { 
+    background: radial-gradient(circle, transparent 20%, #0b0e11 100%); 
+  }
+  
+  .apex-gradient-text {
+    background: linear-gradient(135deg, #FFB3AC 0%, #D32F2F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .red-glow {
+    box-shadow: 0 0 20px rgba(211, 47, 47, 0.15);
+  }
+  
+  .glass-panel {
+    background: rgba(30, 30, 32, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .apex-gradient {
+    background: linear-gradient(135deg, #05070a 0%, #00122e 100%);
+  }
+  
+  .apex-action-gradient {
+    background: linear-gradient(135deg, #b7102a 0%, #db313f 100%);
+  }
+  
+  .metallic-bg {
+    background: linear-gradient(135deg, #1c1c1e 0%, #0e0e0f 100%);
+  }
+}
