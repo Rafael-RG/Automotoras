@@ -147,6 +147,35 @@ public class SubscriptionFunctions(
         return new OkResult();
     }
 
+    // GET /api/subscriptions/verify/{dealershipId}
+    // Consulta directamente a MP y actualiza la BD sin depender del webhook
+    [Function("VerifySubscription")]
+    public async Task<IActionResult> Verify(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "subscriptions/verify/{dealershipId}")] HttpRequest req,
+        string dealershipId)
+    {
+        var dealership = await dealershipService.GetByIdAsync(dealershipId);
+        if (dealership is null)
+            return new NotFoundObjectResult("Automotora no encontrada.");
+
+        if (string.IsNullOrEmpty(dealership.SubscriptionId))
+            return new OkObjectResult(new { status = dealership.SubscriptionStatus, updated = false });
+
+        var info = await subscriptionService.GetPreapprovalStatusAsync(dealership.SubscriptionId);
+        if (info is null)
+            return new OkObjectResult(new { status = dealership.SubscriptionStatus, updated = false });
+
+        var (_, plan, mpStatus, subscriptionId) = info.Value;
+
+        if (mpStatus != dealership.SubscriptionStatus)
+        {
+            await dealershipService.UpdatePlanAsync(dealershipId, plan, subscriptionId, mpStatus);
+            return new OkObjectResult(new { status = mpStatus, updated = true });
+        }
+
+        return new OkObjectResult(new { status = dealership.SubscriptionStatus, updated = false });
+    }
+
     // POST /api/subscriptions/simulate  (SOLO DESARROLLO)
     // Body: { dealershipId, plan }
     [Function("SimulateSubscription")]

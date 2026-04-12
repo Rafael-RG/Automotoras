@@ -106,6 +106,9 @@ export const simulateSubscription = (dealershipId, plan) =>
     body: JSON.stringify({ dealershipId, plan }),
   }).then(handleResponse);
 
+export const verifySubscription = (dealershipId) =>
+  fetch(`${BASE_URL}/subscriptions/verify/${dealershipId}`).then(handleResponse);
+
 // ─── Seed (solo desarrollo) ──────────────────────────────────────────────────
 
 export const seedData = () =>

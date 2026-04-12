@@ -4,7 +4,7 @@ import logoSrc from '../assets/Logo.png';
 import {
   getDealerships, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, removeVehicleImage,
-  createSubscriptionCheckout,
+  createSubscriptionCheckout, verifySubscription,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
 
@@ -1127,6 +1127,8 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
     pollCountRef.current = 0;
     pollTimerRef.current = setInterval(async () => {
       pollCountRef.current += 1;
+      // Ask backend to verify directly with MP and update DB if needed
+      try { await verifySubscription(dealership.id); } catch {}
       await onRefresh();
       if (pollCountRef.current >= 45) { // 45 * 4s = 3 min
         clearInterval(pollTimerRef.current);
@@ -1134,7 +1136,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
       }
     }, 4000);
     return () => clearInterval(pollTimerRef.current);
-  }, [currentStatus, onRefresh]);
+  }, [currentStatus, onRefresh, dealership.id]);
 
   const handleSubscribe = async (planId) => {
     setError('');
@@ -1171,7 +1173,10 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
           </span>
           {currentStatus === 'pending' && (
             <button
-              onClick={onRefresh}
+              onClick={async () => {
+                try { await verifySubscription(dealership.id); } catch {}
+                await onRefresh();
+              }}
               className="text-xs text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors flex items-center gap-1 shrink-0"
             >
               <span className="material-symbols-outlined !text-sm">refresh</span> Verificar ahora
