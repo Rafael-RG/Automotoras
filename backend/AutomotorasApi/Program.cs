@@ -5,9 +5,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+    .ConfigureFunctionsWebApplication(worker =>
+    {
+        worker.UseCors();
+    })
     .ConfigureServices((context, services) =>
     {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .WithOrigins(
+                        "http://localhost:3000",
+                        "https://orangered-deer-311677.hostingersite.com"
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
         var connectionString = context.Configuration["AzureWebJobsStorage"]
             ?? "UseDevelopmentStorage=true";
 
