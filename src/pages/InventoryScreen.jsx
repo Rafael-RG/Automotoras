@@ -497,7 +497,7 @@ const InventoryScreen = () => {
             )}
 
             {!loading && !error && vehicles.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16">
+              <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-10 md:gap-y-16">
                 {vehicles.map((vehicle) => {
                   const thumb = vehicle.imageUrls?.length > 0 ? vehicle.imageUrls[0] : vehicle.imageUrl;
                   return (
@@ -506,7 +506,7 @@ const InventoryScreen = () => {
                       className="group cursor-pointer"
                       onClick={() => navigate(`/product/${encodeURIComponent(vehicle.brand)}/${vehicle.id}`)}
                     >
-                      <div className="relative overflow-hidden rounded-sm aspect-[16/10] bg-black mb-6 border border-[#353436]/50">
+                      <div className="relative overflow-hidden rounded-sm aspect-[16/10] bg-black mb-3 md:mb-6 border border-[#353436]/50">
                         {thumb ? (
                           <img
                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
@@ -526,25 +526,25 @@ const InventoryScreen = () => {
                           </span>
                         )}
                       </div>
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">{vehicle.brand}</p>
-                            <h3 className="font-headline text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter">
+                      <div className="space-y-2 md:space-y-4">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1">
+                          <div className="min-w-0">
+                            <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-0.5">{vehicle.brand}</p>
+                            <h3 className="font-headline text-base md:text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter leading-tight truncate">
                               {vehicle.model}
                             </h3>
                             {vehicle.bodyType && (
-                              <p className="text-[#E5E2E3]/30 text-[10px] uppercase tracking-wider mt-0.5">{vehicle.bodyType}</p>
+                              <p className="text-[#E5E2E3]/30 text-[9px] md:text-[10px] uppercase tracking-wider mt-0.5">{vehicle.bodyType}</p>
                             )}
                           </div>
-                          <span className="font-headline text-xl font-black text-white tracking-tighter">
+                          <span className="font-headline text-sm md:text-xl font-black text-white tracking-tighter whitespace-nowrap">
                             ${vehicle.price.toLocaleString('es-CL')}
                           </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4 border-t border-[#353436]/50">
-                          <div className="spec-chip">{vehicle.year}</div>
-                          <div className="spec-chip">{vehicle.mileage.toLocaleString('es-CL')} KM</div>
-                          <div className="spec-chip text-primary">{vehicle.transmission} / {vehicle.fuel}</div>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-x-6 md:gap-y-2 pt-2 md:pt-4 border-t border-[#353436]/50">
+                          <div className="spec-chip text-[9px] md:text-xs">{vehicle.year}</div>
+                          <div className="spec-chip text-[9px] md:text-xs hidden sm:block">{vehicle.mileage.toLocaleString('es-CL')} KM</div>
+                          <div className="spec-chip text-[9px] md:text-xs text-primary">{vehicle.transmission}</div>
                         </div>
                       </div>
                     </div>

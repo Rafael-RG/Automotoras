@@ -42,6 +42,7 @@ const DealershipProfileScreen = () => {
   const [error, setError] = useState(null);
 
   // Filter state
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState(null);
   const [filterModel, setFilterModel] = useState(null);
@@ -187,7 +188,20 @@ const DealershipProfileScreen = () => {
 
               {/* Sidebar */}
               <aside className="w-full lg:w-64 flex-shrink-0">
-                <div className="sticky top-28 space-y-8">
+                {/* Mobile toggle */}
+                <button
+                  className="lg:hidden w-full flex items-center justify-between bg-[#131314] border border-[#353436] rounded-sm px-4 py-3 mb-4"
+                  onClick={() => setFiltersOpen(v => !v)}
+                >
+                  <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white">
+                    <span className="material-symbols-outlined !text-sm text-primary">tune</span>
+                    Filtros
+                    {hasFilters && <span className="bg-primary text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">ON</span>}
+                  </span>
+                  <span className={`material-symbols-outlined text-[#E5E2E3]/40 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                </button>
+
+                <div className={`sticky top-28 space-y-8 ${filtersOpen ? 'block' : 'hidden'} lg:block`}>
                   <div className="flex items-center justify-between">
                     <h3 className="font-headline text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
                       Filtros <span className="h-[1px] w-8 bg-gradient-to-r from-[#353436] to-transparent" />
@@ -329,13 +343,13 @@ const DealershipProfileScreen = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16">
+                  <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-10 md:gap-y-16">
                     {vehicles.map((v) => {
                       const thumb = v.imageUrls?.length > 0 ? v.imageUrls[0] : v.imageUrl;
                       return (
                         <div key={v.id} className="group cursor-pointer"
                           onClick={() => navigate(`/product/${encodeURIComponent(v.brand)}/${v.id}`)}>
-                          <div className="relative overflow-hidden rounded-sm aspect-[16/10] bg-black mb-6 border border-[#353436]/50">
+                          <div className="relative overflow-hidden rounded-sm aspect-[16/10] bg-black mb-3 md:mb-6 border border-[#353436]/50">
                             {thumb ? (
                               <img className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
                                 src={thumb} alt={`${v.brand} ${v.model}`} />
@@ -350,19 +364,19 @@ const DealershipProfileScreen = () => {
                               </span>
                             )}
                           </div>
-                          <div className="space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">{v.brand}</p>
-                                <h3 className="font-headline text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter">{v.model}</h3>
-                                {v.bodyType && <p className="text-[#E5E2E3]/30 text-[10px] uppercase tracking-wider mt-0.5">{v.bodyType}</p>}
+                          <div className="space-y-2 md:space-y-4">
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1">
+                              <div className="min-w-0">
+                                <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-0.5">{v.brand}</p>
+                                <h3 className="font-headline text-base md:text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter leading-tight truncate">{v.model}</h3>
+                                {v.bodyType && <p className="text-[#E5E2E3]/30 text-[9px] md:text-[10px] uppercase tracking-wider mt-0.5">{v.bodyType}</p>}
                               </div>
-                              <span className="font-headline text-xl font-black text-white tracking-tighter">${v.price.toLocaleString('es-CL')}</span>
+                              <span className="font-headline text-sm md:text-xl font-black text-white tracking-tighter whitespace-nowrap">${v.price.toLocaleString('es-CL')}</span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4 border-t border-[#353436]/50">
-                              <div className="spec-chip">{v.year}</div>
-                              <div className="spec-chip">{v.mileage.toLocaleString('es-CL')} KM</div>
-                              <div className="spec-chip text-primary">{v.transmission} / {v.fuel}</div>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-x-6 md:gap-y-2 pt-2 md:pt-4 border-t border-[#353436]/50">
+                              <div className="spec-chip text-[9px] md:text-xs">{v.year}</div>
+                              <div className="spec-chip text-[9px] md:text-xs hidden sm:block">{v.mileage.toLocaleString('es-CL')} KM</div>
+                              <div className="spec-chip text-[9px] md:text-xs text-primary">{v.transmission}</div>
                             </div>
                           </div>
                         </div>

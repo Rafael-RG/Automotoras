@@ -283,7 +283,7 @@ const DealershipFinderScreen = () => {
       <TopNavBar />
 
       {/* Mobile tab bar */}
-      <div className="lg:hidden fixed top-[60px] left-0 right-0 z-40 flex bg-[#131314] border-b border-[#E5E2E3]/10">
+      <div className="lg:hidden fixed top-20 left-0 right-0 z-40 flex bg-[#131314] border-b border-[#E5E2E3]/10">
         <button
           onClick={() => setMobileTab('map')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
@@ -304,7 +304,7 @@ const DealershipFinderScreen = () => {
         </button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden pt-[100px] lg:pt-24">
+      <div className="flex flex-1 overflow-hidden pt-[124px] lg:pt-24">
         {/* ── Sidebar ───────────────────────────────── */}
         <aside className={`${
           mobileTab === 'list' ? 'flex' : 'hidden'
