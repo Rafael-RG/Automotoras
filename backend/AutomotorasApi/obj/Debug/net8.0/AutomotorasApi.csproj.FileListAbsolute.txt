@@ -93,3 +93,4 @@ C:\Automotoras\backend\AutomotorasApi\bin\output\System.IO.Hashing.dll
 C:\Automotoras\backend\AutomotorasApi\bin\output\System.Memory.Data.dll
 C:\Automotoras\backend\AutomotorasApi\bin\output\System.Security.Cryptography.ProtectedData.dll
 C:\Automotoras\backend\AutomotorasApi\bin\output\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\AutomotorasApi.sourcelink.json

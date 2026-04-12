@@ -3,7 +3,9 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "AZURE_FUNCTIONS_ENVIRONMENT": "Development"
+    "AZURE_FUNCTIONS_ENVIRONMENT": "Development",
+    "MercadoPago:AccessToken": "APP_USR-3533254312275464-041201-5cf0caf1cbf060a3e63e309d9934c1c3-434259673",
+    "MercadoPago:WebhookSecret": "68711f127388f519a7191bc1e88a75a5a6e483b1b3db21346f9569b46e84fce1"
   },
   "Host": {
     "LocalHttpPort": 7071,

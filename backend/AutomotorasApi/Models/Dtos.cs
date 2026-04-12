@@ -32,7 +32,9 @@ public record DealershipDto(
     string Email,
     string LogoUrl,
     double Latitude,
-    double Longitude
+    double Longitude,
+    string Plan,
+    string SubscriptionStatus
 );
 
 // --- Request DTOs ---
@@ -77,3 +79,8 @@ public record UpdateDealershipRequest(
 public record UploadImageResponse(string Url);
 
 public record TrackEventRequest(string Type); // "view" | "lead" | "share"
+
+public record CreateCheckoutRequest(string DealershipId, string Plan, string BackUrl);
+public record CheckoutResponse(string CheckoutUrl);
+public record SubscriptionWebhookPayload(string? Id, string? Type, string? Topic, WebhookData? Data);
+public record WebhookData(string? Id);

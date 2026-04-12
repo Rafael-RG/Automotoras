@@ -64,3 +64,4 @@ C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\WorkerExtensions\obj\Rele
 C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\WorkerExtensions\obj\Release\net6.0\refint\Microsoft.Azure.Functions.Worker.Extensions.dll
 C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\WorkerExtensions\obj\Release\net6.0\Microsoft.Azure.Functions.Worker.Extensions.pdb
 C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\WorkerExtensions\obj\Release\net6.0\ref\Microsoft.Azure.Functions.Worker.Extensions.dll
+C:\Automotoras\backend\AutomotorasApi\obj\Debug\net8.0\WorkerExtensions\obj\Release\net6.0\WorkerExtensions.sourcelink.json

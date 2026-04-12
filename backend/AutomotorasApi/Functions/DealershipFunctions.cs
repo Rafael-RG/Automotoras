@@ -18,7 +18,7 @@ public class DealershipFunctions(DealershipStorageService dealershipService)
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dealerships")] HttpRequest req)
     {
         var dealerships = await dealershipService.GetAllAsync();
-        return new OkObjectResult(dealerships.Select(dealershipService.ToDto));
+        return new OkObjectResult(dealerships.Select(d => DealershipStorageService.ToDto(d)));
     }
 
     // GET /api/dealerships/{id}
@@ -28,7 +28,7 @@ public class DealershipFunctions(DealershipStorageService dealershipService)
         string id)
     {
         var dealership = await dealershipService.GetByIdAsync(id);
-        return dealership is null ? new NotFoundResult() : new OkObjectResult(dealershipService.ToDto(dealership));
+        return dealership is null ? new NotFoundResult() : new OkObjectResult(DealershipStorageService.ToDto(dealership));
     }
 
     // POST /api/dealerships
@@ -41,7 +41,7 @@ public class DealershipFunctions(DealershipStorageService dealershipService)
         if (request is null) return new BadRequestObjectResult("Cuerpo de solicitud inválido.");
 
         var entity = await dealershipService.CreateAsync(request);
-        return new CreatedResult($"/api/dealerships/{entity.RowKey}", dealershipService.ToDto(entity));
+        return new CreatedResult($"/api/dealerships/{entity.RowKey}", DealershipStorageService.ToDto(entity));
     }
 
     // PUT /api/dealerships/{id}
@@ -55,6 +55,6 @@ public class DealershipFunctions(DealershipStorageService dealershipService)
         if (request is null) return new BadRequestObjectResult("Cuerpo de solicitud inválido.");
 
         var entity = await dealershipService.UpdateAsync(id, request);
-        return entity is null ? new NotFoundResult() : new OkObjectResult(dealershipService.ToDto(entity));
+        return entity is null ? new NotFoundResult() : new OkObjectResult(DealershipStorageService.ToDto(entity));
     }
 }

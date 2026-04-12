@@ -243,6 +243,87 @@
     ]
   },
   {
+    "name": "CreateSubscriptionCheckout",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.CreateCheckout",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/checkout",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "SubscriptionWebhook",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.Webhook",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/webhook",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "SimulateSubscription",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.Simulate",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/simulate",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
     "name": "GetVehicles",
     "scriptFile": "AutomotorasApi.dll",
     "entryPoint": "AutomotorasApi.Functions.VehicleFunctions.GetVehicles",

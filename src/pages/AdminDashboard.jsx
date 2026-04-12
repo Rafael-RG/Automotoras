@@ -4,6 +4,7 @@ import logoSrc from '../assets/Logo.png';
 import {
   getDealerships, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, removeVehicleImage,
+  createSubscriptionCheckout,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
 
@@ -68,6 +69,7 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
     { id: 'dashboard', icon: 'speed', label: 'Panel' },
     { id: 'fleet', icon: 'directions_car', label: 'Mi Flota' },
     { id: 'sucursales', icon: 'store', label: 'Sucursales' },
+    { id: 'suscripcion', icon: 'credit_card', label: 'Suscripción' },
     { id: 'config', icon: 'tune', label: 'Configuración' },
   ];
   return (
@@ -1062,6 +1064,170 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
   );
 };
 
+// ─── Subscription Tab ─────────────────────────────────────────────────────────
+const PLANS = [
+  {
+    id: 'test',
+    name: 'Plan Test',
+    price: '$15',
+    period: '/mes',
+    currency: 'UYU',
+    features: ['Para probar el sistema de pagos', 'Se comporta igual que Plan Básico'],
+    notIncluded: ['Múltiples sucursales'],
+    testOnly: true,
+  },
+  {
+    id: 'basic',
+    name: 'Plan Básico',
+    price: '$590',
+    period: '/mes',
+    currency: 'UYU',
+    features: ['1 sucursal', 'Autos ilimitados', 'Panel de métricas', 'Soporte por email'],
+    notIncluded: ['Múltiples sucursales'],
+  },
+  {
+    id: 'pro',
+    name: 'Plan Pro',
+    price: '$1490',
+    period: '/mes',
+    currency: 'UYU',
+    features: ['Sucursales ilimitadas', 'Autos ilimitados', 'Panel de métricas', 'Soporte prioritario', 'Gestión centralizada'],
+    notIncluded: [],
+    highlight: true,
+  },
+];
+
+const STATUS_LABELS = {
+  authorized: { label: 'Activa', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
+  pending:    { label: 'Pendiente de pago', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+  paused:     { label: 'Pausada', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+  cancelled:  { label: 'Cancelada', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
+};
+
+const SubscriptionTab = ({ dealership, onRefresh }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const currentPlan = dealership?.plan || 'basic';
+  const currentStatus = dealership?.subscriptionStatus || '';
+  const statusInfo = STATUS_LABELS[currentStatus] || null;
+
+  const handleSubscribe = async (planId) => {
+    setError('');
+    setLoading(true);
+    try {
+      const backUrl = `${window.location.origin}/admin?sub=ok`;
+      const { checkoutUrl } = await createSubscriptionCheckout(dealership.id, planId, backUrl);
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setError(err.message || 'No se pudo iniciar el pago.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 max-w-3xl">
+      <div>
+        <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">Suscripción</h1>
+        <p className="text-[#E5E2E3]/30 text-sm mt-1">Administrá tu plan de RedAutos</p>
+      </div>
+
+      {/* Current status */}
+      {statusInfo && (
+        <div className={`flex items-center gap-3 border rounded-sm px-5 py-3 ${statusInfo.bg}`}>
+          <span className="material-symbols-outlined !text-lg text-current">info</span>
+          <span className={`text-sm font-semibold ${statusInfo.color}`}>
+            Tu suscripción está: <strong>{statusInfo.label}</strong>
+          </span>
+          {currentStatus === 'pending' && (
+            <button onClick={onRefresh} className="ml-auto text-xs text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined !text-sm">refresh</span> Actualizar
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Plan cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        {PLANS.map((p) => {
+          const isCurrent = currentPlan === p.id && currentStatus === 'authorized';
+          return (
+            <div
+              key={p.id}
+              className={`relative border rounded-sm p-7 flex flex-col gap-5 transition-all ${
+                p.highlight
+                  ? 'border-[#D32F2F]/50 bg-[#D32F2F]/5'
+                  : p.testOnly
+                  ? 'border-yellow-500/20 bg-yellow-500/5'
+                  : 'border-[#E5E2E3]/10 bg-[#1C1C1E]'
+              }`}
+            >
+              {p.highlight && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#D32F2F] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                  Recomendado
+                </span>
+              )}
+              {p.testOnly && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                  Prueba
+                </span>
+              )}
+              <div>
+                <h2 className="text-[#E5E2E3] font-headline font-black text-xl tracking-tight">{p.name}</h2>
+                <div className="flex items-end gap-1 mt-2">
+                  <span className="text-4xl font-headline font-black text-[#E5E2E3]">{p.price}</span>
+                  <span className="text-[#E5E2E3]/40 text-sm mb-1">{p.period} · {p.currency}</span>
+                </div>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {p.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/70">
+                    <span className="material-symbols-outlined !text-base text-green-400">check_circle</span>
+                    {f}
+                  </li>
+                ))}
+                {p.notIncluded.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/25 line-through">
+                    <span className="material-symbols-outlined !text-base">remove_circle</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              {isCurrent ? (
+                <div className="w-full py-3 rounded-sm border border-green-500/30 text-green-400 text-[11px] font-black uppercase tracking-widest text-center">
+                  Plan Activo
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleSubscribe(p.id)}
+                  disabled={loading}
+                  className={`w-full py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest transition-colors disabled:opacity-50 ${
+                    p.highlight
+                      ? 'bg-[#D32F2F] text-white hover:bg-[#B71C1C]'
+                      : 'border border-[#E5E2E3]/20 text-[#E5E2E3] hover:border-[#E5E2E3]/40'
+                  }`}
+                >
+                  {loading ? 'Redirigiendo…' : 'Suscribirme'}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {error && (
+        <p className="text-red-400 text-sm flex items-center gap-2">
+          <span className="material-symbols-outlined !text-base">error</span>{error}
+        </p>
+      )}
+
+      <p className="text-[#E5E2E3]/20 text-xs">
+        El pago se procesa de forma segura a través de MercadoPago. Podés cancelar tu suscripción en cualquier momento.
+      </p>
+    </div>
+  );
+};
+
 // ─── Sucursales Tab ───────────────────────────────────────────────────────────
 const SucursalesTab = ({ dealerships, onCreated }) => {
   const EMPTY = { name: '', address: '', city: '', country: '', phone: '', email: '', latitude: '', longitude: '' };
@@ -1358,6 +1524,16 @@ const AdminDashboard = () => {
   useEffect(() => { loadDealerships(); }, [loadDealerships]);
   useEffect(() => { if (selectedId) loadVehicles(); else setLoading(false); }, [selectedId, loadVehicles]);
 
+  // If returning from MercadoPago checkout, switch to subscription tab and refresh
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sub') === 'ok') {
+      setActiveTab('suscripcion');
+      loadDealerships();
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelectDealership = (id) => {
     localStorage.setItem('adminDealershipId', id);
     setSelectedId(id);
@@ -1393,6 +1569,52 @@ const AdminDashboard = () => {
     );
   }
 
+  // Subscription gate — requires at least basic plan active
+  const hasActivePlan = currentDealership?.subscriptionStatus === 'authorized';
+  if (!hasActivePlan) {
+    return (
+      <div className="min-h-screen bg-[#0E0E0F] flex flex-col items-center justify-center px-4 gap-6 text-center">
+        <img src={logoSrc} alt="RedAutos" className="h-16 object-contain mb-2" />
+        <span className="material-symbols-outlined !text-6xl text-[#D32F2F]/40">lock</span>
+        <div>
+          <h2 className="text-[#E5E2E3] font-headline font-black text-2xl tracking-tighter">Suscripción requerida</h2>
+          <p className="text-[#E5E2E3]/40 text-sm mt-2 max-w-sm">
+            Para acceder al panel de administración necesitás un plan activo de RedAutos.
+          </p>
+          {currentDealership?.subscriptionStatus === 'pending' && (
+            <p className="text-yellow-400 text-xs mt-2">Tu pago está pendiente de confirmación.</p>
+          )}
+        </div>
+        <div className="flex gap-3 flex-wrap justify-center">
+          <button
+            onClick={() => { setActiveTab('suscripcion'); }}
+            className="bg-[#D32F2F] text-white px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:bg-[#B71C1C] transition-colors"
+          >
+            Ver planes
+          </button>
+          <button
+            onClick={loadDealerships}
+            className="border border-[#E5E2E3]/20 text-[#E5E2E3]/50 px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:text-[#E5E2E3] transition-colors flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined !text-sm">refresh</span> Actualizar
+          </button>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-[#E5E2E3]/20 text-xs hover:text-[#E5E2E3]/50 transition-colors px-4"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+        {/* Show subscription tab inline if they clicked "Ver planes" */}
+        {activeTab === 'suscripcion' && (
+          <div className="w-full max-w-4xl mt-4">
+            <SubscriptionTab dealership={currentDealership} onRefresh={loadDealerships} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#0E0E0F] font-body text-[#E5E2E3] antialiased flex min-h-screen">
       <Sidebar
@@ -1416,7 +1638,24 @@ const AdminDashboard = () => {
               <FleetTab vehicles={vehicles} dealershipId={selectedId} dealerships={dealerships} onRefresh={loadVehicles} />
             )}
             {activeTab === 'sucursales' && (
-              <SucursalesTab dealerships={dealerships} onCreated={loadDealerships} />
+              currentDealership?.plan === 'pro' && currentDealership?.subscriptionStatus === 'authorized'
+                ? <SucursalesTab dealerships={dealerships} onCreated={loadDealerships} />
+                : (
+                  <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+                    <span className="material-symbols-outlined !text-5xl text-[#D32F2F]/40">lock</span>
+                    <h2 className="text-[#E5E2E3] font-headline font-black text-xl">Plan Pro requerido</h2>
+                    <p className="text-[#E5E2E3]/40 text-sm max-w-xs">La gestión de múltiples sucursales está disponible en el Plan Pro.</p>
+                    <button
+                      onClick={() => setActiveTab('suscripcion')}
+                      className="bg-[#D32F2F] text-white px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:bg-[#B71C1C] transition-colors"
+                    >
+                      Ver planes
+                    </button>
+                  </div>
+                )
+            )}
+            {activeTab === 'suscripcion' && (
+              <SubscriptionTab dealership={currentDealership} onRefresh={loadDealerships} />
             )}
             {activeTab === 'config' && (
               <ConfigTab dealership={currentDealership} onUpdated={loadDealerships} />

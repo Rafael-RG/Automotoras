@@ -92,6 +92,19 @@ public class DealershipStorageService
         return all.Count;
     }
 
-    public DealershipDto ToDto(DealershipEntity e) =>
-        new(e.RowKey, e.Name, e.Address, e.City, e.Country, e.Phone, e.Email, e.LogoUrl, e.Latitude, e.Longitude);
+    public static DealershipDto ToDto(DealershipEntity e) =>
+        new(e.RowKey, e.Name, e.Address, e.City, e.Country, e.Phone, e.Email, e.LogoUrl, e.Latitude, e.Longitude, e.Plan, e.SubscriptionStatus);
+
+    public async Task<bool> UpdatePlanAsync(string id, string plan, string subscriptionId, string status)
+    {
+        var existing = await GetByIdAsync(id);
+        if (existing is null) return false;
+
+        existing.Plan = plan;
+        existing.SubscriptionId = string.IsNullOrWhiteSpace(subscriptionId) ? existing.SubscriptionId : subscriptionId;
+        existing.SubscriptionStatus = status;
+
+        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
+        return true;
+    }
 }

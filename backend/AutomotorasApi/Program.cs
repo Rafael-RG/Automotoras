@@ -20,6 +20,7 @@ var host = new HostBuilder()
         services.AddSingleton<VehicleStorageService>();
         services.AddSingleton<DealershipStorageService>();
         services.AddSingleton<BlobStorageService>();
+        services.AddSingleton<SubscriptionService>();
     })
     .Build();
 

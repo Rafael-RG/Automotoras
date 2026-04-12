@@ -90,6 +90,22 @@ export const uploadDealershipLogo = (id, file) => {
   }).then(handleResponse);
 };
 
+// ─── Suscripciones ───────────────────────────────────────────────────────────
+
+export const createSubscriptionCheckout = (dealershipId, plan, backUrl) =>
+  fetch(`${BASE_URL}/subscriptions/checkout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dealershipId, plan, backUrl }),
+  }).then(handleResponse);
+
+export const simulateSubscription = (dealershipId, plan) =>
+  fetch(`${BASE_URL}/subscriptions/simulate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dealershipId, plan }),
+  }).then(handleResponse);
+
 // ─── Seed (solo desarrollo) ──────────────────────────────────────────────────
 
 export const seedData = () =>

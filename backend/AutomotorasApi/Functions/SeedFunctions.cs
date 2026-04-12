@@ -89,7 +89,7 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
         return new OkObjectResult(new
         {
             message = "Datos de prueba creados exitosamente.",
-            dealerships = new[] { dealershipService.ToDto(apex), dealershipService.ToDto(luxury) },
+            dealerships = new[] { DealershipStorageService.ToDto(apex), DealershipStorageService.ToDto(luxury) },
             vehiclesCreated = seedVehicles.Length
         });
     }

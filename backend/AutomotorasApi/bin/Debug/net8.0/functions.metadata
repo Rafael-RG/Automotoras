@@ -135,6 +135,33 @@
     ]
   },
   {
+    "name": "RemoveVehicleImage",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.ImageFunctions.RemoveVehicleImage",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "delete"
+        ],
+        "route": "vehicles/{brand}/{id}/image",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
     "name": "UploadDealershipLogo",
     "scriptFile": "AutomotorasApi.dll",
     "entryPoint": "AutomotorasApi.Functions.ImageFunctions.UploadDealershipLogo",
@@ -206,6 +233,87 @@
           "post"
         ],
         "route": "seed/clear",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "CreateSubscriptionCheckout",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.CreateCheckout",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/checkout",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "SubscriptionWebhook",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.Webhook",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/webhook",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "SimulateSubscription",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.SubscriptionFunctions.Simulate",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "subscriptions/simulate",
         "properties": {}
       },
       {
@@ -341,6 +449,33 @@
           "delete"
         ],
         "route": "vehicles/{brand}/{id}",
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
+  },
+  {
+    "name": "TrackVehicleEvent",
+    "scriptFile": "AutomotorasApi.dll",
+    "entryPoint": "AutomotorasApi.Functions.VehicleFunctions.TrackVehicleEvent",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "route": "vehicles/{brand}/{id}/event",
         "properties": {}
       },
       {
