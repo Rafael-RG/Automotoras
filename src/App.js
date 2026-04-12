@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import PrivacyScreen from './pages/PrivacyScreen';
 import LoginScreen from './pages/LoginScreen';
 import PagoExitosoScreen from './pages/PagoExitosoScreen';
+import SobreNosotrosScreen from './pages/SobreNosotrosScreen';
+import PaginaAterrizajeScreen from './pages/PaginaAterrizajeScreen';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/pago-exitoso" element={<PagoExitosoScreen />} />
+        <Route path="/sobre-nosotros" element={<SobreNosotrosScreen />} />
+        <Route path="/unirse" element={<PaginaAterrizajeScreen />} />
         <Route path="/privacidad" element={<PrivacyScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         {/* Fallback routes for other nav items */}

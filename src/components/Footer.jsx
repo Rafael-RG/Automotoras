@@ -22,6 +22,7 @@ const Footer = () => (
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">Navegación</p>
             <a href="/" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Garage</a>
             <a href="/dealerships" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Buscar Automotoras</a>
+            <a href="/sobre-nosotros" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Sobre RedAutos</a>
           </div>
           <div className="flex flex-col gap-3">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">Legal</p>
@@ -29,6 +30,8 @@ const Footer = () => (
           </div>
           <div className="flex flex-col gap-3">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1">Automotoras</p>
+            <a href="/unirse" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Sumá tu automotora</a>
+            <a href="/sobre-nosotros" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors">Sobre RedAutos</a>
             <a href="/login" className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] text-xs transition-colors flex items-center gap-1.5">
               <span className="material-symbols-outlined !text-sm">lock</span>
               Acceso Administrador

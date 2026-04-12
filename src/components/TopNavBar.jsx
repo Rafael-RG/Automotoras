@@ -25,6 +25,7 @@ const TopNavBar = () => {
           <nav className="hidden md:flex gap-10">
             <Link to="/" className={navLinkClass('/')}>Garage</Link>
             <Link to="/dealerships" className={navLinkClass('/dealerships')}>Buscar Automotoras</Link>
+            <Link to="/sobre-nosotros" className={navLinkClass('/sobre-nosotros')}>Sobre RedAutos</Link>
           </nav>
         </div>
 
@@ -56,6 +57,13 @@ const TopNavBar = () => {
             className={`px-6 py-4 font-['Manrope'] uppercase font-bold text-sm border-b border-[#353436]/30 ${location.pathname === '/dealerships' ? 'text-primary' : 'text-[#E5E2E3]/70'}`}
           >
             Buscar Automotoras
+          </Link>
+          <Link
+            to="/sobre-nosotros"
+            onClick={() => setMenuOpen(false)}
+            className={`px-6 py-4 font-['Manrope'] uppercase font-bold text-sm border-b border-[#353436]/30 ${location.pathname === '/sobre-nosotros' ? 'text-primary' : 'text-[#E5E2E3]/70'}`}
+          >
+            Sobre RedAutos
           </Link>
           <Link
             to="/login"
