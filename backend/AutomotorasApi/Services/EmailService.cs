@@ -19,7 +19,7 @@ public class EmailService(IConfiguration config)
         var link = $"{_frontendUrl}/verificar-email?token={Uri.EscapeDataString(token)}";
         var body = $@"
 <div style='font-family:sans-serif;max-width:580px;margin:0 auto;background:#0E0E0F;color:#E5E2E3;padding:32px;border-radius:12px;'>
-  <img src='https://redautos.com.uy/logo.png' alt='RedAutos' style='height:48px;margin-bottom:24px;' />
+  <img src='https://redautos.com.uy/Logo.png' alt='RedAutos' style='height:48px;margin-bottom:24px;' />
   <h2 style='color:#ffffff;margin-top:0;'>Verificá tu email</h2>
   <p>Hola <strong>{toName}</strong>, gracias por registrarte en RedAutos.</p>
   <p>Hacé click en el botón para confirmar tu dirección de email y activar tu cuenta:</p>
@@ -36,7 +36,7 @@ public class EmailService(IConfiguration config)
         var link = $"{_frontendUrl}/reset-password?token={Uri.EscapeDataString(token)}";
         var body = $@"
 <div style='font-family:sans-serif;max-width:580px;margin:0 auto;background:#0E0E0F;color:#E5E2E3;padding:32px;border-radius:12px;'>
-  <img src='https://redautos.com.uy/logo.png' alt='RedAutos' style='height:48px;margin-bottom:24px;' />
+  <img src='https://redautos.com.uy/Logo.png' alt='RedAutos' style='height:48px;margin-bottom:24px;' />
   <h2 style='color:#ffffff;margin-top:0;'>Recuperar contraseña</h2>
   <p>Hola <strong>{toName}</strong>, recibimos una solicitud para restablecer tu contraseña.</p>
   <p>Hacé click en el botón para elegir una nueva contraseña:</p>
