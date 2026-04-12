@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -69,6 +70,106 @@ const FlyToUser = ({ userLocation }) => {
   return null;
 };
 
+// ─── Brand picker modal (portal → map never re-renders) ───────────────────────
+const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) => {
+  const [brandSearch, setBrandSearch] = useState('');
+  return ReactDOM.createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#131314] border border-[#353436] rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#353436]">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Seleccionar Marca</p>
+          <button onClick={onClose} className="text-[#E5E2E3]/40 hover:text-[#D32F2F] transition-colors">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div className="px-6 py-3 border-b border-[#353436]">
+          <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2">
+            <span className="material-symbols-outlined text-[#D32F2F]/40 !text-sm">search</span>
+            <input
+              autoFocus
+              value={brandSearch}
+              onChange={(e) => setBrandSearch(e.target.value)}
+              placeholder="Buscar marca..."
+              className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20"
+            />
+            {brandSearch && (
+              <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-[#D32F2F]">
+                <span className="material-symbols-outlined !text-sm">close</span>
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="overflow-y-auto flex-1 p-4">
+          {(() => {
+            const filtered = allBrands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+            if (brandSearch) {
+              return (
+                <div className="flex flex-wrap gap-2">
+                  {filtered.map(b => (
+                    <button key={b} onClick={() => onSelect(b)}
+                      className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F]' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70'}`}>
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              );
+            }
+            const grouped = filtered.reduce((acc, b) => {
+              const letter = b[0].toUpperCase();
+              if (!acc[letter]) acc[letter] = [];
+              acc[letter].push(b);
+              return acc;
+            }, {});
+            const letters = Object.keys(grouped).sort();
+            return (
+              <div className="space-y-5">
+                <div className="flex flex-wrap gap-1 pb-3 border-b border-[#353436]/50">
+                  {letters.map(l => (
+                    <button key={l}
+                      onClick={() => document.getElementById(`df-brand-letter-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                      className="w-6 h-6 text-[10px] font-black text-[#E5E2E3]/40 hover:text-[#D32F2F] transition-colors">
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                {letters.map(l => (
+                  <div key={l} id={`df-brand-letter-${l}`}>
+                    <p className="text-[9px] font-black text-[#D32F2F] tracking-[0.3em] mb-2">{l}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {grouped[l].map(b => (
+                        <button key={b} onClick={() => onSelect(b)}
+                          className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F]' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70'}`}>
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+        {selectedBrand && (
+          <div className="px-6 py-4 border-t border-[#353436] flex justify-between items-center">
+            <span className="text-[10px] text-[#E5E2E3]/40">Seleccionada: <span className="text-[#D32F2F] font-bold">{selectedBrand}</span></span>
+            <button onClick={() => onSelect(null)}
+              className="text-[9px] font-black uppercase tracking-widest text-[#D32F2F] hover:underline">
+              Quitar filtro
+            </button>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+});
+
 // ─── Main component ───────────────────────────────────────────────────────────
 const DealershipFinderScreen = () => {
   const navigate = useNavigate();
@@ -82,6 +183,8 @@ const DealershipFinderScreen = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [geoError, setGeoError] = useState(false);
   const [maxDistance, setMaxDistance] = useState(null);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
 
   // Load data on mount
   useEffect(() => {
@@ -177,7 +280,7 @@ const DealershipFinderScreen = () => {
     <div className="bg-[#0E0E0F] text-[#E5E2E3] flex flex-col" style={{ height: '100dvh' }}>
       <TopNavBar />
 
-      <div className="flex flex-1 overflow-hidden pt-16">
+      <div className="flex flex-1 overflow-hidden pt-24">
         {/* ── Sidebar ───────────────────────────────── */}
         <aside className="w-72 flex-shrink-0 bg-[#0E0E0F] border-r border-[#E5E2E3]/10 flex flex-col overflow-y-auto">
           <div className="p-6 border-b border-[#E5E2E3]/10">
@@ -222,38 +325,36 @@ const DealershipFinderScreen = () => {
 
           {/* Brand filter */}
           <div className="p-6 border-b border-[#E5E2E3]/10">
-            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-4">
+            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-3">
               Filtrar por marca
             </p>
-            <div className="space-y-1">
-              <button
-                onClick={() => setSelectedBrand(null)}
-                className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                  !selectedBrand
-                    ? 'bg-[#D32F2F]/10 text-[#D32F2F] border border-[#D32F2F]/20'
-                    : 'text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:bg-[#E5E2E3]/5'
-                }`}
-              >
-                Todas las marcas
-                <span className="ml-2 text-[10px] opacity-60">{dealerships.length}</span>
-              </button>
-              {allBrands.map((brand) => {
-                const count = dealerships.filter((d) => dealershipBrands[d.id]?.has(brand)).length;
+            <div className="flex flex-wrap gap-1.5">
+              {selectedBrand && (
+                <button
+                  onClick={() => setSelectedBrand(null)}
+                  className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F] transition-all"
+                >
+                  {selectedBrand}
+                </button>
+              )}
+              {allBrands.filter(b => b !== selectedBrand).slice(0, 5).map((brand) => {
                 return (
                   <button
                     key={brand}
                     onClick={() => setSelectedBrand((b) => (b === brand ? null : brand))}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                      selectedBrand === brand
-                        ? 'bg-[#D32F2F]/10 text-[#D32F2F] border border-[#D32F2F]/20'
-                        : 'text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:bg-[#E5E2E3]/5'
-                    }`}
+                    className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+                  >
                   >
                     {brand}
-                    <span className="ml-2 text-[10px] opacity-60">{count}</span>
                   </button>
                 );
               })}
+              <button
+                onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
+                className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+              >
+                Ver más…
+              </button>
             </div>
           </div>
 
@@ -493,6 +594,16 @@ const DealershipFinderScreen = () => {
           )}
         </div>
       </div>
+
+      {/* ── Brand picker modal (portal) ────────────────────────────── */}
+      {showBrandModal && (
+        <BrandPickerModal
+          allBrands={allBrands}
+          selectedBrand={selectedBrand}
+          onSelect={(b) => { setSelectedBrand(b === selectedBrand ? null : b); setShowBrandModal(false); }}
+          onClose={() => setShowBrandModal(false)}
+        />
+      )}
     </div>
   );
 };

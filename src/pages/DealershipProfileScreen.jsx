@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { getDealershipById, getVehicles } from '../services/api';
+import { VEHICLE_MODELS } from '../constants/vehicles';
 
 // ─── Shared UI ───────────────────────────────────────────────────────────────
 const FilterChip = ({ label, active, onClick }) => (
@@ -42,10 +43,13 @@ const DealershipProfileScreen = () => {
 
   // Filter state
   const [search, setSearch] = useState('');
+  const [filterBrand, setFilterBrand] = useState(null);
   const [filterModel, setFilterModel] = useState(null);
   const [filterFuel, setFilterFuel] = useState(null);
   const [filterTrans, setFilterTrans] = useState(null);
   const [filterBody, setFilterBody] = useState(null);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [yearMin, setYearMin] = useState('');
@@ -67,7 +71,12 @@ const DealershipProfileScreen = () => {
   );
 
   // Derived filter options
-  const models    = useMemo(() => [...new Set(dealershipVehicles.map(v => v.model).filter(Boolean))].sort(), [dealershipVehicles]);
+  const brands    = useMemo(() => [...new Set(dealershipVehicles.map(v => v.brand).filter(Boolean))].sort(), [dealershipVehicles]);
+  const models    = useMemo(() => {
+    if (filterBrand && VEHICLE_MODELS[filterBrand]) return VEHICLE_MODELS[filterBrand];
+    const source = filterBrand ? dealershipVehicles.filter(v => v.brand === filterBrand) : dealershipVehicles;
+    return [...new Set(source.map(v => v.model).filter(Boolean))].sort();
+  }, [dealershipVehicles, filterBrand]);
   const fuels     = useMemo(() => [...new Set(dealershipVehicles.map(v => v.fuel).filter(Boolean))].sort(), [dealershipVehicles]);
   const transList = useMemo(() => [...new Set(dealershipVehicles.map(v => v.transmission).filter(Boolean))].sort(), [dealershipVehicles]);
   const bodyTypes = useMemo(() => [...new Set(dealershipVehicles.map(v => v.bodyType).filter(Boolean))].sort(), [dealershipVehicles]);
@@ -76,6 +85,7 @@ const DealershipProfileScreen = () => {
   const vehicles = useMemo(() => {
     let r = [...dealershipVehicles];
     if (search) { const q = search.toLowerCase(); r = r.filter(v => `${v.brand} ${v.model} ${v.year}`.toLowerCase().includes(q)); }
+    if (filterBrand) r = r.filter(v => v.brand === filterBrand);
     if (filterModel) r = r.filter(v => v.model === filterModel);
     if (filterFuel)  r = r.filter(v => v.fuel === filterFuel);
     if (filterTrans) r = r.filter(v => v.transmission === filterTrans);
@@ -91,13 +101,13 @@ const DealershipProfileScreen = () => {
     if (sortBy === 'year-asc')   return [...r].sort((a, b) => a.year - b.year);
     if (sortBy === 'km-asc')     return [...r].sort((a, b) => a.mileage - b.mileage);
     return r;
-  }, [dealershipVehicles, search, filterModel, filterFuel, filterTrans, filterBody, priceMin, priceMax, yearMin, yearMax, kmMax, sortBy]);
+  }, [dealershipVehicles, search, filterBrand, filterModel, filterFuel, filterTrans, filterBody, priceMin, priceMax, yearMin, yearMax, kmMax, sortBy]);
 
-  const hasFilters = search || filterModel || filterFuel || filterTrans || filterBody ||
+  const hasFilters = search || filterBrand || filterModel || filterFuel || filterTrans || filterBody ||
     priceMin || priceMax || yearMin || yearMax || kmMax;
 
   const clearAll = () => {
-    setSearch(''); setFilterModel(null); setFilterFuel(null); setFilterTrans(null);
+    setSearch(''); setFilterBrand(null); setFilterModel(null); setFilterFuel(null); setFilterTrans(null);
     setFilterBody(null); setPriceMin(''); setPriceMax(''); setYearMin(''); setYearMax(''); setKmMax('');
   };
 
@@ -200,6 +210,29 @@ const DealershipProfileScreen = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Marca */}
+                  {brands.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Marca</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {filterBrand && (
+                          <FilterChip key={filterBrand} label={filterBrand} active={true}
+                            onClick={() => { setFilterBrand(null); setFilterModel(null); }} />
+                        )}
+                        {brands.filter(b => b !== filterBrand).slice(0, 5).map(b => (
+                          <FilterChip key={b} label={b} active={false}
+                            onClick={() => { setFilterBrand(b); setFilterModel(null); }} />
+                        ))}
+                        {brands.length > 5 && (
+                          <button onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
+                            className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70 transition-all">
+                            Ver más…
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Modelo */}
                   {models.length > 0 && (
@@ -344,6 +377,80 @@ const DealershipProfileScreen = () => {
       </main>
 
       <Footer />
+
+      {/* ── Brand picker modal ─────────────────────────────────────── */}
+      {showBrandModal && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowBrandModal(false)}>
+          <div className="bg-[#131314] border border-[#353436] rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#353436]">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Seleccionar Marca</p>
+              <button onClick={() => setShowBrandModal(false)} className="text-[#E5E2E3]/40 hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-3 border-b border-[#353436]">
+              <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2">
+                <span className="material-symbols-outlined text-primary/40 !text-sm">search</span>
+                <input autoFocus value={brandSearch} onChange={(e) => setBrandSearch(e.target.value)}
+                  placeholder="Buscar marca..."
+                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20" />
+                {brandSearch && (
+                  <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-primary">
+                    <span className="material-symbols-outlined !text-sm">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 p-4">
+              {(() => {
+                const filtered = brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+                if (brandSearch) {
+                  return (
+                    <div className="flex flex-wrap gap-2">
+                      {filtered.map(b => (
+                        <button key={b} onClick={() => { setFilterBrand(b === filterBrand ? null : b); setFilterModel(null); setShowBrandModal(false); }}
+                          className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${filterBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70'}`}>{b}</button>
+                      ))}
+                    </div>
+                  );
+                }
+                const grouped = filtered.reduce((acc, b) => { const l = b[0].toUpperCase(); if (!acc[l]) acc[l] = []; acc[l].push(b); return acc; }, {});
+                const letters = Object.keys(grouped).sort();
+                return (
+                  <div className="space-y-5">
+                    <div className="flex flex-wrap gap-1 pb-3 border-b border-[#353436]/50">
+                      {letters.map(l => (
+                        <button key={l} onClick={() => document.getElementById(`dp-brand-letter-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                          className="w-6 h-6 text-[10px] font-black text-[#E5E2E3]/40 hover:text-primary transition-colors">{l}</button>
+                      ))}
+                    </div>
+                    {letters.map(l => (
+                      <div key={l} id={`dp-brand-letter-${l}`}>
+                        <p className="text-[9px] font-black text-primary tracking-[0.3em] mb-2">{l}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grouped[l].map(b => (
+                            <button key={b} onClick={() => { setFilterBrand(b === filterBrand ? null : b); setFilterModel(null); setShowBrandModal(false); }}
+                              className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${filterBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70'}`}>{b}</button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+            {filterBrand && (
+              <div className="px-6 py-4 border-t border-[#353436] flex justify-between items-center">
+                <span className="text-[10px] text-[#E5E2E3]/40">Seleccionada: <span className="text-primary font-bold">{filterBrand}</span></span>
+                <button onClick={() => { setFilterBrand(null); setFilterModel(null); setShowBrandModal(false); }}
+                  className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline">Quitar filtro</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

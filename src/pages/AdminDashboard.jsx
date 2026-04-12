@@ -1,41 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logoSrc from '../assets/Logo.png';
 import {
-  getDealerships, updateDealership, uploadDealershipLogo,
+  getDealerships, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, removeVehicleImage,
 } from '../services/api';
+import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
-const TRANSMISSIONS = ['Manual', 'Automática'];
-const FUELS = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido'];
-const BODY_TYPES = ['Cabriolet','Coupé','Crossover','Furgón','Hatchback','Light Truck','Minibus','Minivan','Monovolumen','Off-Road','Pick-Up','Roadster','Rural','Sedán','SUV','Van'];
-const VEHICLE_BRANDS = [
-  'Acura','Aion','Alfa Romeo','Audi',
-  'BAIC','BAW','Bedford','Bestune','BMW','Brilliance','Buggy','BYD','BYD auto',
-  'Cfmoto','Chana','Changan','Changhe','Cherry','Chery','Chevrolet','Chevy','Chrysler','Citroën','Compro','Corsa',
-  'Daewoo','Dahiatsu','Daihatsu','DFM','DFSK','Dodge','Dongfeng',
-  'Effa',
-  'FAW','Ferrari','Fiat','Ford','Forland','Foton',
-  'G3','Geely','Genérica','GMC','Gonow','Great Wall','Gurgel','GWM',
-  'Haima','Haval','Higer','Honda','Hudson','Hummer','Hyundai',
-  'Infiniti','Isuzu','Iveco',
-  'JAC','Jaguar','Jeep','Jetour','JMC',
-  'Kama','Karry','Keyton','Kia','King Star',
-  'Lada','Land Rover','Lexus','Lifan','Lincoln','Lotus',
-  'Maestro','Mahindra','Maple','Maserati','Maxus','Mazda','Mercedes-Benz','MG','Mini','Mitsubishi','Mobility','Montenegro',
-  'Nissan',
-  'Omoda','Opel','Orient',
-  'Peugeot','Plymouth','Porsche',
-  'RAM','Rely','Renault','Rover',
-  'Seat','Skoda','Smart','Soueast','SsangYong','Studebaker','Subaru','Suzuki',
-  'TATA','Tesla','Toyota','Trike',
-  'Victory','Victory Auto','Volkswagen','Volvo',
-  'Willys','Wuling',
-  'Yasuki',
-  'Zna','Zotye','ZxAuto',
-];
 const EMPTY_VEHICLE = {
   brand: '', model: '', year: new Date().getFullYear(), price: '',
   mileage: 0, transmission: 'Automática', fuel: 'Gasolina', bodyType: 'Sedán',
@@ -43,58 +18,63 @@ const EMPTY_VEHICLE = {
 };
 
 // ─── Dealership Selector ──────────────────────────────────────────────────────
-const DealershipSelector = ({ dealerships, onSelect }) => (
-  <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
-    <div className="max-w-lg w-full mx-4">
-      <h1 className="text-4xl font-headline font-black text-[#E5E2E3] tracking-tighter uppercase text-center mb-2">
-        <span className="text-[#D32F2F]">Red</span>Autos Admin
-      </h1>
-      <p className="text-[#E5E2E3]/40 text-center text-sm mb-10">
-        Seleccioná tu automotora para continuar
-      </p>
-      <div className="space-y-4">
-        {dealerships.map((d) => (
-          <button
-            key={d.id}
-            onClick={() => onSelect(d.id)}
-            className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6 text-left hover:border-[#D32F2F]/50 hover:bg-[#D32F2F]/5 transition-all group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#D32F2F]/10 rounded-lg flex items-center justify-center group-hover:bg-[#D32F2F]/20 transition-colors flex-shrink-0">
-                {d.logoUrl
-                  ? <img src={d.logoUrl} alt={d.name} className="w-10 h-10 object-cover rounded-lg" />
-                  : <span className="material-symbols-outlined text-[#D32F2F]">garage</span>
-                }
+const DealershipSelector = ({ dealerships, onSelect }) => {
+  const multi = dealerships.length > 1;
+  return (
+    <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
+      <div className="max-w-lg w-full mx-4">
+        <div className="flex justify-center mb-8">
+          <img src={logoSrc} alt="RedAutos" className="h-20 object-contain" />
+        </div>
+        <p className="text-[#E5E2E3]/40 text-center text-sm mb-2">
+          {multi ? `Seleccioná tu sucursal (${dealerships.length} disponibles)` : 'Seleccioná tu automotora para continuar'}
+        </p>
+        <h2 className="text-[#E5E2E3] font-headline font-black text-2xl text-center tracking-tighter mb-8">
+          {multi ? '¿Desde qué sucursal vas a trabajar?' : dealerships[0]?.name}
+        </h2>
+        <div className="space-y-3">
+          {dealerships.map((d) => (
+            <button
+              key={d.id}
+              onClick={() => onSelect(d.id)}
+              className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-5 text-left hover:border-[#D32F2F]/50 hover:bg-[#D32F2F]/5 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#D32F2F]/10 rounded-sm flex items-center justify-center group-hover:bg-[#D32F2F]/20 transition-colors flex-shrink-0">
+                  {d.logoUrl
+                    ? <img src={d.logoUrl} alt={d.name} className="w-9 h-9 object-cover rounded-sm" />
+                    : <span className="material-symbols-outlined text-[#D32F2F]">garage</span>
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[#E5E2E3] font-headline font-bold text-base tracking-tight truncate">{d.name}</div>
+                  <div className="text-[#E5E2E3]/40 text-xs">{d.city}, {d.country}</div>
+                </div>
+                <span className="material-symbols-outlined text-[#E5E2E3]/20 group-hover:text-[#D32F2F] transition-colors">
+                  arrow_forward
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[#E5E2E3] font-headline font-bold text-lg tracking-tight truncate">{d.name}</div>
-                <div className="text-[#E5E2E3]/40 text-sm">{d.city}, {d.country}</div>
-              </div>
-              <span className="material-symbols-outlined text-[#E5E2E3]/20 group-hover:text-[#D32F2F] transition-colors">
-                arrow_forward
-              </span>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-const Sidebar = ({ activeTab, setActiveTab, dealership, onLogout }) => {
+const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLogout }) => {
   const nav = [
     { id: 'dashboard', icon: 'speed', label: 'Panel' },
     { id: 'fleet', icon: 'directions_car', label: 'Mi Flota' },
+    { id: 'sucursales', icon: 'store', label: 'Sucursales' },
     { id: 'config', icon: 'tune', label: 'Configuración' },
   ];
   return (
     <aside className="fixed left-0 h-full w-64 border-r border-[#E5E2E3]/10 bg-[#0E0E0F] flex flex-col py-8 z-40">
       <div className="px-6 mb-10">
-        <span className="text-lg font-bold tracking-tighter italic font-headline block">
-          <span className="text-[#D32F2F]">Red</span><span className="text-[#E5E2E3]">Autos</span>
-        </span>
-        <span className="text-[10px] font-semibold text-[#D32F2F] tracking-widest uppercase block mt-1 truncate">
+        <img src={logoSrc} alt="RedAutos" className="h-14 w-auto object-contain mb-2" />
+        <span className="text-[10px] font-semibold text-[#D32F2F] tracking-widest uppercase block truncate">
           {dealership?.name ?? '...'}
         </span>
       </div>
@@ -114,19 +94,20 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onLogout }) => {
           </button>
         ))}
         <button
-          onClick={onLogout}
+          onClick={onChangeDealership}
           className="w-full flex items-center gap-3 px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-[#E5E2E3]/50 hover:text-[#E5E2E3] border-l-4 border-transparent transition-all"
         >
           <span className="material-symbols-outlined !text-xl">swap_horiz</span>
-          Cambiar automotora
+          Cambiar sucursal
         </button>
       </nav>
       <div className="px-6 mt-auto">
         <button
-          onClick={() => setActiveTab('fleet')}
-          className="w-full bg-[#D32F2F] text-white py-4 rounded-lg font-headline font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#B71C1C] transition-colors"
+          onClick={onLogout}
+          className="w-full flex items-center justify-center gap-2 border border-[#E5E2E3]/10 text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/30 py-3 rounded-sm text-[11px] font-semibold uppercase tracking-wider transition-all"
         >
-          + Nueva Unidad
+          <span className="material-symbols-outlined !text-base">logout</span>
+          Cerrar sesión
         </button>
       </div>
     </aside>
@@ -233,7 +214,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">
-          Executive Pulse
+          Panel General
         </h1>
         <p className="text-[#E5E2E3]/30 text-sm mt-1">{dealership?.name}</p>
       </div>
@@ -513,7 +494,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
 };
 
 // ─── Vehicle Modal ─────────────────────────────────────────────────────────────
-const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
+const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) => {
   const isEdit = !!vehicle;
   const [form, setForm] = useState(
     vehicle
@@ -537,6 +518,9 @@ const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
     : []
   );
   const [removingUrl, setRemovingUrl] = useState(null);
+  const [selectedDealershipId, setSelectedDealershipId] = useState(
+    vehicle?.dealershipId || dealershipId
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -555,7 +539,7 @@ const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
         year: Number.parseInt(form.year, 10),
         price: Number.parseFloat(form.price),
         mileage: Number.parseInt(form.mileage, 10),
-        dealershipId,
+        dealershipId: selectedDealershipId,
       };
       let saved;
       if (isEdit) {
@@ -642,10 +626,49 @@ const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
               <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
                 Modelo
               </label>
-              <input
-                value={form.model} onChange={set('model')} required placeholder="911 Carrera S"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
-              />
+              {(() => {
+                const modelOptions = VEHICLE_MODELS[form.brand] || [];
+                if (modelOptions.length > 0) {
+                  const isCustom = form.model && !modelOptions.includes(form.model);
+                  return (
+                    <>
+                      <select
+                        value={isCustom ? '__other__' : (form.model || '')}
+                        onChange={(e) => {
+                          if (e.target.value === '__other__') {
+                            setForm((f) => ({ ...f, model: '' }));
+                          } else {
+                            setForm((f) => ({ ...f, model: e.target.value }));
+                          }
+                        }}
+                        required={!isCustom}
+                        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+                      >
+                        <option value="" disabled>Seleccionar modelo…</option>
+                        {modelOptions.map((m) => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                        <option value="__other__">Otro modelo…</option>
+                      </select>
+                      {isCustom && (
+                        <input
+                          value={form.model}
+                          onChange={set('model')}
+                          required
+                          placeholder="Escribí el modelo"
+                          className="w-full mt-2 bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
+                        />
+                      )}
+                    </>
+                  );
+                }
+                return (
+                  <input
+                    value={form.model} onChange={set('model')} required placeholder="Ej: Corolla"
+                    className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                  />
+                );
+              })()}
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -797,20 +820,37 @@ const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
                 );
               })()}
             </div>
-            <div className="flex items-center gap-3">
+            {/* Sucursal */}
+          {dealerships && dealerships.length > 1 && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+                Sucursal
+              </label>
+              <select
+                value={selectedDealershipId}
+                onChange={(e) => setSelectedDealershipId(e.target.value)}
+                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+              >
+                {dealerships.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name} — {d.city}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
               <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40">
                 Disponible
               </span>
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, isAvailable: !f.isAvailable }))}
-                className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${
+                className={`relative inline-flex w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
                   form.isAvailable ? 'bg-[#D32F2F]' : 'bg-[#E5E2E3]/10'
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                    form.isAvailable ? 'translate-x-6' : 'translate-x-0.5'
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    form.isAvailable ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -838,7 +878,11 @@ const VehicleModal = ({ vehicle, dealershipId, onClose, onSaved }) => {
 };
 
 // ─── Fleet Tab ────────────────────────────────────────────────────────────────
-const FleetTab = ({ vehicles, dealershipId, onRefresh }) => {
+const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
+  const dealershipMap = useMemo(
+    () => Object.fromEntries((dealerships || []).map((d) => [d.id, d])),
+    [dealerships]
+  );
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
@@ -876,6 +920,7 @@ const FleetTab = ({ vehicles, dealershipId, onRefresh }) => {
         <VehicleModal
           vehicle={editingVehicle}
           dealershipId={dealershipId}
+          dealerships={dealerships}
           onClose={closeModal}
           onSaved={() => { closeModal(); onRefresh(); }}
         />
@@ -968,6 +1013,12 @@ const FleetTab = ({ vehicles, dealershipId, onRefresh }) => {
                     <span>{v.transmission}</span>
                     <span>{v.fuel}</span>
                     {v.bodyType && <span>{v.bodyType}</span>}
+                    {dealerships && dealerships.length > 1 && dealershipMap[v.dealershipId] && (
+                      <span className="flex items-center gap-1 text-[#D32F2F]/60">
+                        <span className="material-symbols-outlined !text-[11px]">store</span>
+                        {dealershipMap[v.dealershipId].name}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                     <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
@@ -1008,6 +1059,123 @@ const FleetTab = ({ vehicles, dealershipId, onRefresh }) => {
         </div>
       </div>
     </>
+  );
+};
+
+// ─── Sucursales Tab ───────────────────────────────────────────────────────────
+const SucursalesTab = ({ dealerships, onCreated }) => {
+  const EMPTY = { name: '', address: '', city: '', country: '', phone: '', email: '', latitude: '', longitude: '' };
+  const [form, setForm] = useState(EMPTY);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess(false);
+    if (!form.name.trim() || !form.city.trim() || !form.country.trim()) {
+      setError('Nombre, ciudad y país son obligatorios.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await createDealership({
+        name: form.name.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        country: form.country.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        latitude: parseFloat(form.latitude) || 0,
+        longitude: parseFloat(form.longitude) || 0,
+      });
+      setForm(EMPTY);
+      setSuccess(true);
+      onCreated();
+      setTimeout(() => setSuccess(false), 3000);
+    } catch {
+      setError('Error al crear la sucursal. Verificá los datos.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const Field = ({ label, k, type = 'text', placeholder = '' }) => (
+    <div>
+      <label className="block text-[11px] font-semibold uppercase tracking-widest text-[#E5E2E3]/40 mb-1">{label}</label>
+      <input
+        type={type}
+        value={form[k]}
+        onChange={set(k)}
+        placeholder={placeholder}
+        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm px-4 py-3 text-sm text-[#E5E2E3] placeholder-[#E5E2E3]/20 focus:outline-none focus:border-[#D32F2F]/50 transition-colors"
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-10 max-w-4xl">
+      <div>
+        <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">Sucursales</h1>
+        <p className="text-[#E5E2E3]/30 text-sm mt-1">{dealerships.length} sucursal{dealerships.length !== 1 ? 'es' : ''} registrada{dealerships.length !== 1 ? 's' : ''}</p>
+      </div>
+
+      {/* Listado */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {dealerships.map((d) => (
+          <div key={d.id} className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-5 flex gap-4 items-start">
+            <div className="w-10 h-10 bg-[#D32F2F]/10 rounded-sm flex items-center justify-center flex-shrink-0">
+              {d.logoUrl
+                ? <img src={d.logoUrl} alt={d.name} className="w-9 h-9 object-cover rounded-sm" />
+                : <span className="material-symbols-outlined text-[#D32F2F]">store</span>
+              }
+            </div>
+            <div className="min-w-0">
+              <div className="text-[#E5E2E3] font-bold text-sm truncate">{d.name}</div>
+              <div className="text-[#E5E2E3]/40 text-xs mt-0.5">{d.address && `${d.address}, `}{d.city}, {d.country}</div>
+              {d.phone && <div className="text-[#E5E2E3]/30 text-xs mt-0.5">{d.phone}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Formulario nueva sucursal */}
+      <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8">
+        <h2 className="text-lg font-headline font-bold text-[#E5E2E3] tracking-tight mb-6">+ Nueva Sucursal</h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Field label="Nombre *" k="name" placeholder="Ej: Sucursal Centro" />
+            <Field label="Ciudad *" k="city" placeholder="Ej: Montevideo" />
+            <Field label="País *" k="country" placeholder="Ej: Uruguay" />
+            <Field label="Dirección" k="address" placeholder="Ej: Av. 18 de Julio 1234" />
+            <Field label="Teléfono" k="phone" placeholder="Ej: +598 99 123 456" />
+            <Field label="Email" k="email" type="email" placeholder="Ej: sucursal@automotora.com" />
+            <Field label="Latitud" k="latitude" type="number" placeholder="Ej: -34.9011" />
+            <Field label="Longitud" k="longitude" type="number" placeholder="Ej: -56.1645" />
+          </div>
+          {error && (
+            <p className="text-red-400 text-sm flex items-center gap-2">
+              <span className="material-symbols-outlined !text-base">error</span>{error}
+            </p>
+          )}
+          {success && (
+            <p className="text-green-400 text-sm flex items-center gap-2">
+              <span className="material-symbols-outlined !text-base">check_circle</span>
+              Sucursal creada correctamente
+            </p>
+          )}
+          <button
+            type="submit" disabled={saving}
+            className="w-full py-3 bg-[#D32F2F] text-white rounded-sm font-headline font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#B71C1C] transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Creando...' : 'Crear Sucursal'}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 
@@ -1156,6 +1324,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dealerships, setDealerships] = useState([]);
   const [selectedId, setSelectedId] = useState(
@@ -1230,7 +1399,8 @@ const AdminDashboard = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         dealership={currentDealership}
-        onLogout={handleLogout}
+        onChangeDealership={handleLogout}
+        onLogout={() => navigate('/login')}
       />
       <main className="ml-64 flex-1 p-10 min-w-0">
         {loading ? (
@@ -1243,7 +1413,10 @@ const AdminDashboard = () => {
               <DashboardTab vehicles={vehicles} dealership={currentDealership} />
             )}
             {activeTab === 'fleet' && (
-              <FleetTab vehicles={vehicles} dealershipId={selectedId} onRefresh={loadVehicles} />
+              <FleetTab vehicles={vehicles} dealershipId={selectedId} dealerships={dealerships} onRefresh={loadVehicles} />
+            )}
+            {activeTab === 'sucursales' && (
+              <SucursalesTab dealerships={dealerships} onCreated={loadDealerships} />
             )}
             {activeTab === 'config' && (
               <ConfigTab dealership={currentDealership} onUpdated={loadDealerships} />

@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import { getVehicles } from '../services/api';
+import { getVehicles, getDealerships } from '../services/api';
+import { VEHICLE_MODELS, VEHICLE_BRANDS } from '../constants/vehicles';
+
+const HERO_IMAGES = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuBFekBUfcvEyywcbMwbE8ga9QlZ9b8beF7ue62jNZitJw74aebXZzcQQXoHARNOHrx8qwkCuROfv8EPpfEuse5SKEp2f-0nBwoNV284FE5enRd22-VgOUJ5mjPkqaNVtV7DRGwBiwtEkJFLiFMGNwdy5TRw6uToo8f9tNUHDd2Q3O3GhuNVox67cbb4AQBc4huc0j_-40eTUgeoZRczg2uzMAt-K0XojTDJmVen-IXkL5DN2Gx6Vlvu1F8__i8-DETUT_T6G1mHrvM',
+  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=80',
+  'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1600&q=80',
+  'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1600&q=80',
+  'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?w=1600&q=80',
+];
 
 const FilterChip = ({ label, active, onClick }) => (
   <button
@@ -52,6 +61,8 @@ const InventoryScreen = () => {
   const [filterFuel, setFilterFuel] = useState(null);
   const [filterTrans, setFilterTrans] = useState(null);
   const [filterBody, setFilterBody] = useState(null);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [yearMin, setYearMin] = useState('');
@@ -59,16 +70,68 @@ const InventoryScreen = () => {
   const [kmMax, setKmMax] = useState('');
   const [sortBy, setSortBy] = useState('default');
 
+  // Geolocation + distance filter
+  const [dealershipMap, setDealershipMap] = useState({});
+  const [userLocation, setUserLocation] = useState(null); // { lat, lng }
+  const [locationStatus, setLocationStatus] = useState('idle'); // idle | loading | granted | denied
+  const [distanceMax, setDistanceMax] = useState('');
+
+  // Hero slideshow
+  const [heroIndex, setHeroIndex] = useState(0);
+  const heroTimerRef = useRef(null);
+
+  const restartHeroTimer = () => {
+    clearInterval(heroTimerRef.current);
+    heroTimerRef.current = setInterval(() => setHeroIndex(i => (i + 1) % HERO_IMAGES.length), 5000);
+  };
+
   useEffect(() => {
-    getVehicles()
-      .then(setAllVehicles)
+    restartHeroTimer();
+    return () => clearInterval(heroTimerRef.current);
+  }, []);
+
+  const heroPrev = () => { setHeroIndex(i => (i - 1 + HERO_IMAGES.length) % HERO_IMAGES.length); restartHeroTimer(); };
+  const heroNext = () => { setHeroIndex(i => (i + 1) % HERO_IMAGES.length); restartHeroTimer(); };
+
+  // Haversine distance in km
+  const haversine = (lat1, lng1, lat2, lng2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const requestLocation = () => {
+    setLocationStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus('granted');
+      },
+      () => setLocationStatus('denied')
+    );
+  };
+
+  useEffect(() => {
+    Promise.all([getVehicles(), getDealerships()])
+      .then(([vehicles, dealerships]) => {
+        setAllVehicles(vehicles);
+        const map = {};
+        dealerships.forEach(d => { map[d.id] = d; });
+        setDealershipMap(map);
+      })
       .catch(() => setError('No se pudo conectar con el servidor. Verifica que la API esté corriendo.'))
       .finally(() => setLoading(false));
   }, []);
 
   // Derived options
-  const brands    = useMemo(() => [...new Set(allVehicles.filter(v => v.isAvailable).map(v => v.brand))].sort(), [allVehicles]);
+  const brands    = useMemo(() => VEHICLE_BRANDS, []);
   const models    = useMemo(() => {
+    if (filterBrand && VEHICLE_MODELS[filterBrand]) {
+      return VEHICLE_MODELS[filterBrand];
+    }
     const source = filterBrand
       ? allVehicles.filter(v => v.isAvailable && v.brand === filterBrand)
       : allVehicles.filter(v => v.isAvailable);
@@ -92,6 +155,14 @@ const InventoryScreen = () => {
     if (yearMin)  r = r.filter(v => v.year  >= Number(yearMin));
     if (yearMax)  r = r.filter(v => v.year  <= Number(yearMax));
     if (kmMax)    r = r.filter(v => v.mileage <= Number(kmMax));
+    if (distanceMax && userLocation) {
+      const maxKm = Number(distanceMax);
+      r = r.filter(v => {
+        const d = dealershipMap[v.dealershipId];
+        if (!d || (d.latitude === 0 && d.longitude === 0)) return true;
+        return haversine(userLocation.lat, userLocation.lng, d.latitude, d.longitude) <= maxKm;
+      });
+    }
 
     const s = [...r];
     if (sortBy === 'price-asc')  return s.sort((a, b) => a.price - b.price);
@@ -100,15 +171,15 @@ const InventoryScreen = () => {
     if (sortBy === 'year-asc')   return s.sort((a, b) => a.year - b.year);
     if (sortBy === 'km-asc')     return s.sort((a, b) => a.mileage - b.mileage);
     return s;
-  }, [allVehicles, search, filterBrand, filterModel, filterFuel, filterTrans, filterBody, priceMin, priceMax, yearMin, yearMax, kmMax, sortBy]);
+  }, [allVehicles, search, filterBrand, filterModel, filterFuel, filterTrans, filterBody, priceMin, priceMax, yearMin, yearMax, kmMax, distanceMax, userLocation, dealershipMap, sortBy]);
 
   const hasFilters = search || filterBrand || filterModel || filterFuel || filterTrans || filterBody ||
-    priceMin || priceMax || yearMin || yearMax || kmMax;
+    priceMin || priceMax || yearMin || yearMax || kmMax || distanceMax;
 
   const clearAll = () => {
     setSearch(''); setFilterBrand(null); setFilterModel(null); setFilterFuel(null); setFilterTrans(null);
     setFilterBody(null); setPriceMin(''); setPriceMax('');
-    setYearMin(''); setYearMax(''); setKmMax('');
+    setYearMin(''); setYearMax(''); setKmMax(''); setDistanceMax('');
   };
 
   return (
@@ -116,45 +187,79 @@ const InventoryScreen = () => {
       <TopNavBar />
       <main className="pt-36 pb-20 px-12 max-w-screen-2xl mx-auto">
 
-        {/* Hero */}
+        {/* Hero Slideshow */}
         <section className="mb-20">
-          <div className="relative overflow-hidden rounded-sm bg-black h-[520px] flex items-center px-16 border border-[#353436]/30">
-            <div className="absolute inset-0 z-0">
-              <img
-                className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFekBUfcvEyywcbMwbE8ga9QlZ9b8beF7ue62jNZitJw74aebXZzcQQXoHARNOHrx8qwkCuROfv8EPpfEuse5SKEp2f-0nBwoNV284FE5enRd22-VgOUJ5mjPkqaNVtV7DRGwBiwtEkJFLiFMGNwdy5TRw6uToo8f9tNUHDd2Q3O3GhuNVox67cbb4AQBc4huc0j_-40eTUgeoZRczg2uzMAt-K0XojTDJmVen-IXkL5DN2Gx6Vlvu1F8__i8-DETUT_T6G1mHrvM"
-                alt="Hero"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
-            </div>
+          <div className="relative overflow-hidden rounded-sm bg-black h-[520px] flex items-center px-16 border border-[#353436]/30 group">
+
+            {/* Images — crossfade */}
+            {HERO_IMAGES.map((src, idx) => (
+              <div
+                key={idx}
+                className="absolute inset-0 z-0 transition-opacity duration-1000"
+                style={{ opacity: idx === heroIndex ? 1 : 0 }}
+              >
+                <img
+                  className="w-full h-full object-cover opacity-50 grayscale"
+                  src={src}
+                  alt={`Hero ${idx + 1}`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+              </div>
+            ))}
+
+            {/* Text */}
             <div className="relative z-10 max-w-3xl">
-              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Inventario en vivo</span>
-              </div>
-              <h1 className="font-headline text-7xl font-black text-white leading-[1] mb-10 tracking-tighter">
-                Dominio <br /><span className="text-primary italic">Sin Compromiso.</span>
+              <h1 className="font-headline text-7xl font-black text-white leading-[1] tracking-tighter">
+                Tu próximo auto,<br /><span className="text-primary italic">te está esperando.</span>
               </h1>
-              <div className="bg-[#131314]/80 backdrop-blur-md p-1 rounded-sm flex border border-[#353436]/50 items-center max-w-2xl shadow-2xl">
-                <div className="flex-1 px-5 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary/50">search</span>
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-transparent border-none focus:ring-0 text-white font-bold placeholder:text-white/20 text-xs uppercase tracking-widest"
-                    placeholder="MARCA, MODELO, AÑO..."
-                    type="text"
-                  />
-                </div>
-                {search && (
-                  <button onClick={() => setSearch('')} className="px-4 text-white/30 hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined !text-lg">close</span>
-                  </button>
-                )}
-              </div>
             </div>
+
+            {/* Prev / Next arrows */}
+            <button
+              onClick={heroPrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-primary/80 border border-white/10 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+            >
+              <span className="material-symbols-outlined !text-lg">chevron_left</span>
+            </button>
+            <button
+              onClick={heroNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-primary/80 border border-white/10 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+            >
+              <span className="material-symbols-outlined !text-lg">chevron_right</span>
+            </button>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {HERO_IMAGES.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => { setHeroIndex(idx); restartHeroTimer(); }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === heroIndex ? 'w-6 bg-primary' : 'w-2 bg-white/30 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+
           </div>
         </section>
+
+        {/* Search bar */}
+        <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 mb-10">
+          <span className="material-symbols-outlined text-primary/50 !text-base">search</span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-[#E5E2E3] text-sm focus:outline-none placeholder:text-[#E5E2E3]/20"
+            placeholder="Buscar por marca, modelo, año…"
+            type="text"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="text-[#E5E2E3]/30 hover:text-primary transition-colors">
+              <span className="material-symbols-outlined !text-base">close</span>
+            </button>
+          )}
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-16">
           {/* Sidebar */}
@@ -172,23 +277,31 @@ const InventoryScreen = () => {
               </div>
 
               {/* Marca */}
-              {brands.length > 0 && (
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Manufactura</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {brands.map(b => (
-                      <FilterChip
-                        key={b} label={b} active={filterBrand === b}
-                        onClick={() => {
-                          const next = filterBrand === b ? null : b;
-                          setFilterBrand(next);
-                          setFilterModel(null);
-                        }}
-                      />
-                    ))}
-                  </div>
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Marca</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {/* Show selected brand chip if any */}
+                  {filterBrand && (
+                    <FilterChip
+                      key={filterBrand} label={filterBrand} active={true}
+                      onClick={() => { setFilterBrand(null); setFilterModel(null); }}
+                    />
+                  )}
+                  {/* Show first 6 brands (excluding selected) */}
+                  {brands.filter(b => b !== filterBrand).slice(0, 6).map(b => (
+                    <FilterChip
+                      key={b} label={b} active={false}
+                      onClick={() => { setFilterBrand(b); setFilterModel(null); }}
+                    />
+                  ))}
+                  <button
+                    onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
+                    className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70 transition-all"
+                  >
+                    Ver más…
+                  </button>
                 </div>
-              )}
+              </div>
 
               {/* Modelo */}
               {models.length > 0 && (
@@ -267,18 +380,55 @@ const InventoryScreen = () => {
                   className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
                 />
               </div>
+
+              {/* Distancia automotora */}
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Distancia automotora</p>
+                {locationStatus === 'idle' && (
+                  <button
+                    onClick={requestLocation}
+                    className="w-full flex items-center justify-center gap-2 bg-[#1C1B1F] hover:bg-primary/10 border border-[#353436] hover:border-primary/50 text-[#E5E2E3]/50 hover:text-primary rounded-sm px-3 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    <span className="material-symbols-outlined !text-sm">my_location</span>
+                    Usar mi ubicación
+                  </button>
+                )}
+                {locationStatus === 'loading' && (
+                  <div className="flex items-center gap-2 text-[#E5E2E3]/30 text-[10px] font-bold">
+                    <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" />
+                    Detectando ubicación…
+                  </div>
+                )}
+                {locationStatus === 'denied' && (
+                  <p className="text-[10px] text-[#E5E2E3]/30 leading-relaxed">
+                    Permiso de ubicación denegado. Habilítalo en la configuración del navegador.
+                  </p>
+                )}
+                {locationStatus === 'granted' && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5 text-[#E5E2E3]/30 text-[10px] mb-3">
+                      <span className="material-symbols-outlined !text-xs text-primary">location_on</span>
+                      Ubicación detectada
+                    </div>
+                    <input
+                      type="number"
+                      value={distanceMax}
+                      onChange={(e) => setDistanceMax(e.target.value)}
+                      placeholder="Ej: 20 km"
+                      className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
+                    />
+                    {distanceMax && (
+                      <p className="text-[10px] text-[#E5E2E3]/30">Hasta {distanceMax} km de distancia</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </aside>
 
           {/* Grid */}
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-10 border-b border-[#353436]/30 pb-6 flex-wrap gap-4">
-              <div>
-                <h2 className="font-headline text-4xl font-black text-white tracking-tighter">STOCK DISPONIBLE</h2>
-                <p className="text-primary text-[10px] font-black uppercase tracking-[0.4em] mt-2">
-                  {loading ? 'Cargando...' : `${vehicles.length} unidad${vehicles.length !== 1 ? 'es' : ''} encontrada${vehicles.length !== 1 ? 's' : ''}`}
-                </p>
-              </div>
+            <div className="flex justify-end items-center mb-10 border-b border-[#353436]/30 pb-6 flex-wrap gap-4">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -381,6 +531,112 @@ const InventoryScreen = () => {
         </div>
       </main>
       <Footer />
+
+      {/* ── Brand picker modal ──────────────────────────────────────── */}
+      {showBrandModal && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowBrandModal(false)}
+        >
+          <div
+            className="bg-[#131314] border border-[#353436] rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#353436]">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Seleccionar Marca</p>
+              <button onClick={() => setShowBrandModal(false)} className="text-[#E5E2E3]/40 hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="px-6 py-3 border-b border-[#353436]">
+              <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2">
+                <span className="material-symbols-outlined text-primary/40 !text-sm">search</span>
+                <input
+                  autoFocus
+                  value={brandSearch}
+                  onChange={(e) => setBrandSearch(e.target.value)}
+                  placeholder="Buscar marca..."
+                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20"
+                />
+                {brandSearch && (
+                  <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-primary">
+                    <span className="material-symbols-outlined !text-sm">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Brand list */}
+            <div className="overflow-y-auto flex-1 p-4">
+              {(() => {
+                const filtered = brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+                if (brandSearch) {
+                  return (
+                    <div className="flex flex-wrap gap-2">
+                      {filtered.map(b => (
+                        <button key={b} onClick={() => { setFilterBrand(b === filterBrand ? null : b); setFilterModel(null); setShowBrandModal(false); }}
+                          className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${filterBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70'}`}>
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                }
+                // Group by first letter
+                const grouped = filtered.reduce((acc, b) => {
+                  const letter = b[0].toUpperCase();
+                  if (!acc[letter]) acc[letter] = [];
+                  acc[letter].push(b);
+                  return acc;
+                }, {});
+                const letters = Object.keys(grouped).sort();
+                return (
+                  <div className="space-y-5">
+                    {/* Alphabet index */}
+                    <div className="flex flex-wrap gap-1 pb-3 border-b border-[#353436]/50">
+                      {letters.map(l => (
+                        <button key={l}
+                          onClick={() => document.getElementById(`brand-letter-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                          className="w-6 h-6 text-[10px] font-black text-[#E5E2E3]/40 hover:text-primary transition-colors">
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Groups */}
+                    {letters.map(l => (
+                      <div key={l} id={`brand-letter-${l}`}>
+                        <p className="text-[9px] font-black text-primary tracking-[0.3em] mb-2">{l}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grouped[l].map(b => (
+                            <button key={b} onClick={() => { setFilterBrand(b === filterBrand ? null : b); setFilterModel(null); setShowBrandModal(false); }}
+                              className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${filterBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-primary/50 hover:text-primary/70'}`}>
+                              {b}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Footer */}
+            {filterBrand && (
+              <div className="px-6 py-4 border-t border-[#353436] flex justify-between items-center">
+                <span className="text-[10px] text-[#E5E2E3]/40">Seleccionada: <span className="text-primary font-bold">{filterBrand}</span></span>
+                <button onClick={() => { setFilterBrand(null); setFilterModel(null); setShowBrandModal(false); }}
+                  className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline">
+                  Quitar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
