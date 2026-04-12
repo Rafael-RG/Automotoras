@@ -185,6 +185,7 @@ const DealershipFinderScreen = () => {
   const [maxDistance, setMaxDistance] = useState(null);
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [brandSearch, setBrandSearch] = useState('');
+  const [mobileTab, setMobileTab] = useState('map'); // 'map' | 'list'
 
   // Load data on mount
   useEffect(() => {
@@ -263,6 +264,7 @@ const DealershipFinderScreen = () => {
     if (d.latitude !== 0 || d.longitude !== 0) {
       setFlyTarget([d.latitude, d.longitude]);
     }
+    setMobileTab('map');
   }, []);
 
   const mapCenter = useMemo(() => {
@@ -280,9 +282,33 @@ const DealershipFinderScreen = () => {
     <div className="bg-[#0E0E0F] text-[#E5E2E3] flex flex-col" style={{ height: '100dvh' }}>
       <TopNavBar />
 
-      <div className="flex flex-1 overflow-hidden pt-24">
+      {/* Mobile tab bar */}
+      <div className="lg:hidden fixed top-[60px] left-0 right-0 z-40 flex bg-[#131314] border-b border-[#E5E2E3]/10">
+        <button
+          onClick={() => setMobileTab('map')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
+            mobileTab === 'map' ? 'text-primary border-b-2 border-primary' : 'text-[#E5E2E3]/40'
+          }`}
+        >
+          <span className="material-symbols-outlined !text-sm">map</span>
+          Mapa
+        </button>
+        <button
+          onClick={() => setMobileTab('list')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
+            mobileTab === 'list' ? 'text-primary border-b-2 border-primary' : 'text-[#E5E2E3]/40'
+          }`}
+        >
+          <span className="material-symbols-outlined !text-sm">list</span>
+          Lista ({filteredDealerships.length})
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden pt-[100px] lg:pt-24">
         {/* ── Sidebar ───────────────────────────────── */}
-        <aside className="w-72 flex-shrink-0 bg-[#0E0E0F] border-r border-[#E5E2E3]/10 flex flex-col overflow-y-auto">
+        <aside className={`${
+          mobileTab === 'list' ? 'flex' : 'hidden'
+        } lg:flex w-full lg:w-72 flex-shrink-0 bg-[#0E0E0F] border-r border-[#E5E2E3]/10 flex-col overflow-y-auto`}>
           <div className="p-6 border-b border-[#E5E2E3]/10">
             <h2 className="font-headline text-lg font-extrabold tracking-tight text-[#E5E2E3]">
               Localizador
@@ -441,7 +467,9 @@ const DealershipFinderScreen = () => {
         </aside>
 
         {/* ── Map + detail ──────────────────────────── */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`${
+          mobileTab === 'map' ? 'flex' : 'hidden'
+        } lg:flex flex-1 flex-col overflow-hidden`}>
           {/* Map */}
           <div className="flex-1 relative">
             {!loading && (
@@ -507,7 +535,7 @@ const DealershipFinderScreen = () => {
 
           {/* Selected dealership detail panel */}
           {selectedDealership && (
-            <div className="bg-[#131314] border-t border-[#E5E2E3]/10 p-5 flex items-center gap-6 flex-wrap">
+            <div className="bg-[#131314] border-t border-[#E5E2E3]/10 p-3 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-wrap overflow-y-auto max-h-[45vh] sm:max-h-none">
               <div className="w-12 h-12 rounded-xl bg-[#0E0E0F] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {selectedDealership.logoUrl ? (
                   <img src={selectedDealership.logoUrl} alt={selectedDealership.name} className="w-full h-full object-cover rounded-xl" />
