@@ -64,7 +64,7 @@ const DealershipSelector = ({ dealerships, onSelect }) => {
 };
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLogout }) => {
+const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLogout, mobileOpen }) => {
   const nav = [
     { id: 'dashboard', icon: 'speed', label: 'Panel' },
     { id: 'fleet', icon: 'directions_car', label: 'Mi Flota' },
@@ -73,7 +73,9 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
     { id: 'config', icon: 'tune', label: 'Configuración' },
   ];
   return (
-    <aside className="fixed left-0 h-full w-64 border-r border-[#E5E2E3]/10 bg-[#0E0E0F] flex flex-col py-8 z-40">
+    <aside className={`fixed left-0 top-0 h-full w-64 border-r border-[#E5E2E3]/10 bg-[#0E0E0F] flex flex-col py-8 z-40 transition-transform duration-300 ${
+      mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+    }`}>
       <div className="px-6 mb-10">
         <img src={logoSrc} alt="RedAutos" className="h-14 w-auto object-contain mb-2" />
         <span className="text-[10px] font-semibold text-[#D32F2F] tracking-widest uppercase block truncate">
@@ -126,7 +128,7 @@ const MetricCard = ({ label, value, sub, icon, highlight }) => (
     <div className="flex items-start justify-between">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40 mb-3">{label}</p>
-        <p className="text-4xl font-headline font-black text-[#E5E2E3] tracking-tighter">{value}</p>
+        <p className="text-3xl md:text-4xl font-headline font-black text-[#E5E2E3] tracking-tighter">{value}</p>
         {sub && <p className="text-xs text-[#E5E2E3]/40 mt-1">{sub}</p>}
       </div>
       <div
@@ -451,7 +453,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
         </div>
         <div className="divide-y divide-[#E5E2E3]/5">
           {vehicles.slice(0, 6).map((v) => (
-            <div key={v.id} className="flex items-center gap-4 px-6 py-3">
+            <div key={v.id} className="flex items-center gap-2 md:gap-4 px-4 md:px-6 py-3">
               <div className="w-12 h-8 rounded bg-[#0E0E0F] overflow-hidden flex-shrink-0">
                 {v.imageUrl
                   ? <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
@@ -479,7 +481,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
               </div>
               <p className="text-[#D32F2F] font-headline font-bold text-sm flex-shrink-0">{fmt(v.price)}</p>
               <span
-                className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                className={`hidden sm:inline-flex flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                   v.isAvailable
                     ? 'bg-green-500/10 text-green-400 border border-green-500/20'
                     : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
@@ -573,7 +575,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
                 Marca
@@ -673,7 +675,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               })()}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Año</label>
               <input
@@ -981,9 +983,9 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
             filtered.map((v) => (
               <div
                 key={v.id}
-                className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-4 flex items-center gap-5 hover:border-[#E5E2E3]/20 transition-colors"
+                className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-4 flex items-start gap-4 hover:border-[#E5E2E3]/20 transition-colors"
               >
-                <div className="w-24 h-16 rounded-lg overflow-hidden bg-[#0E0E0F] flex-shrink-0">
+                <div className="w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden bg-[#0E0E0F] flex-shrink-0 mt-0.5">
                   {v.imageUrl ? (
                     <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
                   ) : (
@@ -995,65 +997,67 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h3 className="text-[#E5E2E3] font-headline font-bold tracking-tight">
-                      {v.brand} {v.model}
-                    </h3>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase flex-shrink-0 ${
-                        v.isAvailable
-                          ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                          : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                      }`}
-                    >
-                      {v.isAvailable ? 'Disponible' : 'Reservado'}
-                    </span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-[#E5E2E3] font-headline font-bold tracking-tight text-sm md:text-base">
+                          {v.brand} {v.model}
+                        </h3>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase flex-shrink-0 ${
+                            v.isAvailable
+                              ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                              : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                          }`}
+                        >
+                          {v.isAvailable ? 'Disponible' : 'Reservado'}
+                        </span>
+                      </div>
+                      <div className="flex gap-3 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">
+                        <span>{v.year}</span>
+                        <span>{Number(v.mileage).toLocaleString()} km</span>
+                        <span className="hidden sm:inline">{v.transmission}</span>
+                        <span className="hidden sm:inline">{v.fuel}</span>
+                        {v.bodyType && <span className="hidden sm:inline">{v.bodyType}</span>}
+                        {dealerships && dealerships.length > 1 && dealershipMap[v.dealershipId] && (
+                          <span className="flex items-center gap-1 text-[#D32F2F]/60">
+                            <span className="material-symbols-outlined !text-[11px]">store</span>
+                            {dealershipMap[v.dealershipId].name}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                          <span className="material-symbols-outlined !text-[12px]">visibility</span>
+                          {v.viewCount || 0}
+                        </span>
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                          <span className="material-symbols-outlined !text-[12px]">forum</span>
+                          {v.leadCount || 0}
+                        </span>
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                          <span className="material-symbols-outlined !text-[12px]">share</span>
+                          {v.shareCount || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(v)}
+                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
+                      >
+                        <span className="material-symbols-outlined !text-base">edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(v)}
+                        disabled={deleting === v.id}
+                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined !text-base">delete</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-4 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">
-                    <span>{v.year}</span>
-                    <span>{Number(v.mileage).toLocaleString()} km</span>
-                    <span>{v.transmission}</span>
-                    <span>{v.fuel}</span>
-                    {v.bodyType && <span>{v.bodyType}</span>}
-                    {dealerships && dealerships.length > 1 && dealershipMap[v.dealershipId] && (
-                      <span className="flex items-center gap-1 text-[#D32F2F]/60">
-                        <span className="material-symbols-outlined !text-[11px]">store</span>
-                        {dealershipMap[v.dealershipId].name}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                    <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
-                      <span className="material-symbols-outlined !text-[12px]">visibility</span>
-                      {v.viewCount || 0} vistas
-                    </span>
-                    <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
-                      <span className="material-symbols-outlined !text-[12px]">forum</span>
-                      {v.leadCount || 0} leads
-                    </span>
-                    <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
-                      <span className="material-symbols-outlined !text-[12px]">share</span>
-                      {v.shareCount || 0}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[#D32F2F] font-headline font-black text-lg">{fmt(v.price)}</p>
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => openEdit(v)}
-                    className="p-2.5 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
-                  >
-                    <span className="material-symbols-outlined !text-lg">edit</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(v)}
-                    disabled={deleting === v.id}
-                    className="p-2.5 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined !text-lg">delete</span>
-                  </button>
+                  <p className="text-[#D32F2F] font-headline font-black text-base mt-2">{fmt(v.price)}</p>
                 </div>
               </div>
             ))
@@ -1476,7 +1480,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
           <label className={labelCls}>Dirección</label>
           <input value={form.address} onChange={set('address')} required className={inputCls} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Ciudad</label>
             <input value={form.city} onChange={set('city')} required className={inputCls} />
@@ -1486,7 +1490,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
             <input value={form.country} onChange={set('country')} required className={inputCls} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Teléfono</label>
             <input value={form.phone} onChange={set('phone')} className={inputCls} />
@@ -1496,7 +1500,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
             <input type="email" value={form.email} onChange={set('email')} className={inputCls} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Latitud</label>
             <input type="number" step="0.0001" value={form.latitude} onChange={set('latitude')} placeholder="48.8371" className={inputCls} />
@@ -1536,6 +1540,7 @@ const AdminDashboard = () => {
   );
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const currentDealership = dealerships.find((d) => d.id === selectedId) || null;
 
@@ -1655,14 +1660,35 @@ const AdminDashboard = () => {
 
   return (
     <div className="bg-[#0E0E0F] font-body text-[#E5E2E3] antialiased flex min-h-screen">
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(t) => { setActiveTab(t); setMobileMenuOpen(false); }}
         dealership={currentDealership}
         onChangeDealership={handleLogout}
         onLogout={() => navigate('/login')}
+        mobileOpen={mobileMenuOpen}
       />
-      <main className="ml-64 flex-1 p-10 min-w-0">
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-[#0E0E0F] border-b border-[#E5E2E3]/10 flex items-center gap-3 px-4 h-14">
+        <button
+          onClick={() => setMobileMenuOpen((o) => !o)}
+          className="text-[#E5E2E3]/60 hover:text-[#E5E2E3] transition-colors"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+        <img src={logoSrc} alt="RedAutos" className="h-7 object-contain" />
+        <span className="ml-auto text-[#D32F2F] text-[11px] font-semibold tracking-wide truncate max-w-[130px]">
+          {currentDealership?.name}
+        </span>
+      </div>
+      <main className="md:ml-64 flex-1 px-4 pb-6 pt-[72px] md:p-10 min-w-0">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
