@@ -1270,7 +1270,7 @@ const PLANS = [
   {
     id: 'basic',
     name: 'Plan Básico',
-    price: '$590',
+    price: '$2590',
     period: '/mes',
     currency: 'UYU',
     features: ['1 sucursal', 'Autos ilimitados', 'Panel de métricas', 'Soporte por email'],
@@ -1279,7 +1279,7 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Plan Pro',
-    price: '$1490',
+    price: '$3990',
     period: '/mes',
     currency: 'UYU',
     features: ['Sucursales ilimitadas', 'Autos ilimitados', 'Panel de métricas', 'Soporte prioritario', 'Gestión centralizada'],

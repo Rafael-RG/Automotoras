@@ -91,7 +91,7 @@ const CompareRow = ({ feature, old, nuevo }) => (
 );
 
 // ─── Contact Form ──────────────────────────────────────────────────────────────
-const WHATSAPP_NUMBER = '59899000000'; // ← reemplazá con tu número real
+const WHATSAPP_NUMBER = '59892494067';
 
 const ContactForm = () => {
   const [form, setForm] = useState({ name: '', phone: '', message: '' });
@@ -205,7 +205,7 @@ const PaginaAterrizajeScreen = () => {
             <span className="text-[#D32F2F]">RedAutos.</span>
           </h1>
           <p className="text-[#E5E2E3]/50 text-base md:text-xl leading-relaxed max-w-xl mx-auto mb-8 md:mb-10">
-            La plataforma que digitaliza tu inventario, te da presencia online y conecta tu negocio con compradores de toda Uruguay — desde $590/mes.
+            La plataforma que digitaliza tu inventario, te da presencia online y conecta tu negocio con compradores de toda Uruguay — desde $2590/mes.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
@@ -393,7 +393,7 @@ const PaginaAterrizajeScreen = () => {
             <div className="bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-xl p-8 flex flex-col">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5E2E3]/35 mb-4">Plan Básico</p>
               <div className="flex items-end gap-2 mb-2">
-                <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$590</span>
+                <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$2590</span>
                 <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
               </div>
               <p className="text-[#E5E2E3]/25 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
@@ -420,7 +420,7 @@ const PaginaAterrizajeScreen = () => {
               </span>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D32F2F]/70 mb-4">Plan Pro</p>
               <div className="flex items-end gap-2 mb-2">
-                <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$1490</span>
+                <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$3990</span>
                 <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
               </div>
               <p className="text-[#E5E2E3]/25 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>

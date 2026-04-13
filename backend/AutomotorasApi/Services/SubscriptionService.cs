@@ -14,8 +14,8 @@ public class SubscriptionService
     private static readonly Dictionary<string, (string Reason, decimal Amount)> Plans = new()
     {
         ["test"]  = ("Plan Test RedAutos – prueba", 15m),
-        ["basic"] = ("Plan Básico RedAutos – 1 sucursal", 590m),
-        ["pro"]   = ("Plan Pro RedAutos – Múltiples sucursales", 1490m),
+        ["basic"] = ("Plan Básico RedAutos – 1 sucursal", 2590m),
+        ["pro"]   = ("Plan Pro RedAutos – Múltiples sucursales", 3990m),
     };
 
     public SubscriptionService(IConfiguration config)
