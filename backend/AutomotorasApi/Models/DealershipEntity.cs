@@ -29,6 +29,10 @@ public class DealershipEntity : ITableEntity
     public string SubscriptionId { get; set; } = string.Empty;
     public string SubscriptionStatus { get; set; } = string.Empty; // "authorized" | "paused" | "cancelled" | "pending"
 
+    // Pending upgrade (initiated but not yet confirmed by webhook)
+    public string PendingPlan { get; set; } = string.Empty;
+    public string PendingSubscriptionId { get; set; } = string.Empty;
+
     // Auth
     public string PasswordHash { get; set; } = string.Empty;
     public string PasswordSalt { get; set; } = string.Empty;

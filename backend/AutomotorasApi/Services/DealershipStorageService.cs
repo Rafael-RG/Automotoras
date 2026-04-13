@@ -104,6 +104,33 @@ public class DealershipStorageService
         existing.Plan = plan;
         existing.SubscriptionId = string.IsNullOrWhiteSpace(subscriptionId) ? existing.SubscriptionId : subscriptionId;
         existing.SubscriptionStatus = status;
+        // Clear pending upgrade once the active plan is confirmed
+        existing.PendingPlan = string.Empty;
+        existing.PendingSubscriptionId = string.Empty;
+
+        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
+        return true;
+    }
+
+    public async Task<bool> SavePendingCheckoutAsync(string id, string pendingPlan, string pendingSubscriptionId)
+    {
+        var existing = await GetByIdAsync(id);
+        if (existing is null) return false;
+
+        existing.PendingPlan = pendingPlan;
+        existing.PendingSubscriptionId = pendingSubscriptionId;
+
+        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
+        return true;
+    }
+
+    public async Task<bool> ClearPendingAsync(string id)
+    {
+        var existing = await GetByIdAsync(id);
+        if (existing is null) return false;
+
+        existing.PendingPlan = string.Empty;
+        existing.PendingSubscriptionId = string.Empty;
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
         return true;

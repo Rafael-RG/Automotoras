@@ -81,9 +81,19 @@ public class SubscriptionFunctions(
             var (checkoutUrl, preapprovalId) = await subscriptionService.CreateCheckoutAsync(
                 request.DealershipId, request.Plan, payerEmail, backUrl);
 
-            // Mark as pending and save preapproval ID immediately
-            await dealershipService.UpdatePlanAsync(
-                request.DealershipId, request.Plan, preapprovalId, "pending");
+            // If the dealership already has an active plan, save as pending upgrade
+            // so we don't lose the current plan before the new payment is confirmed.
+            if (dealership.SubscriptionStatus == "authorized")
+            {
+                await dealershipService.SavePendingCheckoutAsync(
+                    request.DealershipId, request.Plan, preapprovalId);
+            }
+            else
+            {
+                // No active plan — safe to mark as pending immediately
+                await dealershipService.UpdatePlanAsync(
+                    request.DealershipId, request.Plan, preapprovalId, "pending");
+            }
 
             return new OkObjectResult(new CheckoutResponse(checkoutUrl));
         }
@@ -134,14 +144,25 @@ public class SubscriptionFunctions(
 
         var (dealershipId, plan, status, subscriptionId) = info.Value;
 
-        // Only activate plan if authorized
         if (status == "authorized")
         {
+            // New plan confirmed — update active plan and clear pending
             await dealershipService.UpdatePlanAsync(dealershipId, plan, subscriptionId, "authorized");
         }
         else
         {
-            await dealershipService.UpdatePlanAsync(dealershipId, plan, subscriptionId, status);
+            // Check if this notification is for a pending upgrade or the active subscription
+            var entity = await dealershipService.GetByIdAsync(dealershipId);
+            if (entity != null && entity.PendingSubscriptionId == subscriptionId)
+            {
+                // Pending upgrade was cancelled/failed — clear pending, keep active plan intact
+                await dealershipService.ClearPendingAsync(dealershipId);
+            }
+            else
+            {
+                // Status change on the active subscription (e.g. paused, cancelled)
+                await dealershipService.UpdatePlanAsync(dealershipId, plan, subscriptionId, status);
+            }
         }
 
         return new OkResult();
