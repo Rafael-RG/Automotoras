@@ -551,14 +551,17 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
       } else {
         saved = await createVehicle(payload);
       }
-      // Close modal immediately — don't wait for image uploads
-      onSaved();
-      // Upload images in the background after closing
+      // Upload images before closing so they show immediately after refresh
       if (imageFiles.length > 0 && saved) {
         for (const f of imageFiles) {
-          await uploadVehicleImage(saved.brand, saved.id, f).catch(() => {});
+          try {
+            await uploadVehicleImage(saved.brand, saved.id, f);
+          } catch (imgErr) {
+            console.error('Error subiendo imagen:', imgErr);
+          }
         }
       }
+      onSaved();
     } catch (err) {
       setError(err.message);
       setSaving(false);

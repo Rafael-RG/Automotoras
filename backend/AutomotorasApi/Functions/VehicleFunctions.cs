@@ -90,7 +90,17 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/{brand}/{id}/image")] HttpRequest req,
         string brand, string id)
     {
-        var file = req.Form.Files.GetFile("file");
+        IFormFile? file;
+        try
+        {
+            var form = await req.ReadFormAsync();
+            file = form.Files.GetFile("file");
+        }
+        catch
+        {
+            return new BadRequestObjectResult("No se pudo leer el formulario.");
+        }
+
         if (file is null || file.Length == 0)
             return new BadRequestObjectResult("No se recibió ningún archivo.");
 
