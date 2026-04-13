@@ -32,4 +32,5 @@ public class VehicleEntity : ITableEntity
     public int ShareCount { get; set; } = 0;
     public string CreatedAt { get; set; } = string.Empty;
     public string SoldAt { get; set; } = string.Empty;
+    public bool IsSold { get; set; }
 }

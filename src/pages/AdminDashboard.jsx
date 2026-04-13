@@ -60,7 +60,7 @@ const fmt = (n) =>
 const EMPTY_VEHICLE = {
   brand: '', model: '', year: new Date().getFullYear(), price: '',
   mileage: 0, transmission: 'Automática', fuel: 'Gasolina', bodyType: 'Sedán',
-  description: '', isAvailable: true,
+  description: '', isAvailable: true, isSold: false,
 };
 
 // ─── Dealership Selector ──────────────────────────────────────────────────────
@@ -501,6 +501,8 @@ const DashboardTab = ({ vehicles, dealership }) => {
   const metrics = useMemo(() => {
     if (!vehicles.length) return null;
     const available = vehicles.filter((v) => v.isAvailable).length;
+    const sold = vehicles.filter((v) => v.isSold).length;
+    const reserved = vehicles.filter((v) => !v.isAvailable && !v.isSold).length;
     const prices = vehicles.map((v) => v.price);
     const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
     const totalValue = prices.reduce((a, b) => a + b, 0);
@@ -529,7 +531,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
     const topShared = [...vehicles].sort((a, b) => (b.shareCount || 0) - (a.shareCount || 0)).slice(0, 3);
 
     return {
-      available, avgPrice, totalValue, maxPrice, minPrice,
+      available, sold, reserved, avgPrice, totalValue, maxPrice, minPrice,
       brands, fuels, transmissions,
       totalViews, totalLeads, totalShares, convRate,
       topViewed, topLeads, topShared,
@@ -562,7 +564,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
         <MetricCard
           label="Total en Flota"
           value={vehicles.length}
-          sub={`${vehicles.length - metrics.available} reservados`}
+          sub={`${metrics.reserved} reservados · ${metrics.sold} vendidos`}
           icon="directions_car"
         />
         <MetricCard
@@ -794,12 +796,14 @@ const DashboardTab = ({ vehicles, dealership }) => {
               <p className="text-[#D32F2F] font-headline font-bold text-sm flex-shrink-0">{fmt(v.price)}</p>
               <span
                 className={`hidden sm:inline-flex flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                  v.isAvailable
+                  v.isSold
+                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                    : v.isAvailable
                     ? 'bg-green-500/10 text-green-400 border border-green-500/20'
                     : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
                 }`}
               >
-                {v.isAvailable ? 'OK' : 'Reservado'}
+                {v.isSold ? 'Vendido' : v.isAvailable ? 'OK' : 'Reservado'}
               </span>
             </div>
           ))}
@@ -820,7 +824,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
       ? {
           brand: vehicle.brand, model: vehicle.model, year: vehicle.year,
           price: vehicle.price, mileage: vehicle.mileage, transmission: vehicle.transmission,
-          fuel: vehicle.fuel, bodyType: vehicle.bodyType || 'Sedán', description: vehicle.description, isAvailable: vehicle.isAvailable,
+          fuel: vehicle.fuel, bodyType: vehicle.bodyType || 'Sedán', description: vehicle.description, isAvailable: vehicle.isAvailable, isSold: vehicle.isSold || false,
         }
       : { ...EMPTY_VEHICLE }
   );
@@ -1196,23 +1200,33 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               </select>
             </div>
           )}
-          <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40">
-                Disponible
-              </span>
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, isAvailable: !f.isAvailable }))}
-                className={`relative inline-flex w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
-                  form.isAvailable ? 'bg-[#D32F2F]' : 'bg-[#E5E2E3]/10'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                    form.isAvailable ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+          <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Estado</label>
+              <div className="flex gap-2">
+                {[
+                  { label: 'Disponible', key: 'available', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
+                  { label: 'Reservado',  key: 'reserved',  activeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+                  { label: 'Vendido',    key: 'sold',      activeClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+                ].map(({ label, key, activeClass }) => {
+                  const current = form.isAvailable ? 'available' : form.isSold ? 'sold' : 'reserved';
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setForm((f) => ({
+                        ...f,
+                        isAvailable: key === 'available',
+                        isSold: key === 'sold',
+                      }))}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                        current === key ? activeClass : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -1270,7 +1284,8 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
     const matchAvail =
       filterAvail === 'all' ||
       (filterAvail === 'available' && v.isAvailable) ||
-      (filterAvail === 'reserved' && !v.isAvailable);
+      (filterAvail === 'reserved' && !v.isAvailable && !v.isSold) ||
+      (filterAvail === 'sold' && v.isSold);
     const matchBrand = filterBrand === 'all' || v.brand === filterBrand;
     const matchYear = filterYear === 'all' || String(v.year) === filterYear;
     return matchSearch && matchAvail && matchBrand && matchYear;
@@ -1400,7 +1415,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
               {yearOptions.map((y) => <option key={y} value={String(y)}>{y}</option>)}
             </select>
           )}
-          {['all', 'available', 'reserved'].map((f) => (
+          {['all', 'available', 'reserved', 'sold'].map((f) => (
             <button
               key={f}
               onClick={() => { setFilterAvail(f); resetPage(); }}
@@ -1410,7 +1425,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                   : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
               }`}
             >
-              {f === 'all' ? 'Todos' : f === 'available' ? 'Disponibles' : 'Reservados'}
+              {f === 'all' ? 'Todos' : f === 'available' ? 'Disponibles' : f === 'reserved' ? 'Reservados' : 'Vendidos'}
             </button>
           ))}
         </div>
@@ -1448,12 +1463,14 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         </h3>
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase flex-shrink-0 ${
-                            v.isAvailable
+                            v.isSold
+                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              : v.isAvailable
                               ? 'bg-green-500/10 text-green-400 border border-green-500/20'
                               : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
                           }`}
                         >
-                          {v.isAvailable ? 'Disponible' : 'Reservado'}
+                          {v.isSold ? 'Vendido' : v.isAvailable ? 'Disponible' : 'Reservado'}
                         </span>
                       </div>
                       <div className="flex gap-3 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">

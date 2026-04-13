@@ -66,6 +66,8 @@ public class VehicleStorageService
             ImageUrl = urls.Length > 0 ? urls[0] : string.Empty,
             ImageUrlsJson = urls.Length > 0 ? string.Join('|', urls) : string.Empty,
             IsAvailable = request.IsAvailable,
+            IsSold = request.IsSold,
+            SoldAt = request.IsSold ? DateTime.UtcNow.ToString("yyyy-MM-dd") : string.Empty,
             CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd")
         };
 
@@ -89,12 +91,14 @@ public class VehicleStorageService
         existing.DealershipId = request.DealershipId;
         existing.Description = request.Description;
 
-        // Track when a vehicle gets sold
-        if (existing.IsAvailable && !request.IsAvailable && string.IsNullOrEmpty(existing.SoldAt))
+        // Sold: mark date when first sold; clear when un-sold
+        if (request.IsSold && !existing.IsSold)
             existing.SoldAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
-        else if (request.IsAvailable)
-            existing.SoldAt = string.Empty; // re-listed
-        existing.IsAvailable = request.IsAvailable;
+        else if (!request.IsSold)
+            existing.SoldAt = string.Empty;
+        existing.IsSold = request.IsSold;
+        // Sold vehicles are always unavailable
+        existing.IsAvailable = request.IsSold ? false : request.IsAvailable;
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
         return existing;
@@ -174,7 +178,7 @@ public class VehicleStorageService
             urls.Length > 0 ? urls[0] : string.Empty, urls,
             e.Description, e.IsAvailable,
             e.ViewCount, e.LeadCount, e.ShareCount,
-            e.CreatedAt, e.SoldAt);
+            e.CreatedAt, e.SoldAt, e.IsSold);
     }
 
     private static string[] ParseImageUrls(VehicleEntity e)

@@ -21,7 +21,8 @@ public record VehicleDto(
     int LeadCount,
     int ShareCount,
     string CreatedAt,
-    string SoldAt
+    string SoldAt,
+    bool IsSold
 );
 
 public record DealershipDto(
@@ -62,7 +63,8 @@ public record CreateVehicleRequest(
     string Description,
     string ImageUrl = "",
     bool IsAvailable = true,
-    string[]? ImageUrls = null
+    string[]? ImageUrls = null,
+    bool IsSold = false
 );
 
 public record CreateDealershipRequest(
