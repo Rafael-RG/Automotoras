@@ -471,7 +471,7 @@ const DealershipFinderScreen = () => {
           mobileTab === 'map' ? 'flex' : 'hidden'
         } lg:flex flex-1 flex-col overflow-hidden`}>
           {/* Map */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative isolate">
             {!loading && (
               <MapContainer
                 center={mapCenter}
