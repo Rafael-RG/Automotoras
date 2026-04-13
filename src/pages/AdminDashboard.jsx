@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo.png';
 import {
@@ -7,6 +10,48 @@ import {
   createSubscriptionCheckout, verifySubscription,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
+
+// ─── Location Map Picker ──────────────────────────────────────────────────────
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41],
+});
+
+const ClickHandler = ({ onPick }) => {
+  useMapEvents({ click(e) { onPick(e.latlng.lat, e.latlng.lng); } });
+  return null;
+};
+
+const LocationMapPicker = ({ lat, lng, onChange }) => {
+  const hasPin = lat !== 0 || lng !== 0;
+  const center = hasPin ? [lat, lng] : [-34.9011, -56.1645]; // Montevideo default
+  return (
+    <div>
+      <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+        Ubicación en el mapa
+        <span className="ml-2 normal-case tracking-normal font-normal text-[#E5E2E3]/25">— hacé click para marcar</span>
+      </label>
+      <div className="rounded-lg overflow-hidden border border-[#E5E2E3]/10" style={{height: 260}}>
+        <MapContainer center={center} zoom={hasPin ? 15 : 12} style={{height:'100%',width:'100%'}} key={`${lat},${lng}`}>
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; OpenStreetMap &copy; CARTO'
+          />
+          <ClickHandler onPick={onChange} />
+          {hasPin && <Marker position={[lat, lng]} icon={redIcon} />}
+        </MapContainer>
+      </div>
+      {hasPin && (
+        <p className="text-[#E5E2E3]/30 text-[10px] mt-1.5">
+          Lat: {lat.toFixed(5)} · Lng: {lng.toFixed(5)}
+          <button type="button" onClick={() => onChange(0, 0)} className="ml-3 text-red-400/60 hover:text-red-400 transition-colors">Quitar pin</button>
+        </p>
+      )}
+      {!hasPin && <p className="text-[#E5E2E3]/20 text-[10px] mt-1.5">Sin ubicación marcada — tocá el mapa para fijar el pin</p>}
+    </div>
+  );
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) =>
@@ -1548,9 +1593,12 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
             <Field label="Dirección" k="address" placeholder="Ej: Av. 18 de Julio 1234" />
             <Field label="Teléfono" k="phone" placeholder="Ej: +598 99 123 456" />
             <Field label="Email" k="email" type="email" placeholder="Ej: sucursal@automotora.com" />
-            <Field label="Latitud" k="latitude" type="number" placeholder="Ej: -34.9011" />
-            <Field label="Longitud" k="longitude" type="number" placeholder="Ej: -56.1645" />
           </div>
+          <LocationMapPicker
+            lat={parseFloat(form.latitude) || 0}
+            lng={parseFloat(form.longitude) || 0}
+            onChange={(lat, lng) => setForm(f => ({ ...f, latitude: lat, longitude: lng }))}
+          />
           {error && (
             <p className="text-red-400 text-sm flex items-center gap-2">
               <span className="material-symbols-outlined !text-base">error</span>{error}
@@ -1687,17 +1735,11 @@ const ConfigTab = ({ dealership, onUpdated }) => {
             <input type="email" value={form.email} onChange={set('email')} className={inputCls} />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelCls}>Latitud</label>
-            <input type="number" step="0.0001" value={form.latitude} onChange={set('latitude')} placeholder="48.8371" className={inputCls} />
-          </div>
-          <div>
-            <label className={labelCls}>Longitud</label>
-            <input type="number" step="0.0001" value={form.longitude} onChange={set('longitude')} placeholder="9.1559" className={inputCls} />
-          </div>
-        </div>
-        <p className="text-[#E5E2E3]/20 text-[10px]">Las coordenadas se usan para mostrar la automotora en el mapa. Podés obtenerlas desde Google Maps.</p>
+        <LocationMapPicker
+          lat={parseFloat(form.latitude) || 0}
+          lng={parseFloat(form.longitude) || 0}
+          onChange={(lat, lng) => setForm(f => ({ ...f, latitude: lat, longitude: lng }))}
+        />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
         {success && (
