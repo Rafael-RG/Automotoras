@@ -33,6 +33,19 @@ public class DealershipEntity : ITableEntity
     public string PendingPlan { get; set; } = string.Empty;
     public string PendingSubscriptionId { get; set; } = string.Empty;
 
+    // Profile
+    public string Bio { get; set; } = string.Empty;
+    public string BusinessHours { get; set; } = string.Empty;
+    public string Instagram { get; set; } = string.Empty;
+    public string TikTok { get; set; } = string.Empty;
+    public string Website { get; set; } = string.Empty;
+
+    // Analytics
+    public int ProfileViews { get; set; } = 0;
+    public int ProfileViewsThisMonth { get; set; } = 0;
+    public string ProfileViewsMonthKey { get; set; } = string.Empty;
+    public string ProfileViewsHistoryJson { get; set; } = string.Empty; // JSON: {"yyyy-MM": count}
+
     // Auth
     public string PasswordHash { get; set; } = string.Empty;
     public string PasswordSalt { get; set; } = string.Empty;

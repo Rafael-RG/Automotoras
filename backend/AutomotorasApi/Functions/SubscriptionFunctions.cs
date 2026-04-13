@@ -229,4 +229,21 @@ public class SubscriptionFunctions(
         await dealershipService.UpdatePlanAsync(request.DealershipId, request.Plan, "sim-" + Guid.NewGuid(), "authorized");
         return new OkObjectResult(new { ok = true });
     }
+
+    // GET /api/subscriptions/info/{dealershipId}
+    [Function("GetSubscriptionInfo")]
+    public async Task<IActionResult> GetInfo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "subscriptions/info/{dealershipId}")] HttpRequest req,
+        string dealershipId)
+    {
+        var dealership = await dealershipService.GetByIdAsync(dealershipId);
+        if (dealership is null)
+            return new NotFoundObjectResult("Automotora no encontrada.");
+
+        if (string.IsNullOrEmpty(dealership.SubscriptionId))
+            return new OkObjectResult(new AutomotorasApi.Models.SubscriptionInfoDto(dealership.SubscriptionStatus, "", Array.Empty<AutomotorasApi.Models.SubscriptionPaymentRecord>()));
+
+        var (nextDate, payments) = await subscriptionService.GetSubscriptionInfoAsync(dealership.SubscriptionId);
+        return new OkObjectResult(new AutomotorasApi.Models.SubscriptionInfoDto(dealership.SubscriptionStatus, nextDate, payments));
+    }
 }

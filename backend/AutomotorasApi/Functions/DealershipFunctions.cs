@@ -57,4 +57,14 @@ public class DealershipFunctions(DealershipStorageService dealershipService)
         var entity = await dealershipService.UpdateAsync(id, request);
         return entity is null ? new NotFoundResult() : new OkObjectResult(DealershipStorageService.ToDto(entity));
     }
+
+    // POST /api/dealerships/{id}/visit
+    [Function("TrackDealershipVisit")]
+    public async Task<IActionResult> TrackVisit(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "dealerships/{id}/visit")] HttpRequest req,
+        string id)
+    {
+        await dealershipService.TrackProfileVisitAsync(id);
+        return new OkResult();
+    }
 }

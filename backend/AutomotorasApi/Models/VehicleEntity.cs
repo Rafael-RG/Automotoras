@@ -30,4 +30,6 @@ public class VehicleEntity : ITableEntity
     public int ViewCount { get; set; } = 0;
     public int LeadCount { get; set; } = 0;
     public int ShareCount { get; set; } = 0;
+    public string CreatedAt { get; set; } = string.Empty;
+    public string SoldAt { get; set; } = string.Empty;
 }

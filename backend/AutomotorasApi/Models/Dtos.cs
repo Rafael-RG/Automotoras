@@ -19,7 +19,9 @@ public record VehicleDto(
     bool IsAvailable,
     int ViewCount,
     int LeadCount,
-    int ShareCount
+    int ShareCount,
+    string CreatedAt,
+    string SoldAt
 );
 
 public record DealershipDto(
@@ -34,7 +36,15 @@ public record DealershipDto(
     double Latitude,
     double Longitude,
     string Plan,
-    string SubscriptionStatus
+    string SubscriptionStatus,
+    string Bio,
+    string BusinessHours,
+    string Instagram,
+    string TikTok,
+    string Website,
+    int ProfileViews,
+    int ProfileViewsThisMonth,
+    string ProfileViewsHistoryJson
 );
 
 // --- Request DTOs ---
@@ -74,7 +84,12 @@ public record UpdateDealershipRequest(
     string Phone,
     string Email,
     double Latitude = 0,
-    double Longitude = 0
+    double Longitude = 0,
+    string Bio = "",
+    string BusinessHours = "",
+    string Instagram = "",
+    string TikTok = "",
+    string Website = ""
 );
 
 public record UploadImageResponse(string Url);
@@ -104,6 +119,9 @@ public record ForgotPasswordRequest(string Email);
 public record ResetPasswordRequest(string Token, string NewPassword);
 
 public record TrackEventRequest(string Type); // "view" | "lead" | "share"
+
+public record SubscriptionPaymentRecord(string Date, decimal Amount, string Currency, string Status);
+public record SubscriptionInfoDto(string Status, string NextPaymentDate, SubscriptionPaymentRecord[] Payments);
 
 public record CreateCheckoutRequest(string DealershipId, string Plan, string BackUrl);
 public record CheckoutResponse(string CheckoutUrl);

@@ -65,7 +65,8 @@ public class VehicleStorageService
             Description = request.Description,
             ImageUrl = urls.Length > 0 ? urls[0] : string.Empty,
             ImageUrlsJson = urls.Length > 0 ? string.Join('|', urls) : string.Empty,
-            IsAvailable = request.IsAvailable
+            IsAvailable = request.IsAvailable,
+            CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd")
         };
 
         await _tableClient.AddEntityAsync(entity);
@@ -87,6 +88,12 @@ public class VehicleStorageService
         existing.BodyType = request.BodyType;
         existing.DealershipId = request.DealershipId;
         existing.Description = request.Description;
+
+        // Track when a vehicle gets sold
+        if (existing.IsAvailable && !request.IsAvailable && string.IsNullOrEmpty(existing.SoldAt))
+            existing.SoldAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        else if (request.IsAvailable)
+            existing.SoldAt = string.Empty; // re-listed
         existing.IsAvailable = request.IsAvailable;
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
@@ -166,7 +173,8 @@ public class VehicleStorageService
             e.Transmission, e.Fuel, e.BodyType, e.DealershipId,
             urls.Length > 0 ? urls[0] : string.Empty, urls,
             e.Description, e.IsAvailable,
-            e.ViewCount, e.LeadCount, e.ShareCount);
+            e.ViewCount, e.LeadCount, e.ShareCount,
+            e.CreatedAt, e.SoldAt);
     }
 
     private static string[] ParseImageUrls(VehicleEntity e)

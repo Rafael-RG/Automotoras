@@ -121,4 +121,44 @@ public class SubscriptionService
 
         return (parts[0], parts[1], status, id);
     }
+
+    /// <summary>
+    /// Returns next payment date and recent payment history for a preapproval.
+    /// </summary>
+    public async Task<(string NextPaymentDate, AutomotorasApi.Models.SubscriptionPaymentRecord[] Payments)> GetSubscriptionInfoAsync(string preapprovalId)
+    {
+        // Get preapproval details for next_payment_date
+        var detailResp = await _http.GetAsync($"/preapproval/{preapprovalId}");
+        var nextDate = "";
+        if (detailResp.IsSuccessStatusCode)
+        {
+            using var doc = JsonDocument.Parse(await detailResp.Content.ReadAsStringAsync());
+            var root = doc.RootElement;
+            if (root.TryGetProperty("next_payment_date", out var nd))
+                nextDate = nd.GetString() ?? "";
+        }
+
+        // Get authorized payments (payment history)
+        var paymentsResp = await _http.GetAsync($"/authorized_payments/search?preapproval_id={preapprovalId}&limit=10");
+        var payments = new List<AutomotorasApi.Models.SubscriptionPaymentRecord>();
+        if (paymentsResp.IsSuccessStatusCode)
+        {
+            using var doc = JsonDocument.Parse(await paymentsResp.Content.ReadAsStringAsync());
+            var root = doc.RootElement;
+            if (root.TryGetProperty("results", out var results))
+            {
+                foreach (var item in results.EnumerateArray())
+                {
+                    var date = item.TryGetProperty("date_approved", out var d) ? d.GetString() ?? "" : "";
+                    var amount = item.TryGetProperty("transaction_amount", out var a) ? a.GetDecimal() : 0m;
+                    var currency = item.TryGetProperty("currency_id", out var c) ? c.GetString() ?? "UYU" : "UYU";
+                    var status = item.TryGetProperty("status", out var s) ? s.GetString() ?? "" : "";
+                    if (!string.IsNullOrEmpty(date))
+                        payments.Add(new(date[..Math.Min(10, date.Length)], amount, currency, status));
+                }
+            }
+        }
+
+        return (nextDate, payments.ToArray());
+    }
 }

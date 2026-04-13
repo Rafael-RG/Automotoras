@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import { getDealershipById, getVehicles } from '../services/api';
+import { getDealershipById, getVehicles, trackDealershipProfileVisit } from '../services/api';
 import { VEHICLE_MODELS } from '../constants/vehicles';
 
 // ─── Shared UI ───────────────────────────────────────────────────────────────
@@ -68,6 +68,7 @@ const DealershipProfileScreen = () => {
       .then(([ds, vs]) => { setDealership(ds); setAllVehicles(vs); })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+    trackDealershipProfileVisit(id);
   }, [id]);
 
   // All available vehicles of this dealership
@@ -210,7 +211,35 @@ const DealershipProfileScreen = () => {
                       <span className="material-symbols-outlined !text-sm">directions</span>Cómo llegar
                     </a>
                   )}
+                  {dealership.instagram && (
+                    <a href={`https://instagram.com/${dealership.instagram.replace('@','')}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-[#E5E2E3]/50 hover:text-pink-400 transition-colors text-xs">
+                      <span className="material-symbols-outlined !text-sm">photo_camera</span>@{dealership.instagram.replace('@','')}
+                    </a>
+                  )}
+                  {dealership.tiktok && (
+                    <a href={`https://tiktok.com/@${dealership.tiktok.replace('@','')}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-[#E5E2E3]/50 hover:text-white transition-colors text-xs">
+                      <span className="material-symbols-outlined !text-sm">music_video</span>@{dealership.tiktok.replace('@','')}
+                    </a>
+                  )}
+                  {dealership.website && (
+                    <a href={dealership.website} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-[#E5E2E3]/50 hover:text-primary transition-colors text-xs">
+                      <span className="material-symbols-outlined !text-sm">language</span>Sitio web
+                    </a>
+                  )}
+                  {dealership.businessHours && (
+                    <span className="flex items-center gap-1.5 text-[#E5E2E3]/50 text-xs">
+                      <span className="material-symbols-outlined !text-sm">schedule</span>{dealership.businessHours}
+                    </span>
+                  )}
                 </div>
+                {dealership.bio && (
+                  <p className="text-[#E5E2E3]/50 text-sm leading-relaxed mt-3 max-w-xl">
+                    {dealership.bio}
+                  </p>
+                )}
               </div>
             </div>
 

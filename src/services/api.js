@@ -118,6 +118,14 @@ export const simulateSubscription = (dealershipId, plan) =>
 export const verifySubscription = (dealershipId) =>
   fetch(`${BASE_URL}/subscriptions/verify/${dealershipId}`).then(handleResponse);
 
+export const getSubscriptionInfo = (dealershipId) =>
+  fetch(`${BASE_URL}/subscriptions/info/${dealershipId}`).then(handleResponse);
+
+export const trackDealershipProfileVisit = (id) =>
+  fetch(`${BASE_URL}/dealerships/${id}/visit`, { method: 'POST' })
+    .then(handleResponse)
+    .catch(() => {}); // fire-and-forget
+
 // ─── Seed (solo desarrollo) ──────────────────────────────────────────────────
 
 export const seedData = () =>

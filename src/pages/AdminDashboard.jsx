@@ -7,7 +7,7 @@ import logoSrc from '../assets/Logo.png';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
-  createSubscriptionCheckout, verifySubscription,
+  createSubscriptionCheckout, verifySubscription, getSubscriptionInfo,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
 
@@ -207,6 +207,295 @@ const DistBar = ({ label, count, max, color = 'bg-[#D32F2F]' }) => (
   </div>
 );
 
+// ─── Shared SVG Line Chart ────────────────────────────────────────────────────
+const W = 600; const H = 140; const PAD = { t: 16, r: 16, b: 0, l: 40 };
+const cw = W - PAD.l - PAD.r;
+const ch = H - PAD.t - PAD.b;
+
+const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
+  const [hovered, setHovered] = useState(null); // { xi, serieIdx }
+
+  const allVals = series.flatMap(s => s.values);
+  const maxVal = Math.max(1, ...allVals);
+  const minVal = 0;
+  const range = maxVal - minVal || 1;
+
+  const px = (xi) => PAD.l + (xi / Math.max(xLabels.length - 1, 1)) * cw;
+  const py = (v)  => PAD.t + ch - ((v - minVal) / range) * ch;
+
+  const hasAnyData = allVals.some(v => v > 0);
+
+  // Y-axis ticks (3 levels)
+  const yTicks = [0, Math.round(maxVal / 2), maxVal].filter((v, i, a) => a.indexOf(v) === i);
+
+  return (
+    <div className="relative w-full" style={{ aspectRatio: `${W}/${H + 28}` }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" preserveAspectRatio="none">
+        {/* Grid lines */}
+        {yTicks.map(tick => (
+          <g key={tick}>
+            <line x1={PAD.l} x2={W - PAD.r} y1={py(tick)} y2={py(tick)}
+              stroke="rgba(229,226,227,0.06)" strokeWidth="1" />
+            <text x={PAD.l - 6} y={py(tick) + 4} textAnchor="end"
+              fill="rgba(229,226,227,0.25)" fontSize="10" fontFamily="monospace">
+              {formatY(tick)}
+            </text>
+          </g>
+        ))}
+
+        {/* Area fills */}
+        {hasAnyData && series.map((s) => {
+          const pts = s.values.map((v, xi) => `${px(xi)},${py(v)}`).join(' ');
+          const first = `${px(0)},${py(s.values[0])}`;
+          const last  = `${px(s.values.length - 1)},${py(s.values[s.values.length - 1])}`;
+          const area  = `M ${px(0)},${py(0)} L ${first} L ${pts} L ${last} L ${px(s.values.length - 1)},${py(0)} Z`;
+          return (
+            <path key={s.label + '-area'} d={area}
+              fill={s.color} fillOpacity="0.08" />
+          );
+        })}
+
+        {/* Lines */}
+        {hasAnyData && series.map((s) => {
+          const d = s.values.map((v, xi) => `${xi === 0 ? 'M' : 'L'} ${px(xi)},${py(v)}`).join(' ');
+          return (
+            <path key={s.label + '-line'} d={d}
+              fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          );
+        })}
+
+        {/* Dots + hover zones */}
+        {xLabels.map((lbl, xi) => (
+          <g key={xi}>
+            {series.map((s, si) => {
+              const v = s.values[xi];
+              const isHov = hovered?.xi === xi;
+              return (
+                <circle key={si} cx={px(xi)} cy={py(v)} r={isHov ? 5 : 3}
+                  fill={isHov ? s.color : '#1C1C1E'} stroke={s.color} strokeWidth="2"
+                  style={{ transition: 'r 0.15s' }} />
+              );
+            })}
+            {/* Invisible wide hit target */}
+            <rect
+              x={px(xi) - 20} y={PAD.t} width={40} height={ch}
+              fill="transparent"
+              onMouseEnter={() => setHovered({ xi })}
+              onMouseLeave={() => setHovered(null)}
+            />
+            {/* Tooltip */}
+            {hovered?.xi === xi && (
+              <g>
+                <line x1={px(xi)} x2={px(xi)} y1={PAD.t} y2={py(0)}
+                  stroke="rgba(229,226,227,0.15)" strokeWidth="1" strokeDasharray="4 3" />
+                {series.map((s, si) => {
+                  const v = s.values[xi];
+                  const bw = 90; const bh = 18 + series.length * 16;
+                  const bx = px(xi) + 8;
+                  const by = PAD.t + 4;
+                  return si === 0 ? (
+                    <g key="tip">
+                      <rect x={bx} y={by} width={bw} height={bh}
+                        rx={4} fill="#0E0E0F" stroke="rgba(229,226,227,0.15)" strokeWidth="1" />
+                      <text x={bx + 8} y={by + 13} fill="rgba(229,226,227,0.4)" fontSize="9" fontWeight="bold">
+                        {lbl}
+                      </text>
+                      {series.map((s2, si2) => (
+                        <text key={si2} x={bx + 8} y={by + 13 + (si2 + 1) * 15}
+                          fill={s2.color} fontSize="11" fontWeight="bold">
+                          {s2.label}: {formatY(s2.values[xi])}
+                        </text>
+                      ))}
+                    </g>
+                  ) : null;
+                })}
+              </g>
+            )}
+          </g>
+        ))}
+      </svg>
+      {/* X labels */}
+      <div className="flex" style={{ paddingLeft: PAD.l, paddingRight: PAD.r }}>
+        {xLabels.map((lbl, xi) => (
+          <div key={xi} className="flex-1 text-center">
+            <p className="text-[9px] text-[#E5E2E3]/25 mt-1">{lbl}</p>
+          </div>
+        ))}
+      </div>
+      {!hasAnyData && emptyMsg && (
+        <p className="absolute inset-0 flex items-center justify-center text-[#E5E2E3]/20 text-xs text-center px-8">
+          {emptyMsg}
+        </p>
+      )}
+    </div>
+  );
+};
+
+// ─── Price Histogram ──────────────────────────────────────────────────────────
+const BUCKET_COUNT = 6;
+
+const PriceHistogram = ({ vehicles, fmt }) => {
+  const data = useMemo(() => {
+    if (!vehicles.length) return { buckets: [], labels: [], values: [], tooltips: [] };
+    const prices = vehicles.map(v => v.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    if (min === max) {
+      return {
+        labels: [fmt(min)],
+        values: [vehicles.length],
+        tooltips: [vehicles],
+      };
+    }
+    const step = (max - min) / BUCKET_COUNT;
+    const buckets = Array.from({ length: BUCKET_COUNT }, (_, i) => {
+      const from = min + i * step;
+      const to   = i === BUCKET_COUNT - 1 ? max + 1 : min + (i + 1) * step;
+      const list = vehicles.filter(v => v.price >= from && v.price < to);
+      return { label: fmt(Math.round(from / 1000) * 1000), count: list.length, list };
+    });
+    return {
+      labels: buckets.map(b => b.label),
+      values: buckets.map(b => b.count),
+      tooltips: buckets.map(b => b.list),
+    };
+  }, [vehicles, fmt]);
+
+  if (!data.labels?.length) return null;
+
+  const seriesLine = [{ label: 'Autos', color: '#D32F2F', values: data.values }];
+
+  return (
+    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+          Distribución de Precios
+        </h3>
+        <div className="flex items-center gap-3 text-[10px] text-[#E5E2E3]/30">
+          <span>Min: {fmt(Math.min(...vehicles.map(v => v.price)))}</span>
+          <span>·</span>
+          <span>Max: {fmt(Math.max(...vehicles.map(v => v.price)))}</span>
+          <span>·</span>
+          <span>Prom: {fmt(Math.round(vehicles.reduce((s, v) => s + v.price, 0) / vehicles.length))}</span>
+        </div>
+      </div>
+      <LineChart
+        series={seriesLine}
+        xLabels={data.labels}
+        formatY={v => String(v)}
+        emptyMsg="Sin datos de precios aún."
+      />
+    </div>
+  );
+};
+
+// ─── Profile Visits Chart ─────────────────────────────────────────────────────
+const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+const ProfileVisitsChart = ({ dealership }) => {
+  const months = useMemo(() => {
+    const now = new Date();
+    const result = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      result.push({ key, label: MONTH_NAMES[d.getMonth()], isCurrent: i === 0 });
+    }
+    return result;
+  }, []);
+
+  const history = useMemo(() => {
+    if (!dealership?.profileViewsHistoryJson) return {};
+    try { return JSON.parse(dealership.profileViewsHistoryJson); }
+    catch { return {}; }
+  }, [dealership?.profileViewsHistoryJson]);
+
+  const data = months.map(({ key, label, isCurrent }) => ({
+    label, isCurrent, count: history[key] ?? 0,
+  }));
+
+  const thisMonth = data.find(d => d.isCurrent)?.count ?? 0;
+  const total = dealership?.profileViews ?? 0;
+
+  return (
+    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+      <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">store</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+              Visitas al perfil
+            </h3>
+          </div>
+          <p className="text-[#E5E2E3]/20 text-[10px]">{total} históricas en total</p>
+        </div>
+        <div className="text-right">
+          <p className="text-3xl font-headline font-black text-[#E5E2E3] tracking-tighter">{thisMonth}</p>
+          <p className="text-[10px] text-[#E5E2E3]/30 capitalize">
+            {new Date().toLocaleDateString('es-UY', { month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+      </div>
+      <LineChart
+        series={[{ label: 'Visitas', color: '#D32F2F', values: data.map(d => d.count) }]}
+        xLabels={data.map(d => d.label)}
+        formatY={v => String(v)}
+        emptyMsg="Las visitas se registrarán cuando los clientes visiten tu perfil."
+      />
+    </div>
+  );
+};
+
+// ─── Monthly Activity Chart ───────────────────────────────────────────────────
+
+const MonthlyActivityChart = ({ vehicles }) => {
+  const months = useMemo(() => {
+    const now = new Date();
+    const result = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      result.push({ key, label: `${MONTH_NAMES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}` });
+    }
+    return result;
+  }, []);
+
+  const data = useMemo(() => {
+    return months.map(({ key, label }) => {
+      const added = vehicles.filter(v => (v.createdAt || '').startsWith(key)).length;
+      const sold  = vehicles.filter(v => (v.soldAt  || '').startsWith(key)).length;
+      return { label, added, sold };
+    });
+  }, [months, vehicles]);
+
+  return (
+    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+          Actividad mensual — Añadidos vs. Vendidos
+        </h3>
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-[10px] text-[#E5E2E3]/40">
+            <span className="inline-block w-6 h-0.5 bg-[#D32F2F] rounded" />Añadidos
+          </span>
+          <span className="flex items-center gap-1.5 text-[10px] text-[#E5E2E3]/40">
+            <span className="inline-block w-6 h-0.5 bg-[#1565C0] rounded" />Vendidos
+          </span>
+        </div>
+      </div>
+      <LineChart
+        series={[
+          { label: 'Añadidos', color: '#D32F2F', values: data.map(d => d.added) },
+          { label: 'Vendidos',  color: '#1565C0', values: data.map(d => d.sold)  },
+        ]}
+        xLabels={data.map(d => d.label)}
+        formatY={v => String(v)}
+        emptyMsg="El gráfico mostrará datos a medida que se registren altas y ventas de vehículos."
+      />
+    </div>
+  );
+};
+
 // ─── Dashboard Tab ────────────────────────────────────────────────────────────
 const DashboardTab = ({ vehicles, dealership }) => {
   const metrics = useMemo(() => {
@@ -297,6 +586,9 @@ const DashboardTab = ({ vehicles, dealership }) => {
           icon="trending_up"
         />
       </div>
+
+      {/* Profile visits chart */}
+      <ProfileVisitsChart dealership={dealership} />
 
       {/* Engagement: most viewed + most leads */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -461,33 +753,8 @@ const DashboardTab = ({ vehicles, dealership }) => {
         </div>
       </div>
 
-      {/* Price distribution */}
-      <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40 mb-5">
-          Distribución de Precios
-        </h3>
-        <div className="flex items-end gap-1.5 h-20">
-          {sorted.map((v) => {
-            const heightPct = (v.price / metrics.maxPrice) * 100;
-            return (
-              <div
-                key={v.id}
-                className="flex-1 flex flex-col justify-end group/bar"
-                title={`${v.brand} ${v.model} — ${fmt(v.price)}`}
-              >
-                <div
-                  className="w-full bg-[#D32F2F]/30 group-hover/bar:bg-[#D32F2F] rounded-t transition-colors duration-200"
-                  style={{ height: `${Math.max(heightPct, 6)}%` }}
-                />
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-xs text-[#E5E2E3]/30">Min: {fmt(metrics.minPrice)}</span>
-          <span className="text-xs text-[#E5E2E3]/30">Max: {fmt(metrics.maxPrice)}</span>
-        </div>
-      </div>
+      {/* Price distribution — histogram */}
+      <PriceHistogram vehicles={vehicles} fmt={fmt} />
 
       {/* Vehicles — engagement performance */}
       <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg overflow-hidden">
@@ -538,6 +805,9 @@ const DashboardTab = ({ vehicles, dealership }) => {
           ))}
         </div>
       </div>
+
+      {/* Monthly activity chart */}
+      <MonthlyActivityChart vehicles={vehicles} />
     </div>
   );
 };
@@ -1344,11 +1614,23 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [polling, setPolling] = useState(false);
+  const [subInfo, setSubInfo] = useState(null);
+  const [subInfoLoading, setSubInfoLoading] = useState(false);
   const pollCountRef = useRef(0);
   const pollTimerRef = useRef(null);
 
   const currentPlan = dealership?.plan || 'basic';
   const currentStatus = dealership?.subscriptionStatus || '';
+
+  // Load subscription billing info when tab mounts and status is authorized
+  useEffect(() => {
+    if (currentStatus !== 'authorized' || !dealership?.id) return;
+    setSubInfoLoading(true);
+    getSubscriptionInfo(dealership.id)
+      .then((info) => setSubInfo(info))
+      .catch(() => {})
+      .finally(() => setSubInfoLoading(false));
+  }, [currentStatus, dealership?.id]);
   const statusInfo = STATUS_LABELS[currentStatus] || null;
 
   // Auto-poll when pending: check every 4s up to 3 minutes
@@ -1495,6 +1777,60 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
         </p>
       )}
 
+      {/* Billing info */}
+      {currentStatus === 'authorized' && (
+        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            Facturación
+          </h3>
+          {subInfoLoading ? (
+            <div className="flex items-center gap-2 text-[#E5E2E3]/30 text-sm">
+              <div className="w-4 h-4 border-2 border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
+              Cargando información…
+            </div>
+          ) : subInfo ? (
+            <>
+              {subInfo.nextPaymentDate && (
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#D32F2F] !text-xl">calendar_month</span>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40">Próximo cobro</p>
+                    <p className="text-[#E5E2E3] font-semibold text-sm">
+                      {new Date(subInfo.nextPaymentDate + 'T12:00:00').toLocaleDateString('es-UY', {
+                        day: '2-digit', month: 'long', year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {subInfo.payments?.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-3">Historial de pagos</p>
+                  <div className="space-y-2">
+                    {subInfo.payments.map((p, i) => (
+                      <div key={i} className="flex items-center justify-between py-2.5 border-b border-[#E5E2E3]/5 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                            p.status === 'approved' ? 'bg-green-400' : 'bg-yellow-400'
+                          }`} />
+                          <span className="text-[#E5E2E3]/50 text-xs">{p.date}</span>
+                        </div>
+                        <span className="text-[#E5E2E3] text-xs font-semibold">
+                          {p.currency} {p.amount?.toLocaleString('es-UY')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {!subInfo.nextPaymentDate && (!subInfo.payments || subInfo.payments.length === 0) && (
+                <p className="text-[#E5E2E3]/30 text-xs">No hay información de facturación disponible.</p>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
+
       <p className="text-[#E5E2E3]/20 text-xs">
         El pago se procesa de forma segura a través de MercadoPago. Podés cancelar tu suscripción en cualquier momento.
       </p>
@@ -1628,6 +1964,11 @@ const ConfigTab = ({ dealership, onUpdated }) => {
     name: dealership.name, address: dealership.address, city: dealership.city,
     country: dealership.country, phone: dealership.phone, email: dealership.email,
     latitude: dealership.latitude ?? 0, longitude: dealership.longitude ?? 0,
+    bio: dealership.bio || '',
+    businessHours: dealership.businessHours || '',
+    instagram: dealership.instagram || '',
+    tiktok: dealership.tiktok || '',
+    website: dealership.website || '',
   });
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(dealership.logoUrl || null);
@@ -1740,6 +2081,76 @@ const ConfigTab = ({ dealership, onUpdated }) => {
           lng={parseFloat(form.longitude) || 0}
           onChange={(lat, lng) => setForm(f => ({ ...f, latitude: lat, longitude: lng }))}
         />
+
+        <div className="border-t border-[#E5E2E3]/10 pt-5 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            Descripción
+          </h3>
+          <div>
+            <label className={labelCls}>Sobre la automotora</label>
+            <textarea
+              value={form.bio}
+              onChange={set('bio')}
+              rows={3}
+              maxLength={500}
+              placeholder="Contá brevemente quiénes son, su experiencia y lo que los diferencia…"
+              className={`${inputCls} resize-none`}
+            />
+            <p className="text-[#E5E2E3]/20 text-[10px] mt-1">{form.bio.length}/500 caracteres</p>
+          </div>
+          <div>
+            <label className={labelCls}>Horarios de atención</label>
+            <textarea
+              value={form.businessHours}
+              onChange={set('businessHours')}
+              rows={2}
+              placeholder="Ej: Lun–Vie: 9–18hs · Sáb: 9–13hs"
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-[#E5E2E3]/10 pt-5 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            Redes sociales
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className={labelCls}>Instagram</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#E5E2E3]/30 text-sm">@</span>
+                <input
+                  value={form.instagram}
+                  onChange={set('instagram')}
+                  placeholder="usuario"
+                  className={`${inputCls} pl-7`}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>TikTok</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#E5E2E3]/30 text-sm">@</span>
+                <input
+                  value={form.tiktok}
+                  onChange={set('tiktok')}
+                  placeholder="usuario"
+                  className={`${inputCls} pl-7`}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Sitio web</label>
+              <input
+                value={form.website}
+                onChange={set('website')}
+                type="url"
+                placeholder="https://…"
+                className={inputCls}
+              />
+            </div>
+          </div>
+        </div>
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
         {success && (

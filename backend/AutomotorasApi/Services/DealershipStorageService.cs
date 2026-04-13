@@ -70,6 +70,11 @@ public class DealershipStorageService
         existing.Email = request.Email;
         existing.Latitude = request.Latitude;
         existing.Longitude = request.Longitude;
+        existing.Bio = request.Bio;
+        existing.BusinessHours = request.BusinessHours;
+        existing.Instagram = request.Instagram;
+        existing.TikTok = request.TikTok;
+        existing.Website = request.Website;
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
         return existing;
@@ -94,7 +99,10 @@ public class DealershipStorageService
     }
 
     public static DealershipDto ToDto(DealershipEntity e) =>
-        new(e.RowKey, e.Name, e.Address, e.City, e.Country, e.Phone, e.Email, e.LogoUrl, e.Latitude, e.Longitude, e.Plan, e.SubscriptionStatus);
+        new(e.RowKey, e.Name, e.Address, e.City, e.Country, e.Phone, e.Email, e.LogoUrl,
+            e.Latitude, e.Longitude, e.Plan, e.SubscriptionStatus,
+            e.Bio, e.BusinessHours, e.Instagram, e.TikTok, e.Website,
+            e.ProfileViews, e.ProfileViewsThisMonth, e.ProfileViewsHistoryJson);
 
     public async Task<bool> UpdatePlanAsync(string id, string plan, string subscriptionId, string status)
     {
@@ -131,6 +139,44 @@ public class DealershipStorageService
 
         existing.PendingPlan = string.Empty;
         existing.PendingSubscriptionId = string.Empty;
+
+        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
+        return true;
+    }
+
+    public async Task<bool> TrackProfileVisitAsync(string id)
+    {
+        var existing = await GetByIdAsync(id);
+        if (existing is null) return false;
+
+        var monthKey = DateTime.UtcNow.ToString("yyyy-MM");
+        if (existing.ProfileViewsMonthKey != monthKey)
+        {
+            existing.ProfileViewsThisMonth = 0;
+            existing.ProfileViewsMonthKey = monthKey;
+        }
+        existing.ProfileViews++;
+        existing.ProfileViewsThisMonth++;
+
+        // Update monthly history JSON
+        var history = new System.Collections.Generic.Dictionary<string, int>();
+        if (!string.IsNullOrEmpty(existing.ProfileViewsHistoryJson))
+        {
+            try
+            {
+                history = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, int>>(existing.ProfileViewsHistoryJson)
+                    ?? new();
+            }
+            catch { }
+        }
+        history[monthKey] = history.TryGetValue(monthKey, out var prev) ? prev + 1 : 1;
+        // Keep only last 12 months
+        if (history.Count > 12)
+        {
+            var oldest = history.Keys.OrderBy(k => k).First();
+            history.Remove(oldest);
+        }
+        existing.ProfileViewsHistoryJson = System.Text.Json.JsonSerializer.Serialize(history);
 
         await _tableClient.UpdateEntityAsync(existing, existing.ETag);
         return true;
