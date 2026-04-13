@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
@@ -58,6 +58,11 @@ const DealershipProfileScreen = () => {
   const [kmMax, setKmMax] = useState('');
   const [sortBy, setSortBy] = useState('default');
 
+  // Infinite scroll
+  const PAGE = 12;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const sentinelRef = useRef(null);
+
   useEffect(() => {
     Promise.all([getDealershipById(id), getVehicles()])
       .then(([ds, vs]) => { setDealership(ds); setAllVehicles(vs); })
@@ -107,6 +112,24 @@ const DealershipProfileScreen = () => {
   const hasFilters = search || filterBrand || filterModel || filterFuel || filterTrans || filterBody ||
     priceMin || priceMax || yearMin || yearMax || kmMax;
 
+  // Reset visible count when filters/sort change
+  useEffect(() => { setVisibleCount(PAGE); }, [vehicles]);
+
+  // IntersectionObserver to load more
+  const handleSentinel = useCallback((entries) => {
+    if (entries[0].isIntersecting) {
+      setVisibleCount((prev) => Math.min(prev + PAGE, vehicles.length));
+    }
+  }, [vehicles.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(handleSentinel, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [handleSentinel]);
+
   const clearAll = () => {
     setSearch(''); setFilterBrand(null); setFilterModel(null); setFilterFuel(null); setFilterTrans(null);
     setFilterBody(null); setPriceMin(''); setPriceMax(''); setYearMin(''); setYearMax(''); setKmMax('');
@@ -116,12 +139,12 @@ const DealershipProfileScreen = () => {
     <div className="bg-[#0E0E0F] text-[#E5E2E3] min-h-screen flex flex-col">
       <TopNavBar />
 
-      <main className="flex-1 pt-28 pb-20 px-6 md:px-12 max-w-screen-2xl mx-auto w-full">
+      <main className="flex-1 pt-20 md:pt-28 pb-20 px-4 md:px-12 max-w-screen-2xl mx-auto w-full">
 
         {/* Back */}
         <button
           onClick={() => navigate('/dealerships')}
-          className="flex items-center gap-2 text-[#E5E2E3]/40 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest mb-10"
+          className="flex items-center gap-2 text-[#E5E2E3]/40 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest mb-6 md:mb-10"
         >
           <span className="material-symbols-outlined !text-sm">arrow_back</span>
           Automotoras
@@ -143,43 +166,51 @@ const DealershipProfileScreen = () => {
         {!loading && !error && dealership && (
           <>
             {/* ── Header ─────────────────────────────────────────── */}
-            <div className="flex flex-col md:flex-row items-start gap-8 mb-16 pb-16 border-b border-[#353436]/50">
-              <div className="w-24 h-24 rounded-2xl bg-[#1C1C1E] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
-                {dealership.logoUrl
-                  ? <img src={dealership.logoUrl} alt={dealership.name} className="w-full h-full object-contain" />
-                  : <span className="material-symbols-outlined text-4xl text-[#E5E2E3]/20">garage</span>}
+            <div className="flex flex-col md:flex-row items-start gap-5 md:gap-8 mb-8 pb-8 md:mb-16 md:pb-16 border-b border-[#353436]/50">
+              <div className="flex items-center gap-4 md:block">
+                <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl bg-[#1C1C1E] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
+                  {dealership.logoUrl
+                    ? <img src={dealership.logoUrl} alt={dealership.name} className="w-full h-full object-contain" />
+                    : <span className="material-symbols-outlined text-4xl text-[#E5E2E3]/20">garage</span>}
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-2">{dealership.city}, {dealership.country}</p>
-                <h1 className="font-headline text-4xl md:text-5xl font-black tracking-tighter text-white mb-6">{dealership.name}</h1>
-                <div className="flex flex-wrap gap-6">
+              <div className="flex-1 min-w-0">
+                {(dealership.city || dealership.country) && (
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-1.5">
+                    {[dealership.city, dealership.country].filter(Boolean).join(', ')}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-baseline gap-3 mb-4">
+                  <h1 className="font-headline text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight">{dealership.name}</h1>
+                  <span className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-3 py-1 text-center flex-shrink-0">
+                    <span className="font-headline text-xl font-black text-white">{dealershipVehicles.length}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[#E5E2E3]/30 ml-1.5">unid.</span>
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {dealership.address && (
-                    <span className="flex items-center gap-2 text-[#E5E2E3]/50 text-sm">
-                      <span className="material-symbols-outlined !text-base">location_on</span>{dealership.address}
+                    <span className="flex items-center gap-1.5 text-[#E5E2E3]/50 text-xs">
+                      <span className="material-symbols-outlined !text-sm">location_on</span>{dealership.address}
                     </span>
                   )}
                   {dealership.phone && (
-                    <a href={`tel:${dealership.phone}`} className="flex items-center gap-2 text-[#E5E2E3]/50 hover:text-primary transition-colors text-sm">
-                      <span className="material-symbols-outlined !text-base">call</span>{dealership.phone}
+                    <a href={`tel:${dealership.phone}`} className="flex items-center gap-1.5 text-[#E5E2E3]/50 hover:text-primary transition-colors text-xs">
+                      <span className="material-symbols-outlined !text-sm">call</span>{dealership.phone}
                     </a>
                   )}
                   {dealership.email && (
-                    <a href={`mailto:${dealership.email}`} className="flex items-center gap-2 text-[#E5E2E3]/50 hover:text-primary transition-colors text-sm">
-                      <span className="material-symbols-outlined !text-base">mail</span>{dealership.email}
+                    <a href={`mailto:${dealership.email}`} className="flex items-center gap-1.5 text-[#E5E2E3]/50 hover:text-primary transition-colors text-xs">
+                      <span className="material-symbols-outlined !text-sm">mail</span>{dealership.email}
                     </a>
                   )}
                   {dealership.latitude !== 0 && (
                     <a href={`https://www.google.com/maps/dir/?api=1&destination=${dealership.latitude},${dealership.longitude}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-[#4285F4] hover:underline text-sm font-bold">
-                      <span className="material-symbols-outlined !text-base">directions</span>Cómo llegar
+                      className="flex items-center gap-1.5 text-[#4285F4] hover:underline text-xs font-bold">
+                      <span className="material-symbols-outlined !text-sm">directions</span>Cómo llegar
                     </a>
                   )}
                 </div>
-              </div>
-              <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-xl px-6 py-4 text-center flex-shrink-0">
-                <p className="font-headline text-3xl font-black text-white">{dealershipVehicles.length}</p>
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#E5E2E3]/30 mt-1">Vehículos</p>
               </div>
             </div>
 
@@ -343,12 +374,13 @@ const DealershipProfileScreen = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-10 md:gap-y-16">
-                    {vehicles.map((v) => {
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-10 md:gap-y-16">
+                    {vehicles.slice(0, visibleCount).map((v) => {
                       const thumb = v.imageUrls?.length > 0 ? v.imageUrls[0] : v.imageUrl;
                       return (
                         <div key={v.id} className="group cursor-pointer"
-                          onClick={() => navigate(`/product/${encodeURIComponent(v.brand)}/${v.id}`)}>
+                          onClick={() => navigate(`/product/${encodeURIComponent(v.brand)}/${v.id}`)}
+                        >
                           <div className="relative overflow-hidden rounded-sm aspect-[16/10] bg-black mb-3 md:mb-6 border border-[#353436]/50">
                             {thumb ? (
                               <img className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
@@ -365,23 +397,29 @@ const DealershipProfileScreen = () => {
                             )}
                           </div>
                           <div className="space-y-2 md:space-y-4">
-                            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1">
-                              <div className="min-w-0">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0 flex-1">
                                 <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-0.5">{v.brand}</p>
-                                <h3 className="font-headline text-base md:text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter leading-tight truncate">{v.model}</h3>
+                                <h3 className="font-headline text-lg md:text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter leading-tight">{v.model}</h3>
                                 {v.bodyType && <p className="text-[#E5E2E3]/30 text-[9px] md:text-[10px] uppercase tracking-wider mt-0.5">{v.bodyType}</p>}
                               </div>
-                              <span className="font-headline text-sm md:text-xl font-black text-white tracking-tighter whitespace-nowrap">${v.price.toLocaleString('es-CL')}</span>
+                              <span className="font-headline text-base md:text-xl font-black text-white tracking-tighter whitespace-nowrap">${v.price.toLocaleString('es-CL')}</span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-x-6 md:gap-y-2 pt-2 md:pt-4 border-t border-[#353436]/50">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:gap-x-6 md:gap-y-2 pt-2 md:pt-4 border-t border-[#353436]/50">
                               <div className="spec-chip text-[9px] md:text-xs">{v.year}</div>
-                              <div className="spec-chip text-[9px] md:text-xs hidden sm:block">{v.mileage.toLocaleString('es-CL')} KM</div>
+                              <div className="spec-chip text-[9px] md:text-xs">{v.mileage.toLocaleString('es-CL')} KM</div>
                               <div className="spec-chip text-[9px] md:text-xs text-primary">{v.transmission}</div>
                             </div>
                           </div>
                         </div>
                       );
                     })}
+                    {/* Infinite scroll sentinel */}
+                    {visibleCount < vehicles.length && (
+                      <div ref={sentinelRef} className="col-span-2 xl:col-span-3 py-6 flex justify-center">
+                        <span className="material-symbols-outlined animate-spin text-primary/40">progress_activity</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -45,17 +45,17 @@ const SobreNosotrosScreen = () => {
       <TopNavBar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-20 overflow-hidden">
+      <section className="relative min-h-[85vh] md:min-h-screen flex flex-col items-center justify-center text-center px-5 pt-24 pb-16 overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#D32F2F]/8 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 max-w-4xl mx-auto">
           <SectionLabel>El marketplace automotriz de Uruguay</SectionLabel>
-          <h1 className="font-headline font-black text-5xl md:text-7xl lg:text-8xl tracking-tighter text-[#E5E2E3] leading-[0.95] mb-6">
+          <h1 className="font-headline font-black text-4xl md:text-7xl lg:text-8xl tracking-tighter text-[#E5E2E3] leading-[0.95] mb-5 md:mb-6">
             Encontrá el auto<br />
             que <span className="text-[#D32F2F]">buscabas.</span><br />
             Sin vueltas.
           </h1>
-          <p className="text-[#E5E2E3]/50 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+          <p className="text-[#E5E2E3]/50 text-base md:text-xl leading-relaxed max-w-2xl mx-auto mb-8 md:mb-10">
             RedAutos reúne las automotoras de Uruguay en un solo lugar.
             Buscá, filtrá por lo que necesitás y contactá directamente — sin intermediarios.
           </p>
@@ -91,8 +91,8 @@ const SobreNosotrosScreen = () => {
       </section>
 
       {/* ── QUÉ ES REDAUTOS ────────────────────────────────────────────────── */}
-      <section className="max-w-screen-xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           <div>
             <SectionLabel>¿Qué es RedAutos?</SectionLabel>
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-6">
@@ -109,7 +109,7 @@ const SobreNosotrosScreen = () => {
               su inventario, sigue métricas de interés y se mantiene visible las 24 horas del día.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FeatureCard icon="storefront" title="Perfil propio" description="Cada automotora tiene su página pública con logo, dirección, contacto e inventario completo." />
             <FeatureCard icon="directions_car" title="Catálogo digital" description="Publicá autos con fotos, precio, km, ficha técnica y estado de disponibilidad en segundos." />
             <FeatureCard icon="speed" title="Panel de métricas" description="Visualizá vistas, leads y compartidos de cada vehículo para tomar mejores decisiones." />
@@ -119,8 +119,8 @@ const SobreNosotrosScreen = () => {
       </section>
 
       {/* ── PARA COMPRADORES ──────────────────────────────────────────────── */}
-      <section className="max-w-screen-xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           <div>
             <SectionLabel>Para compradores</SectionLabel>
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-6">
@@ -208,10 +208,10 @@ const SobreNosotrosScreen = () => {
       {/* ── CTA FINAL ──────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#131314] border-t border-[#E5E2E3]/8">
         <div className="absolute inset-0 bg-gradient-to-br from-[#D32F2F]/15 via-transparent to-transparent pointer-events-none" />
-        <div className="relative max-w-screen-xl mx-auto px-6 py-28">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-28">
           <div className="max-w-3xl mx-auto text-center">
             <img src={logoSrc} alt="RedAutos" className="h-14 w-auto object-contain mx-auto mb-8 opacity-80" />
-            <h2 className="font-headline font-black text-4xl md:text-6xl lg:text-7xl tracking-tighter text-[#E5E2E3] leading-tight mb-6">
+            <h2 className="font-headline font-black text-3xl md:text-6xl lg:text-7xl tracking-tighter text-[#E5E2E3] leading-tight mb-5 md:mb-6">
               El auto que buscás<br />
               <span className="text-[#D32F2F]">está en RedAutos.</span>
             </h2>

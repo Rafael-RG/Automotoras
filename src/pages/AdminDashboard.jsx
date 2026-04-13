@@ -515,6 +515,11 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
   const [brandMode, setBrandMode] = useState(
     vehicle && !VEHICLE_BRANDS.includes(vehicle.brand) ? 'other' : 'list'
   );
+  const [modelMode, setModelMode] = useState(() => {
+    if (!vehicle) return 'list';
+    const opts = VEHICLE_MODELS[vehicle.brand] || [];
+    return opts.length > 0 && !opts.includes(vehicle.model) ? 'other' : 'list';
+  });
   const [imageFiles, setImageFiles] = useState([]);
   const [existingUrls, setExistingUrls] = useState(
     vehicle?.imageUrls?.length > 0 ? vehicle.imageUrls
@@ -624,11 +629,13 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                     onChange={(e) => {
                       if (e.target.value === '__other__') {
                         setBrandMode('other');
-                        setForm((f) => ({ ...f, brand: customBrand }));
+                        setForm((f) => ({ ...f, brand: customBrand, model: '' }));
+                        setModelMode('list');
                       } else {
                         setBrandMode('list');
                         setCustomBrand('');
-                        setForm((f) => ({ ...f, brand: e.target.value }));
+                        setForm((f) => ({ ...f, brand: e.target.value, model: '' }));
+                        setModelMode('list');
                       }
                     }}
                     required={brandMode !== 'other'}
@@ -662,19 +669,20 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               {(() => {
                 const modelOptions = VEHICLE_MODELS[form.brand] || [];
                 if (modelOptions.length > 0) {
-                  const isCustom = form.model && !modelOptions.includes(form.model);
                   return (
                     <>
                       <select
-                        value={isCustom ? '__other__' : (form.model || '')}
+                        value={modelMode === 'other' ? '__other__' : (form.model || '')}
                         onChange={(e) => {
                           if (e.target.value === '__other__') {
+                            setModelMode('other');
                             setForm((f) => ({ ...f, model: '' }));
                           } else {
+                            setModelMode('list');
                             setForm((f) => ({ ...f, model: e.target.value }));
                           }
                         }}
-                        required={!isCustom}
+                        required={modelMode !== 'other'}
                         className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
                       >
                         <option value="" disabled>Seleccionar modelo…</option>
@@ -683,11 +691,12 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                         ))}
                         <option value="__other__">Otro modelo…</option>
                       </select>
-                      {isCustom && (
+                      {modelMode === 'other' && (
                         <input
                           value={form.model}
                           onChange={set('model')}
                           required
+                          autoFocus
                           placeholder="Escribí el modelo"
                           className="w-full mt-2 bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
                         />

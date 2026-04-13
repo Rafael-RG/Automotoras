@@ -52,27 +52,40 @@ const FaqItem = ({ question, answer }) => {
 };
 
 const FeatureCard = ({ icon, title, description }) => (
-  <div className="bg-[#0E0E0F] border border-[#E5E2E3]/8 rounded-xl p-6 flex flex-col gap-4 hover:border-[#D32F2F]/30 transition-colors">
-    <div className="w-11 h-11 rounded-lg bg-[#D32F2F]/10 flex items-center justify-center flex-shrink-0">
-      <span className="material-symbols-outlined text-[#D32F2F] !text-2xl">{icon}</span>
+  <>
+    {/* Mobile: compact row */}
+    <div className="sm:hidden flex items-start gap-3 py-3 border-b border-[#E5E2E3]/5 last:border-0">
+      <div className="w-8 h-8 rounded-lg bg-[#D32F2F]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="material-symbols-outlined text-[#D32F2F] !text-base">{icon}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-headline font-black text-[#E5E2E3] text-sm tracking-tight leading-tight">{title}</p>
+        <p className="text-[#E5E2E3]/40 text-xs leading-relaxed mt-0.5">{description}</p>
+      </div>
     </div>
-    <div>
-      <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{title}</h3>
-      <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{description}</p>
+    {/* sm+: card */}
+    <div className="hidden sm:flex bg-[#0E0E0F] border border-[#E5E2E3]/8 rounded-xl p-6 flex-col gap-4 hover:border-[#D32F2F]/30 transition-colors">
+      <div className="w-11 h-11 rounded-lg bg-[#D32F2F]/10 flex items-center justify-center flex-shrink-0">
+        <span className="material-symbols-outlined text-[#D32F2F] !text-2xl">{icon}</span>
+      </div>
+      <div>
+        <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{title}</h3>
+        <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{description}</p>
+      </div>
     </div>
-  </div>
+  </>
 );
 
 const CompareRow = ({ feature, old, nuevo }) => (
-  <div className="grid grid-cols-3 gap-3 py-4 border-b border-[#E5E2E3]/5 last:border-0 items-center">
-    <p className="text-[#E5E2E3]/60 text-sm">{feature}</p>
-    <div className="flex items-center gap-2">
-      <span className="material-symbols-outlined text-red-500/70 !text-base flex-shrink-0">close</span>
-      <span className="text-[#E5E2E3]/30 text-sm">{old}</span>
+  <div className="grid grid-cols-3 gap-1 md:gap-3 py-3 md:py-4 border-b border-[#E5E2E3]/5 last:border-0 items-start md:items-center">
+    <p className="text-[#E5E2E3]/60 text-xs md:text-sm leading-tight">{feature}</p>
+    <div className="flex items-start gap-1 md:gap-2">
+      <span className="material-symbols-outlined text-red-500/70 !text-sm flex-shrink-0 mt-0.5">close</span>
+      <span className="text-[#E5E2E3]/30 text-[10px] md:text-sm leading-tight">{old}</span>
     </div>
-    <div className="flex items-center gap-2">
-      <span className="material-symbols-outlined text-green-400 !text-base flex-shrink-0">check_circle</span>
-      <span className="text-[#E5E2E3]/80 text-sm">{nuevo}</span>
+    <div className="flex items-start gap-1 md:gap-2">
+      <span className="material-symbols-outlined text-green-400 !text-sm flex-shrink-0 mt-0.5">check_circle</span>
+      <span className="text-[#E5E2E3]/80 text-[10px] md:text-sm leading-tight">{nuevo}</span>
     </div>
   </div>
 );
@@ -186,12 +199,12 @@ const PaginaAterrizajeScreen = () => {
             <span className="text-[#FFB3AC] text-xs font-bold uppercase tracking-widest">Plataforma abierta a nuevas automotoras</span>
           </div>
 
-          <h1 className="font-headline font-black text-5xl md:text-7xl lg:text-8xl tracking-tighter text-[#E5E2E3] leading-[0.92] mb-6">
+          <h1 className="font-headline font-black text-4xl md:text-7xl lg:text-8xl tracking-tighter text-[#E5E2E3] leading-[0.92] mb-5 md:mb-6">
             Sumá tu<br />
             automotora a<br />
             <span className="text-[#D32F2F]">RedAutos.</span>
           </h1>
-          <p className="text-[#E5E2E3]/50 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10">
+          <p className="text-[#E5E2E3]/50 text-base md:text-xl leading-relaxed max-w-xl mx-auto mb-8 md:mb-10">
             La plataforma que digitaliza tu inventario, te da presencia online y conecta tu negocio con compradores de toda Uruguay — desde $590/mes.
           </p>
 
@@ -212,7 +225,7 @@ const PaginaAterrizajeScreen = () => {
           </div>
 
           {/* Reassurance pills */}
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             <BenefitPill icon="credit_card_off" label="Sin tarjeta para registrarte" />
             <BenefitPill icon="cancel" label="Cancelá cuando quieras" />
             <BenefitPill icon="attach_money" label="Sin comisiones por venta" />
@@ -245,8 +258,8 @@ const PaginaAterrizajeScreen = () => {
       </div>
 
       {/* ── EL PROBLEMA ────────────────────────────────────────────────────── */}
-      <section className="max-w-screen-xl mx-auto px-6 py-24">
-        <div className="max-w-2xl mb-14">
+      <section className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+        <div className="max-w-2xl mb-10 md:mb-14">
           <SectionLabel>El problema que resolvemos</SectionLabel>
           <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-6">
             El mercado automotriz<br />sigue atrasado.
@@ -276,14 +289,14 @@ const PaginaAterrizajeScreen = () => {
       </section>
 
       {/* ── 3 BENEFICIOS CLAVE ─────────────────────────────────────────────── */}
-      <section className="max-w-screen-xl mx-auto px-6 py-24">
-        <div className="text-center max-w-xl mx-auto mb-14">
+      <section className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+        <div className="text-center max-w-xl mx-auto mb-10 md:mb-14">
           <SectionLabel>¿Por qué RedAutos?</SectionLabel>
           <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3]">
             Todo lo que necesitás,<br />nada de lo que no.
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:grid md:grid-cols-3 md:gap-6 bg-[#131314] md:bg-transparent border md:border-0 border-[#E5E2E3]/8 rounded-xl px-4 md:px-0 py-1 md:py-0">
           {[
             {
               icon: 'visibility',
@@ -304,20 +317,32 @@ const PaginaAterrizajeScreen = () => {
               highlight: false,
             },
           ].map((b) => (
-            <div
-              key={b.title}
-              className={`rounded-xl p-8 flex flex-col gap-5 border transition-all ${
-                b.highlight
-                  ? 'bg-[#D32F2F]/8 border-[#D32F2F]/30'
-                  : 'bg-[#131314] border-[#E5E2E3]/8 hover:border-[#D32F2F]/20'
-              }`}
-            >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${b.highlight ? 'bg-[#D32F2F]/20' : 'bg-[#D32F2F]/10'}`}>
-                <span className="material-symbols-outlined text-[#D32F2F] !text-2xl">{b.icon}</span>
+            <div key={b.title}>
+              {/* Mobile: compact row */}
+              <div className="md:hidden flex items-start gap-3 py-3 border-b border-[#E5E2E3]/5 last:border-0">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${b.highlight ? 'bg-[#D32F2F]/20' : 'bg-[#D32F2F]/10'}`}>
+                  <span className="material-symbols-outlined text-[#D32F2F] !text-base">{b.icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-headline font-black text-sm tracking-tight leading-tight ${b.highlight ? 'text-[#FFB3AC]' : 'text-[#E5E2E3]'}`}>{b.title}</p>
+                  <p className="text-[#E5E2E3]/40 text-xs leading-relaxed mt-0.5">{b.description}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-headline font-black text-[#E5E2E3] text-xl tracking-tight mb-2">{b.title}</h3>
-                <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{b.description}</p>
+              {/* Desktop: card */}
+              <div
+                className={`hidden md:flex rounded-xl p-8 flex-col gap-5 border transition-all ${
+                  b.highlight
+                    ? 'bg-[#D32F2F]/8 border-[#D32F2F]/30'
+                    : 'bg-[#131314] border-[#E5E2E3]/8 hover:border-[#D32F2F]/20'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${b.highlight ? 'bg-[#D32F2F]/20' : 'bg-[#D32F2F]/10'}`}>
+                  <span className="material-symbols-outlined text-[#D32F2F] !text-2xl">{b.icon}</span>
+                </div>
+                <div>
+                  <h3 className="font-headline font-black text-[#E5E2E3] text-xl tracking-tight mb-2">{b.title}</h3>
+                  <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{b.description}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -326,8 +351,8 @@ const PaginaAterrizajeScreen = () => {
 
       {/* ── PARA AUTOMOTORAS ───────────────────────────────────────────────── */}
       <section className="bg-[#131314] border-y border-[#E5E2E3]/8">
-        <div className="max-w-screen-xl mx-auto px-6 py-24">
-          <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+          <div className="text-center max-w-2xl mx-auto mb-10 md:mb-14">
             <SectionLabel>Para automotoras</SectionLabel>
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-4">
               ¿Por qué todas las automotoras del país deben unirse?
@@ -336,7 +361,7 @@ const PaginaAterrizajeScreen = () => {
               Los compradores cada vez buscan más online. Si tu automotora no está, no existe para ellos.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 bg-[#0E0E0F] sm:bg-transparent border sm:border-0 border-[#E5E2E3]/8 rounded-xl px-4 sm:px-0 py-1 sm:py-0">
             <FeatureCard icon="visibility" title="Presencia digital inmediata" description="Sin necesitar un sitio web ni contratar a nadie. Tu automotora aparece online desde el momento en que activás el plan." />
             <FeatureCard icon="search" title="Compradores que ya están buscando" description="RedAutos atrae a personas que quieren comprar un auto. No necesitás salir a buscarlos: ellos llegan solos." />
             <FeatureCard icon="trending_up" title="Métricas reales de tu negocio" description="Sabé qué autos generan más interés, cuántas personas los ven y cuántos te contactan. Tomá decisiones con datos." />
@@ -352,8 +377,8 @@ const PaginaAterrizajeScreen = () => {
 
       {/* ── PLANES Y PRECIOS ───────────────────────────────────────────────── */}
       <section id="planes" className="bg-[#131314] border-y border-[#E5E2E3]/8">
-        <div className="max-w-screen-xl mx-auto px-6 py-24">
-          <div className="text-center max-w-xl mx-auto mb-14">
+        <div className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+          <div className="text-center max-w-xl mx-auto mb-10 md:mb-14">
             <SectionLabel>Planes y precios</SectionLabel>
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] mb-4">
               Simple. Transparente.<br />Sin sorpresas.
@@ -446,33 +471,47 @@ const PaginaAterrizajeScreen = () => {
       </section>
 
       {/* ── CÓMO FUNCIONA ──────────────────────────────────────────────────── */}
-      <section className="max-w-screen-xl mx-auto px-6 py-24">
-        <div className="max-w-xl mb-14">
+      <section className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
+        <div className="max-w-xl mb-10 md:mb-14">
           <SectionLabel>Proceso de alta</SectionLabel>
-          <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3]">
+          <h2 className="font-headline font-black text-3xl md:text-5xl tracking-tighter text-[#E5E2E3]">
             De cero a online<br />en 5 minutos.
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-0 relative">
-          {/* Connecting line */}
+          {/* Connecting line desktop */}
           <div className="hidden md:block absolute top-5 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-[#D32F2F]/30 to-transparent pointer-events-none" />
+          {/* Connecting line mobile */}
+          <div className="md:hidden absolute top-0 bottom-0 left-5 w-px bg-[#D32F2F]/15 pointer-events-none" />
           {[
             { n: '1', icon: 'person_add', title: 'Creás tu cuenta', desc: 'Nombre, ciudad y listo. Menos de un minuto.' },
             { n: '2', icon: 'credit_card', title: 'Elegís un plan', desc: 'Básico o Pro. Pagás con MercadoPago.' },
             { n: '3', icon: 'directions_car', title: 'Cargás tus autos', desc: 'Fotos, precio, ficha técnica. Pan comido.' },
             { n: '4', icon: 'public', title: 'Los clientes llegan', desc: 'Tu automotora aparece en búsquedas y el mapa.' },
           ].map((step) => (
-            <div key={step.n} className="flex flex-col items-center text-center px-6 pb-10 md:pb-0">
-              <div className="relative mb-5">
-                <div className="w-12 h-12 rounded-full bg-[#D32F2F] flex items-center justify-center z-10 relative">
+            <div key={step.n}>
+              {/* Mobile: horizontal row */}
+              <div className="md:hidden flex items-center gap-4 pb-6 last:pb-0 relative pl-1">
+                <div className="w-10 h-10 rounded-full bg-[#D32F2F] flex items-center justify-center z-10 flex-shrink-0">
+                  <span className="font-headline font-black text-white text-sm">{step.n}</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-headline font-black text-[#E5E2E3] text-base tracking-tight leading-tight">{step.title}</p>
+                  <p className="text-[#E5E2E3]/40 text-xs mt-0.5">{step.desc}</p>
+                </div>
+                <span className="material-symbols-outlined text-[#D32F2F]/50 !text-xl flex-shrink-0">{step.icon}</span>
+              </div>
+              {/* Desktop: vertical column */}
+              <div className="hidden md:flex flex-col items-center text-center px-6">
+                <div className="w-12 h-12 rounded-full bg-[#D32F2F] flex items-center justify-center z-10 relative mb-5">
                   <span className="font-headline font-black text-white text-base">{step.n}</span>
                 </div>
+                <div className="w-10 h-10 rounded-xl bg-[#131314] border border-[#E5E2E3]/8 flex items-center justify-center mb-4">
+                  <span className="material-symbols-outlined text-[#D32F2F] !text-xl">{step.icon}</span>
+                </div>
+                <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{step.title}</h3>
+                <p className="text-[#E5E2E3]/40 text-sm">{step.desc}</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-[#131314] border border-[#E5E2E3]/8 flex items-center justify-center mb-4">
-                <span className="material-symbols-outlined text-[#D32F2F] !text-xl">{step.icon}</span>
-              </div>
-              <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{step.title}</h3>
-              <p className="text-[#E5E2E3]/40 text-sm">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -489,8 +528,8 @@ const PaginaAterrizajeScreen = () => {
 
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
       <section className="bg-[#131314] border-y border-[#E5E2E3]/8">
-        <div className="max-w-3xl mx-auto px-6 py-24">
-          <div className="text-center mb-14">
+        <div className="max-w-3xl mx-auto px-5 md:px-6 py-14 md:py-24">
+          <div className="text-center mb-10 md:mb-14">
             <SectionLabel>Preguntas frecuentes</SectionLabel>
             <h2 className="font-headline font-black text-4xl tracking-tighter text-[#E5E2E3]">
               Resolvemos tus dudas.
@@ -526,7 +565,7 @@ const PaginaAterrizajeScreen = () => {
       </section>
 
       {/* ── CONTACTO ───────────────────────────────────────────────────────── */}
-      <section id="contacto" className="max-w-screen-xl mx-auto px-6 py-24">
+      <section id="contacto" className="max-w-screen-xl mx-auto px-5 md:px-6 py-14 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <div>
             <SectionLabel>Contacto</SectionLabel>
@@ -582,7 +621,7 @@ const PaginaAterrizajeScreen = () => {
       {/* ── CTA FINAL ──────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#131314] border-t border-[#E5E2E3]/8">
         <div className="absolute inset-0 bg-gradient-to-br from-[#D32F2F]/12 via-transparent to-transparent pointer-events-none" />
-        <div className="relative max-w-screen-xl mx-auto px-6 py-28 flex flex-col lg:flex-row items-center justify-between gap-10">
+        <div className="relative max-w-screen-xl mx-auto px-5 md:px-6 py-16 md:py-28 flex flex-col lg:flex-row items-center justify-between gap-10">
           <div className="max-w-2xl text-center lg:text-left">
             <img src={logoSrc} alt="RedAutos" className="h-12 w-auto object-contain mb-6 mx-auto lg:mx-0 opacity-80" />
             <h2 className="font-headline font-black text-4xl md:text-5xl lg:text-6xl tracking-tighter text-[#E5E2E3] leading-tight mb-4">

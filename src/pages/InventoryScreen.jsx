@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
@@ -70,6 +70,11 @@ const InventoryScreen = () => {
   const [kmMax, setKmMax] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Infinite scroll
+  const PAGE = 12;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const sentinelRef = useRef(null);
 
   // Geolocation + distance filter
   const [dealershipMap, setDealershipMap] = useState({});
@@ -176,6 +181,24 @@ const InventoryScreen = () => {
 
   const hasFilters = search || filterBrand || filterModel || filterFuel || filterTrans || filterBody ||
     priceMin || priceMax || yearMin || yearMax || kmMax || distanceMax;
+
+  // Reset visible count when filters/sort change
+  useEffect(() => { setVisibleCount(PAGE); }, [vehicles]);
+
+  // IntersectionObserver to load more
+  const handleSentinel = useCallback((entries) => {
+    if (entries[0].isIntersecting) {
+      setVisibleCount((prev) => Math.min(prev + PAGE, vehicles.length));
+    }
+  }, [vehicles.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(handleSentinel, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [handleSentinel]);
 
   const clearAll = () => {
     setSearch(''); setFilterBrand(null); setFilterModel(null); setFilterFuel(null); setFilterTrans(null);
@@ -498,7 +521,7 @@ const InventoryScreen = () => {
 
             {!loading && !error && vehicles.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-10 md:gap-y-16">
-                {vehicles.map((vehicle) => {
+                {vehicles.slice(0, visibleCount).map((vehicle) => {
                   const thumb = vehicle.imageUrls?.length > 0 ? vehicle.imageUrls[0] : vehicle.imageUrl;
                   return (
                     <div
@@ -549,7 +572,13 @@ const InventoryScreen = () => {
                       </div>
                     </div>
                   );
-                })}
+                })}                
+                {/* Infinite scroll sentinel */}
+                {visibleCount < vehicles.length && (
+                  <div ref={sentinelRef} className="col-span-2 xl:col-span-3 py-6 flex justify-center">
+                    <span className="material-symbols-outlined animate-spin text-primary/40">progress_activity</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
