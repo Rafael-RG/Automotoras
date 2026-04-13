@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo.png';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
-  getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, removeVehicleImage,
+  getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
   createSubscriptionCheckout, verifySubscription,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
@@ -545,22 +545,30 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
         mileage: Number.parseInt(form.mileage, 10),
         dealershipId: selectedDealershipId,
       };
-      let saved;
+
       if (isEdit) {
-        saved = await updateVehicle(vehicle.brand, vehicle.id, payload);
+        // Editing: save data first, then upload new images to the existing vehicle
+        const saved = await updateVehicle(vehicle.brand, vehicle.id, payload);
+        if (imageFiles.length > 0 && saved) {
+          for (const f of imageFiles) {
+            try { await uploadVehicleImage(saved.brand, saved.id, f); }
+            catch (imgErr) { console.error('Error subiendo imagen:', imgErr); }
+          }
+        }
       } else {
-        saved = await createVehicle(payload);
-      }
-      // Upload images before closing so they show immediately after refresh
-      if (imageFiles.length > 0 && saved) {
+        // Creating: upload images FIRST to get URLs, then create the record with them included
+        const imageUrls = [];
         for (const f of imageFiles) {
           try {
-            await uploadVehicleImage(saved.brand, saved.id, f);
+            const res = await uploadTempVehicleImage(f);
+            if (res?.url) imageUrls.push(res.url);
           } catch (imgErr) {
             console.error('Error subiendo imagen:', imgErr);
           }
         }
+        await createVehicle({ ...payload, imageUrls });
       }
+
       onSaved();
     } catch (err) {
       setError(err.message);

@@ -54,6 +54,15 @@ export const uploadVehicleImage = (brand, id, file) => {
   }).then(handleResponse);
 };
 
+export const uploadTempVehicleImage = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return fetch(`${BASE_URL}/vehicles/images/temp`, {
+    method: 'POST',
+    body: formData,
+  }).then(handleResponse);
+};
+
 export const removeVehicleImage = (brand, id, url) =>
   fetch(`${BASE_URL}/vehicles/${encodeURIComponent(brand)}/${id}/image?url=${encodeURIComponent(url)}`, {
     method: 'DELETE',

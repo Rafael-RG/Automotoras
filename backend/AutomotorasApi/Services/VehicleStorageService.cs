@@ -44,6 +44,11 @@ public class VehicleStorageService
 
     public async Task<VehicleEntity> CreateAsync(CreateVehicleRequest request)
     {
+        // Use ImageUrls array if provided (preferred), else fall back to ImageUrl string
+        var urls = request.ImageUrls != null && request.ImageUrls.Length > 0
+            ? request.ImageUrls
+            : (!string.IsNullOrEmpty(request.ImageUrl) ? new[] { request.ImageUrl } : Array.Empty<string>());
+
         var entity = new VehicleEntity
         {
             PartitionKey = request.Brand,
@@ -58,7 +63,8 @@ public class VehicleStorageService
             BodyType = request.BodyType,
             DealershipId = request.DealershipId,
             Description = request.Description,
-            ImageUrl = request.ImageUrl,
+            ImageUrl = urls.Length > 0 ? urls[0] : string.Empty,
+            ImageUrlsJson = urls.Length > 0 ? string.Join('|', urls) : string.Empty,
             IsAvailable = request.IsAvailable
         };
 

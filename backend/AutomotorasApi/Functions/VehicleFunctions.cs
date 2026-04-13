@@ -84,6 +84,40 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         return ok ? new OkResult() : new NotFoundResult();
     }
 
+    // POST /api/vehicles/images/temp
+    // Upload image to blob BEFORE the vehicle record exists. Returns the blob URL.
+    [Function("UploadTempVehicleImage")]
+    public async Task<IActionResult> UploadTempVehicleImage(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/images/temp")] HttpRequest req)
+    {
+        IFormFile? file;
+        try
+        {
+            var form = await req.ReadFormAsync();
+            file = form.Files.GetFile("file");
+        }
+        catch
+        {
+            return new BadRequestObjectResult("No se pudo leer el formulario.");
+        }
+
+        if (file is null || file.Length == 0)
+            return new BadRequestObjectResult("No se recibió ningún archivo.");
+
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowedTypes.Contains(file.ContentType))
+            return new BadRequestObjectResult("Tipo de archivo no permitido. Usá JPG, PNG o WEBP.");
+
+        if (file.Length > 5 * 1024 * 1024)
+            return new BadRequestObjectResult("El archivo supera el límite de 5 MB.");
+
+        using var stream = file.OpenReadStream();
+        // Use "temp" as vehicleId prefix — will be stored under temp/ in the container
+        var imageUrl = await blobService.UploadVehicleImageAsync("temp", stream, file.ContentType);
+
+        return new OkObjectResult(new UploadImageResponse(imageUrl));
+    }
+
     // POST /api/vehicles/{brand}/{id}/image
     [Function("UploadVehicleImage")]
     public async Task<IActionResult> UploadVehicleImage(

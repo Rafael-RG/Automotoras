@@ -51,7 +51,8 @@ public record CreateVehicleRequest(
     string DealershipId,
     string Description,
     string ImageUrl = "",
-    bool IsAvailable = true
+    bool IsAvailable = true,
+    string[]? ImageUrls = null
 );
 
 public record CreateDealershipRequest(
