@@ -186,6 +186,7 @@ const DealershipFinderScreen = () => {
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [brandSearch, setBrandSearch] = useState('');
   const [mobileTab, setMobileTab] = useState('map'); // 'map' | 'list'
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Load data on mount
   useEffect(() => {
@@ -309,7 +310,9 @@ const DealershipFinderScreen = () => {
         <aside className={`${
           mobileTab === 'list' ? 'flex' : 'hidden'
         } lg:flex w-full lg:w-72 flex-shrink-0 bg-[#0E0E0F] border-r border-[#E5E2E3]/10 flex-col overflow-y-auto`}>
-          <div className="p-6 border-b border-[#E5E2E3]/10">
+
+          {/* Header — desktop only */}
+          <div className="hidden lg:block p-6 border-b border-[#E5E2E3]/10">
             <h2 className="font-headline text-lg font-extrabold tracking-tight text-[#E5E2E3]">
               Localizador
             </h2>
@@ -318,69 +321,100 @@ const DealershipFinderScreen = () => {
             </p>
           </div>
 
-          {/* Distance filter */}
-          {!geoError && (
-            <div className="p-6 border-b border-[#E5E2E3]/10">
-              <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-3">
-                {userLocation ? 'Distancia' : 'Obteniendo ubicación…'}
-              </p>
-              {userLocation ? (
+          {/* ── Filtros colapsables (mobile) / siempre visibles (desktop) ── */}
+          <div className="border-b border-[#E5E2E3]/10">
+
+            {/* Barra toggle — solo mobile */}
+            <button
+              className="lg:hidden w-full flex items-center justify-between px-4 py-2.5"
+              onClick={() => setFiltersOpen(o => !o)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined !text-sm text-[#D32F2F]">tune</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#E5E2E3]/60">Filtros</span>
+                {/* Badges de filtros activos */}
+                {maxDistance && (
+                  <span className="px-1.5 py-0.5 bg-[#2196F3]/20 text-[#2196F3] text-[9px] font-bold rounded">
+                    &lt;{maxDistance}km
+                  </span>
+                )}
+                {selectedBrand && (
+                  <span className="px-1.5 py-0.5 bg-[#D32F2F]/20 text-[#D32F2F] text-[9px] font-bold rounded truncate max-w-[80px]">
+                    {selectedBrand}
+                  </span>
+                )}
+              </div>
+              <span className={`material-symbols-outlined !text-sm text-[#E5E2E3]/30 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}>
+                expand_more
+              </span>
+            </button>
+
+            {/* Contenido de filtros */}
+            <div className={`${filtersOpen ? 'block' : 'hidden'} lg:block`}>
+
+              {/* Distance filter */}
+              {!geoError && (
+                <div className="px-4 py-3 lg:p-6 border-t lg:border-t-0 border-[#E5E2E3]/10 lg:border-b">
+                  <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-2">
+                    {userLocation ? 'Distancia' : 'Obteniendo ubicación…'}
+                  </p>
+                  {userLocation ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {[null, 10, 25, 50, 100].map((km) => (
+                        <button
+                          key={km ?? 'all'}
+                          onClick={() => setMaxDistance(km)}
+                          className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-colors ${
+                            maxDistance === km
+                              ? 'bg-[#2196F3]/20 text-[#2196F3] border border-[#2196F3]/30'
+                              : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
+                          }`}
+                        >
+                          {km ? `< ${km} km` : 'Todas'}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border-2 border-[#2196F3] border-t-transparent animate-spin" />
+                      <span className="text-[#E5E2E3]/20 text-[10px]">Localizando…</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Brand filter */}
+              <div className="px-4 py-3 lg:p-6">
+                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-2">
+                  Filtrar por marca
+                </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {[null, 10, 25, 50, 100].map((km) => (
+                  {selectedBrand && (
                     <button
-                      key={km ?? 'all'}
-                      onClick={() => setMaxDistance(km)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-colors ${
-                        maxDistance === km
-                          ? 'bg-[#2196F3]/20 text-[#2196F3] border border-[#2196F3]/30'
-                          : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
-                      }`}
+                      onClick={() => setSelectedBrand(null)}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F] transition-all"
                     >
-                      {km ? `< ${km} km` : 'Todas'}
+                      {selectedBrand} ✕
+                    </button>
+                  )}
+                  {allBrands.filter(b => b !== selectedBrand).slice(0, 5).map((brand) => (
+                    <button
+                      key={brand}
+                      onClick={() => setSelectedBrand((b) => (b === brand ? null : brand))}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+                    >
+                      {brand}
                     </button>
                   ))}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border-2 border-[#2196F3] border-t-transparent animate-spin" />
-                  <span className="text-[#E5E2E3]/20 text-[10px]">Localizando…</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Brand filter */}
-          <div className="p-6 border-b border-[#E5E2E3]/10">
-            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-3">
-              Filtrar por marca
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {selectedBrand && (
-                <button
-                  onClick={() => setSelectedBrand(null)}
-                  className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F] transition-all"
-                >
-                  {selectedBrand}
-                </button>
-              )}
-              {allBrands.filter(b => b !== selectedBrand).slice(0, 5).map((brand) => {
-                return (
                   <button
-                    key={brand}
-                    onClick={() => setSelectedBrand((b) => (b === brand ? null : brand))}
-                    className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+                    onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
                   >
-                  >
-                    {brand}
+                    Ver más…
                   </button>
-                );
-              })}
-              <button
-                onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
-                className="px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
-              >
-                Ver más…
-              </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
