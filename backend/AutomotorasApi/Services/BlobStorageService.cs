@@ -45,4 +45,26 @@ public class BlobStorageService
         await blob.UploadAsync(imageStream, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = contentType } });
         return blob.Uri.ToString();
     }
+
+    public async Task<bool> DeleteBlobByUrlAsync(string blobUrl)
+    {
+        try
+        {
+            var uri = new Uri(blobUrl);
+            // Path is like /container-name/blob-name
+            var segments = uri.AbsolutePath.TrimStart('/').Split('/', 2);
+            if (segments.Length < 2) return false;
+
+            var containerName = segments[0];
+            var blobName = segments[1];
+
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
+            var result = await container.GetBlobClient(blobName).DeleteIfExistsAsync();
+            return result.Value;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

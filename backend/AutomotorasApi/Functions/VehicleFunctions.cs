@@ -65,6 +65,11 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "vehicles/{brand}/{id}")] HttpRequest req,
         string brand, string id)
     {
+        // Delete blob images first
+        var urls = await vehicleService.GetImageUrlsAsync(brand, id);
+        foreach (var url in urls)
+            await blobService.DeleteBlobByUrlAsync(url);
+
         var deleted = await vehicleService.DeleteAsync(brand, id);
         return deleted ? new NoContentResult() : new NotFoundResult();
     }
@@ -118,55 +123,4 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         return new OkObjectResult(new UploadImageResponse(imageUrl));
     }
 
-    // POST /api/vehicles/{brand}/{id}/image
-    [Function("UploadVehicleImage")]
-    public async Task<IActionResult> UploadVehicleImage(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/{brand}/{id}/image")] HttpRequest req,
-        string brand, string id)
-    {
-        IFormFile? file;
-        try
-        {
-            var form = await req.ReadFormAsync();
-            file = form.Files.GetFile("file");
-        }
-        catch
-        {
-            return new BadRequestObjectResult("No se pudo leer el formulario.");
-        }
-
-        if (file is null || file.Length == 0)
-            return new BadRequestObjectResult("No se recibió ningún archivo.");
-
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-        if (!allowedTypes.Contains(file.ContentType))
-            return new BadRequestObjectResult("Tipo de archivo no permitido. Usá JPG, PNG o WEBP.");
-
-        if (file.Length > 5 * 1024 * 1024)
-            return new BadRequestObjectResult("El archivo supera el límite de 5 MB.");
-
-        var vehicle = await vehicleService.GetByIdAsync(brand, id);
-        if (vehicle is null)
-            return new NotFoundObjectResult("Vehículo no encontrado.");
-
-        using var stream = file.OpenReadStream();
-        var imageUrl = await blobService.UploadVehicleImageAsync(id, stream, file.ContentType);
-        await vehicleService.AddImageUrlAsync(brand, id, imageUrl);
-
-        return new OkObjectResult(new UploadImageResponse(imageUrl));
-    }
-
-    // DELETE /api/vehicles/{brand}/{id}/image?url=...
-    [Function("RemoveVehicleImage")]
-    public async Task<IActionResult> RemoveVehicleImage(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "vehicles/{brand}/{id}/image")] HttpRequest req,
-        string brand, string id)
-    {
-        var url = req.Query["url"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(url))
-            return new BadRequestObjectResult("El parámetro 'url' es obligatorio.");
-
-        var ok = await vehicleService.RemoveImageUrlAsync(brand, id, url);
-        return ok ? new NoContentResult() : new NotFoundResult();
-    }
 }

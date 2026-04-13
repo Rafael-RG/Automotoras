@@ -20,10 +20,19 @@ public class ImageFunctions(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/{brand}/{id}/image")] HttpRequest req,
         string brand, string id)
     {
-        if (!req.HasFormContentType || req.Form.Files.Count == 0)
-            return new BadRequestObjectResult("Se requiere un archivo en el campo 'file'.");
+        IFormFile? file;
+        try
+        {
+            var form = await req.ReadFormAsync();
+            file = form.Files.GetFile("file") ?? (form.Files.Count > 0 ? form.Files[0] : null);
+        }
+        catch
+        {
+            return new BadRequestObjectResult("No se pudo leer el formulario.");
+        }
 
-        var file = req.Form.Files[0];
+        if (file is null || file.Length == 0)
+            return new BadRequestObjectResult("Se requiere un archivo en el campo 'file'.");
 
         if (!AllowedTypes.Contains(file.ContentType))
             return new BadRequestObjectResult("Solo se permiten imágenes JPEG, PNG o WebP.");
@@ -59,7 +68,12 @@ public class ImageFunctions(
             return new BadRequestObjectResult("Parámetro 'url' requerido.");
 
         var ok = await vehicleService.RemoveImageUrlAsync(brand, id, imageUrl);
-        return ok ? new NoContentResult() : new NotFoundResult();
+        if (!ok) return new NotFoundResult();
+
+        // Delete the actual blob from storage
+        await blobService.DeleteBlobByUrlAsync(imageUrl);
+
+        return new NoContentResult();
     }
 
     // POST /api/dealerships/{id}/logo  (multipart/form-data, campo: "file")
@@ -68,10 +82,19 @@ public class ImageFunctions(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "dealerships/{id}/logo")] HttpRequest req,
         string id)
     {
-        if (!req.HasFormContentType || req.Form.Files.Count == 0)
-            return new BadRequestObjectResult("Se requiere un archivo en el campo 'file'.");
+        IFormFile? file;
+        try
+        {
+            var form = await req.ReadFormAsync();
+            file = form.Files.GetFile("file") ?? (form.Files.Count > 0 ? form.Files[0] : null);
+        }
+        catch
+        {
+            return new BadRequestObjectResult("No se pudo leer el formulario.");
+        }
 
-        var file = req.Form.Files[0];
+        if (file is null || file.Length == 0)
+            return new BadRequestObjectResult("Se requiere un archivo en el campo 'file'.");
 
         if (!AllowedTypes.Contains(file.ContentType))
             return new BadRequestObjectResult("Solo se permiten imágenes JPEG, PNG o WebP.");

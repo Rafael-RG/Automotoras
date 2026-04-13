@@ -521,7 +521,8 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
     : vehicle?.imageUrl ? [vehicle.imageUrl]
     : []
   );
-  const [removingUrl, setRemovingUrl] = useState(null);
+  // URLs marcadas para eliminar al guardar (no se borran hasta confirmar)
+  const [urlsToRemove, setUrlsToRemove] = useState([]);
   const [selectedDealershipId, setSelectedDealershipId] = useState(
     vehicle?.dealershipId || dealershipId
   );
@@ -547,9 +548,15 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
       };
 
       if (isEdit) {
-        // Editing: save data first, then upload new images to the existing vehicle
+        // Editing: save data first, then apply image changes
         const saved = await updateVehicle(vehicle.brand, vehicle.id, payload);
-        if (imageFiles.length > 0 && saved) {
+        if (saved) {
+          // Delete staged removals
+          for (const url of urlsToRemove) {
+            try { await removeVehicleImage(vehicle.brand, vehicle.id, url); }
+            catch (imgErr) { console.error('Error eliminando imagen:', imgErr); }
+          }
+          // Upload new images
           for (const f of imageFiles) {
             try { await uploadVehicleImage(saved.brand, saved.id, f); }
             catch (imgErr) { console.error('Error subiendo imagen:', imgErr); }
@@ -578,16 +585,25 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#141415] border border-[#E5E2E3]/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-[#141415] border border-[#E5E2E3]/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {saving && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/60">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
+              <span className="text-[#E5E2E3]/60 text-sm">Guardando…</span>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E2E3]/10">
           <h2 className="text-xl font-headline font-black text-[#E5E2E3] uppercase tracking-tight">
             {isEdit ? 'Editar Vehículo' : 'Nueva Unidad'}
           </h2>
-          <button onClick={onClose} className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors">
+          <button onClick={onClose} disabled={saving} className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <fieldset disabled={saving} className="contents">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
@@ -767,28 +783,30 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                 Imágenes actuales ({existingUrls.length})
               </label>
               <div className="flex flex-wrap gap-2">
-                {existingUrls.map((url) => (
-                  <div key={url} className="relative group/img w-20 h-14 rounded-lg overflow-hidden border border-[#E5E2E3]/10">
-                    <img src={url} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      disabled={removingUrl === url}
-                      onClick={async () => {
-                        setRemovingUrl(url);
-                        try {
-                          await removeVehicleImage(vehicle.brand, vehicle.id, url);
-                          setExistingUrls((prev) => prev.filter((u) => u !== url));
-                        } catch {}
-                        setRemovingUrl(null);
-                      }}
-                      className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity"
-                    >
-                      <span className="material-symbols-outlined text-red-400 !text-lg">
-                        {removingUrl === url ? 'hourglass_empty' : 'delete'}
-                      </span>
-                    </button>
-                  </div>
-                ))}
+                {existingUrls.map((url) => {
+                  const markedForRemoval = urlsToRemove.includes(url);
+                  return (
+                    <div key={url} className={`relative group/img w-20 h-14 rounded-lg overflow-hidden border transition-opacity ${
+                      markedForRemoval ? 'border-red-500/60 opacity-40' : 'border-[#E5E2E3]/10'
+                    }`}>
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (markedForRemoval) {
+                            setUrlsToRemove((prev) => prev.filter((u) => u !== url));
+                          } else {
+                            setUrlsToRemove((prev) => [...prev, url]);
+                            setExistingUrls((prev) => prev.filter((u) => u !== url));
+                          }
+                        }}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity"
+                      >
+                        <span className="material-symbols-outlined text-red-400 !text-lg">delete</span>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -888,6 +906,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               {saving ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Crear Vehículo'}
             </button>
           </div>
+        </fieldset>
         </form>
       </div>
     </div>
@@ -904,7 +923,22 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [confirmDeleteVehicle, setConfirmDeleteVehicle] = useState(null);
   const [filterAvail, setFilterAvail] = useState('all');
+  const [filterBrand, setFilterBrand] = useState('all');
+  const [filterYear, setFilterYear] = useState('all');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  const brandOptions = useMemo(() => {
+    const brands = [...new Set(vehicles.map((v) => v.brand))].sort();
+    return brands;
+  }, [vehicles]);
+
+  const yearOptions = useMemo(() => {
+    const years = [...new Set(vehicles.map((v) => v.year))].sort((a, b) => b - a);
+    return years;
+  }, [vehicles]);
 
   const filtered = vehicles.filter((v) => {
     const q = search.toLowerCase();
@@ -913,15 +947,28 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
       filterAvail === 'all' ||
       (filterAvail === 'available' && v.isAvailable) ||
       (filterAvail === 'reserved' && !v.isAvailable);
-    return matchSearch && matchAvail;
+    const matchBrand = filterBrand === 'all' || v.brand === filterBrand;
+    const matchYear = filterYear === 'all' || String(v.year) === filterYear;
+    return matchSearch && matchAvail && matchBrand && matchYear;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const resetPage = () => setPage(1);
 
   const openNew = () => { setEditingVehicle(null); setShowModal(true); };
   const openEdit = (v) => { setEditingVehicle(v); setShowModal(true); };
   const closeModal = () => setShowModal(false);
 
   const handleDelete = async (v) => {
-    if (!window.confirm(`¿Eliminar ${v.brand} ${v.model}? Esta acción no se puede deshacer.`)) return;
+    setConfirmDeleteVehicle(v);
+  };
+
+  const confirmDelete = async () => {
+    const v = confirmDeleteVehicle;
+    if (!v) return;
+    setConfirmDeleteVehicle(null);
     setDeleting(v.id);
     try {
       await deleteVehicle(v.brand, v.id);
@@ -933,6 +980,41 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
 
   return (
     <>
+      {confirmDeleteVehicle && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#141415] border border-[#E5E2E3]/10 rounded-xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-6 border-b border-[#E5E2E3]/10">
+              <h2 className="text-xl font-headline font-black text-[#E5E2E3] uppercase tracking-tight">Eliminar vehículo</h2>
+              <button onClick={() => setConfirmDeleteVehicle(null)} className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6 space-y-5">
+              <p className="text-[#E5E2E3]/70 text-sm">
+                ¿Eliminarsás{' '}
+                <span className="text-[#E5E2E3] font-semibold">{confirmDeleteVehicle.brand} {confirmDeleteVehicle.model} {confirmDeleteVehicle.year}</span>?
+                Esta acción no se puede deshacer.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteVehicle(null)}
+                  className="flex-1 py-3 border border-[#E5E2E3]/10 text-[#E5E2E3]/50 rounded-lg text-sm font-semibold hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3] transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="flex-1 py-3 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:bg-[#B71C1C] transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showModal && (
         <VehicleModal
           vehicle={editingVehicle}
@@ -948,7 +1030,11 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
             <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">
               Mi Flota
             </h1>
-            <p className="text-[#E5E2E3]/30 text-sm mt-1">{vehicles.length} unidades en total</p>
+            <p className="text-[#E5E2E3]/30 text-sm mt-1">
+              {filtered.length !== vehicles.length
+                ? `${filtered.length} de ${vehicles.length} unidades`
+                : `${vehicles.length} unidades en total`}
+            </p>
           </div>
           <button
             onClick={openNew}
@@ -965,15 +1051,35 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
               search
             </span>
             <input
-              value={search} onChange={(e) => setSearch(e.target.value)}
+              value={search} onChange={(e) => { setSearch(e.target.value); resetPage(); }}
               placeholder="Buscar por marca o modelo..."
               className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg pl-11 pr-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
             />
           </div>
+          {brandOptions.length > 1 && (
+            <select
+              value={filterBrand}
+              onChange={(e) => { setFilterBrand(e.target.value); resetPage(); }}
+              className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+            >
+              <option value="all">Todas las marcas</option>
+              {brandOptions.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          )}
+          {yearOptions.length > 1 && (
+            <select
+              value={filterYear}
+              onChange={(e) => { setFilterYear(e.target.value); resetPage(); }}
+              className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+            >
+              <option value="all">Todos los años</option>
+              {yearOptions.map((y) => <option key={y} value={String(y)}>{y}</option>)}
+            </select>
+          )}
           {['all', 'available', 'reserved'].map((f) => (
             <button
               key={f}
-              onClick={() => setFilterAvail(f)}
+              onClick={() => { setFilterAvail(f); resetPage(); }}
               className={`px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
                 filterAvail === f
                   ? 'bg-[#D32F2F]/20 text-[#FFB3AC] border border-[#D32F2F]/30'
@@ -993,7 +1099,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
               <p className="text-[#E5E2E3]/30 mt-3 text-sm">No se encontraron vehículos</p>
             </div>
           ) : (
-            filtered.map((v) => (
+            paginated.map((v) => (
               <div
                 key={v.id}
                 className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-4 flex items-start gap-4 hover:border-[#E5E2E3]/20 transition-colors"
@@ -1055,6 +1161,15 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                       </div>
                     </div>
                     <div className="flex-shrink-0 flex items-center gap-2">
+                      <a
+                        href={`/product/${v.brand}/${v.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#E5E2E3]/10 hover:text-[#E5E2E3] transition-colors"
+                        title="Ver publicación"
+                      >
+                        <span className="material-symbols-outlined !text-base">open_in_new</span>
+                      </a>
                       <button
                         onClick={() => openEdit(v)}
                         className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
@@ -1076,6 +1191,56 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
             ))
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <span className="text-[#E5E2E3]/30 text-xs">
+              Página {page} de {totalPages} &middot; {filtered.length} resultados
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined !text-base">chevron_left</span>
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .reduce((acc, p, idx, arr) => {
+                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((item, idx) =>
+                  item === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="text-[#E5E2E3]/20 px-1 text-sm">…</span>
+                  ) : (
+                    <button
+                      key={item}
+                      onClick={() => setPage(item)}
+                      className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                        page === item
+                          ? 'bg-[#D32F2F] text-white'
+                          : 'bg-[#1C1C1E] border border-[#E5E2E3]/10 text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  )
+                )
+              }
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="p-2 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined !text-base">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

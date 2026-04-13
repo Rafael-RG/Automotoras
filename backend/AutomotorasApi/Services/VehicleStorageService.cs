@@ -152,6 +152,12 @@ public class VehicleStorageService
         }
     }
 
+    public async Task<string[]> GetImageUrlsAsync(string brand, string id)
+    {
+        var entity = await GetByIdAsync(brand, id);
+        return entity is null ? Array.Empty<string>() : ParseImageUrls(entity);
+    }
+
     public VehicleDto ToDto(VehicleEntity e)
     {
         var urls = ParseImageUrls(e);
