@@ -68,9 +68,6 @@ const Footer = () => (
         <p className="text-[#E5E2E3]/20 text-[10px] tracking-[0.15em] uppercase">
           © 2026 RedAutos. Todos los derechos reservados.
         </p>
-        <p className="text-[#E5E2E3]/15 text-[10px] tracking-[0.1em] uppercase">
-          Hecho con ♥ en Uruguay
-        </p>
       </div>
 
     </div>
