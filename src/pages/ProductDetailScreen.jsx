@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { getVehicleById, getDealershipById, getVehicles, trackVehicleEvent } from '../services/api';
+import useSEO from '../hooks/useSEO';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -28,6 +29,18 @@ const ProductDetailScreen = () => {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
+
+  useSEO({
+    title: vehicle
+      ? `${vehicle.year} ${vehicle.brand} ${vehicle.model}${dealership ? ` – ${dealership.name}` : ''}`
+      : 'Vehículo',
+    description: vehicle
+      ? `${vehicle.year} ${vehicle.brand} ${vehicle.model} con ${vehicle.mileage?.toLocaleString('es-UY')} km. USD ${vehicle.price?.toLocaleString('es-UY')}.${dealership ? ` Vendido por ${dealership.name} en ${dealership.city}.` : ''} Contactalo en RedAutos.`
+      : '',
+    image: vehicle?.images?.[0] || undefined,
+    url: `/product/${brand}/${id}`,
+    type: 'product',
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -56,6 +69,41 @@ const ProductDetailScreen = () => {
     };
     load();
   }, [brand, id]);
+
+  // JSON-LD structured data for Google rich results
+  useEffect(() => {
+    if (!vehicle) return;
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'Car',
+      name: `${vehicle.year} ${vehicle.brand} ${vehicle.model}`,
+      brand: { '@type': 'Brand', name: vehicle.brand },
+      model: vehicle.model,
+      vehicleModelDate: String(vehicle.year),
+      mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage, unitCode: 'KMT' },
+      fuelType: vehicle.fuel,
+      vehicleTransmission: vehicle.transmission,
+      bodyType: vehicle.bodyType,
+      color: vehicle.color,
+      offers: {
+        '@type': 'Offer',
+        price: vehicle.price,
+        priceCurrency: 'USD',
+        availability: vehicle.isAvailable
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/SoldOut',
+        seller: dealership ? { '@type': 'AutoDealer', name: dealership.name, address: dealership.city } : undefined,
+      },
+      image: vehicle.images?.[0] || undefined,
+      url: `https://redautos.com.uy/product/${vehicle.brand}/${vehicle.id}`,
+    };
+    const el = document.createElement('script');
+    el.id = 'vehicle-jsonld';
+    el.type = 'application/ld+json';
+    el.textContent = JSON.stringify(schema);
+    document.head.appendChild(el);
+    return () => { const s = document.getElementById('vehicle-jsonld'); if (s) s.remove(); };
+  }, [vehicle, dealership]);
 
   const whatsappUrl = useMemo(() => {
     if (!vehicle || !dealership?.phone) return null;

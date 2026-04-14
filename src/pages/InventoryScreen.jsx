@@ -4,6 +4,7 @@ import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { getVehicles, getDealerships } from '../services/api';
 import { VEHICLE_MODELS, VEHICLE_BRANDS } from '../constants/vehicles';
+import useSEO from '../hooks/useSEO';
 
 const HERO_IMAGES = [
   'https://lh3.googleusercontent.com/aida-public/AB6AXuBFekBUfcvEyywcbMwbE8ga9QlZ9b8beF7ue62jNZitJw74aebXZzcQQXoHARNOHrx8qwkCuROfv8EPpfEuse5SKEp2f-0nBwoNV284FE5enRd22-VgOUJ5mjPkqaNVtV7DRGwBiwtEkJFLiFMGNwdy5TRw6uToo8f9tNUHDd2Q3O3GhuNVox67cbb4AQBc4huc0j_-40eTUgeoZRczg2uzMAt-K0XojTDJmVen-IXkL5DN2Gx6Vlvu1F8__i8-DETUT_T6G1mHrvM',
@@ -49,6 +50,11 @@ const RangeInput = ({ label, minVal, maxVal, onMinChange, onMaxChange, prefix = 
 );
 
 const InventoryScreen = () => {
+  useSEO({
+    title: 'Autos en Uruguay',
+    description: 'Encontrá autos, camionetas, SUVs y más en los mejores concesionarios de Uruguay. Filtrá por marca, precio, año y kilómetros.',
+    url: '/',
+  });
   const navigate = useNavigate();
   const [allVehicles, setAllVehicles] = useState([]);
   const [loading, setLoading] = useState(true);

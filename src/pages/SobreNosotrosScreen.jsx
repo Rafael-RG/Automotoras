@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import logoSrc from '../assets/Logo.png';
+import useSEO from '../hooks/useSEO';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const SectionLabel = ({ children }) => (
@@ -40,6 +41,11 @@ const StatBlock = ({ value, label }) => (
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 const SobreNosotrosScreen = () => {
+  useSEO({
+    title: 'Sobre Nosotros',
+    description: 'Conocé el equipo detrás de RedAutos y nuestra misión de conectar compradores con los mejores concesionarios de Uruguay.',
+    url: '/sobre-nosotros',
+  });
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#E5E2E3] font-body antialiased">
       <TopNavBar />

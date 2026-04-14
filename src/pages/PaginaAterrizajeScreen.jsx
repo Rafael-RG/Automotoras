@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import logoSrc from '../assets/Logo.png';
+import useSEO from '../hooks/useSEO';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const SectionLabel = ({ children }) => (
@@ -185,6 +186,11 @@ const ContactForm = () => {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 const PaginaAterrizajeScreen = () => {
+  useSEO({
+    title: 'Publicá tu concesionario',
+    description: 'Sumá tu concesionario a RedAutos y llegá a más compradores en Uruguay. Planes flexibles, sin comisiones por venta.',
+    url: '/unirse',
+  });
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#E5E2E3] font-body antialiased">
       <TopNavBar />

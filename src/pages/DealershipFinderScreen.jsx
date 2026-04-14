@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
+import useSEO from '../hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -172,6 +173,11 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const DealershipFinderScreen = () => {
+  useSEO({
+    title: 'Concesionarios en Uruguay',
+    description: 'Encontrá los mejores concesionarios de autos en Uruguay. Buscá por ubicación, marca y más en RedAutos.',
+    url: '/dealerships',
+  });
   const navigate = useNavigate();
 
   const [dealerships, setDealerships] = useState([]);

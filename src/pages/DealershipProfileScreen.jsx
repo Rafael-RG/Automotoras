@@ -4,6 +4,7 @@ import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { getDealershipById, getVehicles, trackDealershipProfileVisit } from '../services/api';
 import { VEHICLE_MODELS } from '../constants/vehicles';
+import useSEO from '../hooks/useSEO';
 
 // ─── Shared UI ───────────────────────────────────────────────────────────────
 const FilterChip = ({ label, active, onClick }) => (
@@ -40,6 +41,16 @@ const DealershipProfileScreen = () => {
   const [allVehicles, setAllVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useSEO({
+    title: dealership
+      ? `${dealership.name} – Concesionario en ${dealership.city}`
+      : 'Concesionario',
+    description: dealership
+      ? `Visitá ${dealership.name} en ${dealership.city}. Autos disponibles en RedAutos.`
+      : '',
+    url: `/dealerships/${id}`,
+  });
 
   // Filter state
   const [filtersOpen, setFiltersOpen] = useState(false);

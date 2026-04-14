@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Admin panel - no indexar
+Disallow: /admin
+Disallow: /admin/
+
+# Auth pages - no indexar
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verificar-email
+Disallow: /pago-exitoso
+
+Sitemap: https://redautos.com.uy/sitemap.xml
