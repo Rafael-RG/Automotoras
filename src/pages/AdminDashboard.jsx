@@ -122,10 +122,17 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
       mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
     }`}>
       <div className="px-6 mb-10">
-        <img src={logoSrc} alt="RedAutos" className="h-14 w-auto object-contain mb-2" />
-        <span className="text-[10px] font-semibold text-[#D32F2F] tracking-widest uppercase block truncate">
-          {dealership?.name ?? '...'}
-        </span>
+        <div className="flex items-center gap-3">
+          <img src={logoSrc} alt="RedAutos" className="h-10 w-auto object-contain flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[#E5E2E3] font-headline font-bold text-sm tracking-tight leading-tight truncate">
+              {dealership?.name ?? '...'}
+            </p>
+            <p className="text-[#E5E2E3]/35 text-[10px] mt-0.5 truncate">
+              {dealership?.city ?? ''}
+            </p>
+          </div>
+        </div>
       </div>
       <nav className="flex-1 space-y-1">
         {nav.map((n) => (
@@ -290,19 +297,20 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
                   stroke="rgba(229,226,227,0.15)" strokeWidth="1" strokeDasharray="4 3" />
                 {series.map((s, si) => {
                   const v = s.values[xi];
-                  const bw = 90; const bh = 18 + series.length * 16;
-                  const bx = px(xi) + 8;
-                  const by = PAD.t + 4;
+                  const bw = 82; const bh = 14 + series.length * 12;
+                  const flipLeft = px(xi) + 8 + bw > W - PAD.r;
+                  const bx = flipLeft ? px(xi) - bw - 8 : px(xi) + 8;
+                  const by = Math.min(PAD.t + 4, H - bh - 4);
                   return si === 0 ? (
                     <g key="tip">
                       <rect x={bx} y={by} width={bw} height={bh}
-                        rx={4} fill="#0E0E0F" stroke="rgba(229,226,227,0.15)" strokeWidth="1" />
-                      <text x={bx + 8} y={by + 13} fill="rgba(229,226,227,0.4)" fontSize="9" fontWeight="bold">
+                        rx={3} fill="#0E0E0F" stroke="rgba(229,226,227,0.15)" strokeWidth="1" />
+                      <text x={bx + 6} y={by + 9} fill="rgba(229,226,227,0.4)" fontSize="7" fontWeight="bold">
                         {lbl}
                       </text>
                       {series.map((s2, si2) => (
-                        <text key={si2} x={bx + 8} y={by + 13 + (si2 + 1) * 15}
-                          fill={s2.color} fontSize="11" fontWeight="bold">
+                        <text key={si2} x={bx + 6} y={by + 9 + (si2 + 1) * 11}
+                          fill={s2.color} fontSize="8" fontWeight="bold">
                           {s2.label}: {formatY(s2.values[xi])}
                         </text>
                       ))}
