@@ -1695,7 +1695,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
   };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8 max-w-3xl mx-auto">
       <div>
         <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">Suscripción</h1>
         <p className="text-[#E5E2E3]/30 text-sm mt-1">Administrá tu plan de RedAutos</p>
@@ -1729,9 +1729,10 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
       )}
 
       {/* Plan cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {PLANS.map((p) => {
           const isCurrent = currentPlan === p.id && currentStatus === 'authorized';
+          if (p.testOnly) return null;
           return (
             <div
               key={p.id}
