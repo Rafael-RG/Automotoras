@@ -135,7 +135,10 @@ public class SubscriptionService
             using var doc = JsonDocument.Parse(await detailResp.Content.ReadAsStringAsync());
             var root = doc.RootElement;
             if (root.TryGetProperty("next_payment_date", out var nd))
-                nextDate = nd.GetString() ?? "";
+            {
+                var raw = nd.GetString() ?? "";
+                nextDate = raw.Length >= 10 ? raw[..10] : raw;
+            }
         }
 
         // Get authorized payments (payment history)
