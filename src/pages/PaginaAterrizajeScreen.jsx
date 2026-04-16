@@ -18,7 +18,7 @@ const Check = ({ children }) => (
 );
 
 const Cross = ({ children }) => (
-  <li className="flex items-start gap-2.5 text-sm text-[#E5E2E3]/50 line-through">
+  <li className="flex items-start gap-2.5 text-sm text-[#E5E2E3]/55 line-through">
     <span className="material-symbols-outlined !text-base text-[#E5E2E3]/45 flex-shrink-0 mt-0.5">remove_circle</span>
     {children}
   </li>
@@ -27,7 +27,7 @@ const Cross = ({ children }) => (
 const BenefitPill = ({ icon, label }) => (
   <div className="flex items-center gap-2 bg-[#131314] border border-[#E5E2E3]/8 rounded-full px-4 py-2">
     <span className="material-symbols-outlined text-[#D32F2F] !text-base">{icon}</span>
-    <span className="text-[#E5E2E3]/60 text-xs font-semibold">{label}</span>
+    <span className="text-[#E5E2E3]/75 text-xs font-semibold">{label}</span>
   </div>
 );
 
@@ -46,7 +46,7 @@ const FaqItem = ({ question, answer }) => {
         </span>
       </div>
       {open && (
-        <p className="text-[#E5E2E3]/45 text-sm leading-relaxed pb-5">{answer}</p>
+        <p className="text-[#E5E2E3]/70 text-sm leading-relaxed pb-5">{answer}</p>
       )}
     </button>
   );
@@ -61,7 +61,7 @@ const FeatureCard = ({ icon, title, description }) => (
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-headline font-black text-[#E5E2E3] text-sm tracking-tight leading-tight">{title}</p>
-        <p className="text-[#E5E2E3]/40 text-xs leading-relaxed mt-0.5">{description}</p>
+        <p className="text-[#E5E2E3]/60 text-xs leading-relaxed mt-0.5">{description}</p>
       </div>
     </div>
     {/* sm+: card */}
@@ -71,7 +71,7 @@ const FeatureCard = ({ icon, title, description }) => (
       </div>
       <div>
         <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{title}</h3>
-        <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{description}</p>
+        <p className="text-[#E5E2E3]/70 text-sm leading-relaxed">{description}</p>
       </div>
     </div>
   </>
@@ -82,7 +82,7 @@ const CompareRow = ({ feature, old, nuevo }) => (
     <p className="text-[#E5E2E3]/60 text-xs md:text-sm leading-tight">{feature}</p>
     <div className="flex items-start gap-1 md:gap-2">
       <span className="material-symbols-outlined text-red-500/70 !text-sm flex-shrink-0 mt-0.5">close</span>
-      <span className="text-[#E5E2E3]/30 text-[10px] md:text-sm leading-tight">{old}</span>
+      <span className="text-[#E5E2E3]/50 text-[10px] md:text-sm leading-tight">{old}</span>
     </div>
     <div className="flex items-start gap-1 md:gap-2">
       <span className="material-symbols-outlined text-green-400 !text-sm flex-shrink-0 mt-0.5">check_circle</span>
@@ -210,7 +210,7 @@ const PaginaAterrizajeScreen = () => {
             automotora a<br />
             <span className="text-[#D32F2F]">RedAutos.</span>
           </h1>
-          <p className="text-[#E5E2E3]/50 text-base md:text-xl leading-relaxed max-w-xl mx-auto mb-8 md:mb-10">
+          <p className="text-[#E5E2E3]/70 text-base md:text-xl leading-relaxed max-w-xl mx-auto mb-8 md:mb-10">
             La plataforma que digitaliza tu inventario, te da presencia online y conecta tu negocio con compradores de toda Uruguay — desde $2590/mes.
           </p>
 
@@ -256,7 +256,7 @@ const PaginaAterrizajeScreen = () => {
             ].map(({ v, l }) => (
               <div key={l}>
                 <p className="font-headline font-black text-3xl md:text-4xl text-[#D32F2F] tracking-tighter">{v}</p>
-                <p className="text-[#E5E2E3]/35 text-[10px] uppercase tracking-widest mt-1.5">{l}</p>
+                <p className="text-[#E5E2E3]/55 text-[10px] uppercase tracking-widest mt-1.5">{l}</p>
               </div>
             ))}
           </div>
@@ -270,7 +270,7 @@ const PaginaAterrizajeScreen = () => {
           <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-6">
             El mercado automotriz<br />sigue atrasado.
           </h2>
-          <p className="text-[#E5E2E3]/50 text-base leading-relaxed">
+          <p className="text-[#E5E2E3]/70 text-base leading-relaxed">
             La mayoría de las automotoras en Uruguay todavía dependen de carteles, boca a boca y publicaciones
             dispersas en distintos portales. No tienen presencia digital propia, no miden nada y pierden
             oportunidades todos los días. Con RedAutos eso cambia — hoy mismo.
@@ -331,7 +331,7 @@ const PaginaAterrizajeScreen = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`font-headline font-black text-sm tracking-tight leading-tight ${b.highlight ? 'text-[#FFB3AC]' : 'text-[#E5E2E3]'}`}>{b.title}</p>
-                  <p className="text-[#E5E2E3]/40 text-xs leading-relaxed mt-0.5">{b.description}</p>
+                  <p className="text-[#E5E2E3]/60 text-xs leading-relaxed mt-0.5">{b.description}</p>
                 </div>
               </div>
               {/* Desktop: card */}
@@ -347,7 +347,7 @@ const PaginaAterrizajeScreen = () => {
                 </div>
                 <div>
                   <h3 className="font-headline font-black text-[#E5E2E3] text-xl tracking-tight mb-2">{b.title}</h3>
-                  <p className="text-[#E5E2E3]/50 text-sm leading-relaxed">{b.description}</p>
+                  <p className="text-[#E5E2E3]/70 text-sm leading-relaxed">{b.description}</p>
                 </div>
               </div>
             </div>
@@ -363,7 +363,7 @@ const PaginaAterrizajeScreen = () => {
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] leading-tight mb-4">
               ¿Por qué todas las automotoras del país deben unirse?
             </h2>
-            <p className="text-[#E5E2E3]/50 text-base leading-relaxed">
+            <p className="text-[#E5E2E3]/70 text-base leading-relaxed">
               Los compradores cada vez buscan más online. Si tu automotora no está, no existe para ellos.
             </p>
           </div>
@@ -389,7 +389,7 @@ const PaginaAterrizajeScreen = () => {
             <h2 className="font-headline font-black text-4xl md:text-5xl tracking-tighter text-[#E5E2E3] mb-4">
               Simple. Transparente.<br />Sin sorpresas.
             </h2>
-            <p className="text-[#E5E2E3]/45 text-base">
+            <p className="text-[#E5E2E3]/65 text-base">
               Sin comisiones por venta · Sin costo de instalación · Cancelá cuando quieras
             </p>
           </div>
@@ -397,12 +397,12 @@ const PaginaAterrizajeScreen = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {/* Basic */}
             <div className="bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-xl p-8 flex flex-col">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5E2E3]/35 mb-4">Plan Básico</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5E2E3]/60 mb-4">Plan Básico</p>
               <div className="flex items-end gap-2 mb-2">
                 <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$2590</span>
-                <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
+                <span className="text-[#E5E2E3]/50 text-sm mb-1.5">/mes</span>
               </div>
-              <p className="text-[#E5E2E3]/50 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
+              <p className="text-[#E5E2E3]/65 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>1 sucursal</Check>
                 <Check>Autos ilimitados</Check>
@@ -427,9 +427,9 @@ const PaginaAterrizajeScreen = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D32F2F]/70 mb-4">Plan Pro</p>
               <div className="flex items-end gap-2 mb-2">
                 <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$3990</span>
-                <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
+                <span className="text-[#E5E2E3]/50 text-sm mb-1.5">/mes</span>
               </div>
-              <p className="text-[#E5E2E3]/50 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
+              <p className="text-[#E5E2E3]/65 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>Sucursales ilimitadas</Check>
                 <Check>Autos ilimitados</Check>
@@ -448,11 +448,11 @@ const PaginaAterrizajeScreen = () => {
 
             {/* Enterprise / contact */}
             <div className="bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-xl p-8 flex flex-col">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5E2E3]/35 mb-4">Plan Empresarial</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5E2E3]/60 mb-4">Plan Empresarial</p>
               <div className="flex items-end gap-2 mb-2">
                 <span className="font-headline font-black text-3xl text-[#E5E2E3] tracking-tighter">A medida</span>
               </div>
-              <p className="text-[#E5E2E3]/50 text-xs mb-8">Para grupos automotrices y flotas grandes</p>
+              <p className="text-[#E5E2E3]/65 text-xs mb-8">Para grupos automotrices y flotas grandes</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>Todo lo del Plan Pro</Check>
                 <Check>Onboarding personalizado</Check>
@@ -470,7 +470,7 @@ const PaginaAterrizajeScreen = () => {
             </div>
           </div>
 
-          <p className="text-center text-[#E5E2E3]/45 text-xs mt-10">
+          <p className="text-center text-[#E5E2E3]/65 text-xs mt-10">
             Todos los planes incluyen acceso completo al panel · El pago se procesa de forma segura vía MercadoPago
           </p>
         </div>
@@ -503,7 +503,7 @@ const PaginaAterrizajeScreen = () => {
                 </div>
                 <div className="flex-1">
                   <p className="font-headline font-black text-[#E5E2E3] text-base tracking-tight leading-tight">{step.title}</p>
-                  <p className="text-[#E5E2E3]/40 text-xs mt-0.5">{step.desc}</p>
+                  <p className="text-[#E5E2E3]/65 text-xs mt-0.5">{step.desc}</p>
                 </div>
                 <span className="material-symbols-outlined text-[#D32F2F]/50 !text-xl flex-shrink-0">{step.icon}</span>
               </div>
@@ -516,7 +516,7 @@ const PaginaAterrizajeScreen = () => {
                   <span className="material-symbols-outlined text-[#D32F2F] !text-xl">{step.icon}</span>
                 </div>
                 <h3 className="font-headline font-black text-[#E5E2E3] text-lg tracking-tight mb-2">{step.title}</h3>
-                <p className="text-[#E5E2E3]/40 text-sm">{step.desc}</p>
+                <p className="text-[#E5E2E3]/65 text-sm">{step.desc}</p>
               </div>
             </div>
           ))}
@@ -579,7 +579,7 @@ const PaginaAterrizajeScreen = () => {
               ¿Tenés dudas?<br />
               <span className="text-[#D32F2F]">Hablemos.</span>
             </h2>
-            <p className="text-[#E5E2E3]/45 text-base leading-relaxed mb-8">
+            <p className="text-[#E5E2E3]/70 text-base leading-relaxed mb-8">
               Escribinos y te respondemos en el día.
               Podemos hacer una demo en vivo, mostrarte cómo funciona el panel
               y ayudarte a elegir el plan ideal para tu automotora.
@@ -592,7 +592,7 @@ const PaginaAterrizajeScreen = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[#E5E2E3]/40 text-[10px] uppercase tracking-widest font-bold mb-0.5">WhatsApp</p>
+                  <p className="text-[#E5E2E3]/60 text-[10px] uppercase tracking-widest font-bold mb-0.5">WhatsApp</p>
                   <a
                     href={`https://wa.me/${WHATSAPP_NUMBER}`}
                     target="_blank"
@@ -608,7 +608,7 @@ const PaginaAterrizajeScreen = () => {
                   <span className="material-symbols-outlined text-[#D32F2F] !text-xl">schedule</span>
                 </div>
                 <div>
-                  <p className="text-[#E5E2E3]/40 text-[10px] uppercase tracking-widest font-bold mb-0.5">Horario de atención</p>
+                  <p className="text-[#E5E2E3]/60 text-[10px] uppercase tracking-widest font-bold mb-0.5">Horario de atención</p>
                   <p className="text-[#E5E2E3]/70 text-sm">Lunes a viernes · 9:00 – 18:00</p>
                 </div>
               </div>
@@ -634,7 +634,7 @@ const PaginaAterrizajeScreen = () => {
               Cada día sin estar en RedAutos<br />
               <span className="text-[#D32F2F]">es un cliente que perdés.</span>
             </h2>
-            <p className="text-[#E5E2E3]/40 text-base leading-relaxed">
+            <p className="text-[#E5E2E3]/65 text-base leading-relaxed">
               Registrarte es gratis y tarda menos de 2 minutos. Empezá hoy.
             </p>
           </div>
@@ -648,7 +648,7 @@ const PaginaAterrizajeScreen = () => {
             </Link>
             <a
               href="#contacto"
-              className="text-[#E5E2E3]/30 text-xs hover:text-[#E5E2E3]/60 transition-colors flex items-center gap-1.5"
+              className="text-[#E5E2E3]/55 text-xs hover:text-[#E5E2E3]/80 transition-colors flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined !text-sm">chat</span>
               O hablá con nosotros primero
