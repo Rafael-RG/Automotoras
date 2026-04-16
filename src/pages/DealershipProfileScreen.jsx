@@ -25,9 +25,9 @@ const RangeInput = ({ label, minVal, maxVal, onMinChange, onMaxChange, placehold
     <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">{label}</p>
     <div className="flex gap-2">
       <input type="number" value={minVal} onChange={(e) => onMinChange(e.target.value)} placeholder={placeholder[0]}
-        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20" />
+        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50" />
       <input type="number" value={maxVal} onChange={(e) => onMaxChange(e.target.value)} placeholder={placeholder[1]}
-        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20" />
+        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50" />
     </div>
   </div>
 );
@@ -183,7 +183,7 @@ const DealershipProfileScreen = () => {
                 <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl bg-[#1C1C1E] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
                   {dealership.logoUrl
                     ? <img src={dealership.logoUrl} alt={dealership.name} className="w-full h-full object-contain" />
-                    : <span className="material-symbols-outlined text-4xl text-[#E5E2E3]/20">garage</span>}
+                    : <span className="material-symbols-outlined text-4xl text-[#E5E2E3]/45">garage</span>}
                 </div>
               </div>
               <div className="flex-1 min-w-0">
@@ -288,7 +288,7 @@ const DealershipProfileScreen = () => {
                   <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2">
                     <span className="material-symbols-outlined text-primary/40 !text-sm">search</span>
                     <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..."
-                      className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20" />
+                      className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/50" />
                     {search && (
                       <button onClick={() => setSearch('')} className="text-[#E5E2E3]/30 hover:text-primary">
                         <span className="material-symbols-outlined !text-sm">close</span>
@@ -376,7 +376,7 @@ const DealershipProfileScreen = () => {
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Kilómetros máx.</p>
                     <input type="number" value={kmMax} onChange={(e) => setKmMax(e.target.value)} placeholder="Ej: 50000"
-                      className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20" />
+                      className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50" />
                   </div>
                 </div>
               </aside>
@@ -403,7 +403,7 @@ const DealershipProfileScreen = () => {
 
                 {vehicles.length === 0 ? (
                   <div className="text-center py-24">
-                    <span className="material-symbols-outlined text-6xl text-[#E5E2E3]/10 block mb-4">search_off</span>
+                    <span className="material-symbols-outlined text-6xl text-[#E5E2E3]/35 block mb-4">search_off</span>
                     <p className="text-[#E5E2E3]/30 font-bold text-sm">
                       {hasFilters ? 'No hay vehículos que coincidan con los filtros.' : 'Sin vehículos disponibles por el momento.'}
                     </p>
@@ -487,7 +487,7 @@ const DealershipProfileScreen = () => {
                 <span className="material-symbols-outlined text-primary/40 !text-sm">search</span>
                 <input autoFocus value={brandSearch} onChange={(e) => setBrandSearch(e.target.value)}
                   placeholder="Buscar marca..."
-                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20" />
+                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/50" />
                 {brandSearch && (
                   <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-primary">
                     <span className="material-symbols-outlined !text-sm">close</span>

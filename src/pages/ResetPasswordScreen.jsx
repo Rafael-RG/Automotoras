@@ -96,7 +96,7 @@ const ResetPasswordScreen = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors"
+                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors"
                 />
                 <button
                   type="button"
@@ -118,7 +118,7 @@ const ResetPasswordScreen = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repetí tu contraseña"
-                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors"
+                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors"
                 />
                 <button
                   type="button"

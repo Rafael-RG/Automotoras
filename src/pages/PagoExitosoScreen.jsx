@@ -37,7 +37,7 @@ const PagoExitosoScreen = () => {
         Ir al Panel de Administración
       </a>
 
-      <p className="text-[#E5E2E3]/20 text-[10px] mt-6 max-w-xs">
+      <p className="text-[#E5E2E3]/45 text-[10px] mt-6 max-w-xs">
         Si el panel todavía muestra "Pendiente", esperá unos segundos y hacé clic en "Verificar ahora".
       </p>
     </div>

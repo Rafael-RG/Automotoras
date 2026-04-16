@@ -10,6 +10,10 @@
   ::selection {
     @apply bg-primary/30;
   }
+
+  ::placeholder {
+    opacity: 0.5;
+  }
 }
 
 @layer components {

@@ -65,7 +65,7 @@ const Footer = () => (
 
       {/* Bottom row */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-2">
-        <p className="text-[#E5E2E3]/20 text-[10px] tracking-[0.15em] uppercase">
+        <p className="text-[#E5E2E3]/45 text-[10px] tracking-[0.15em] uppercase">
           © 2026 RedAutos. Todos los derechos reservados.
         </p>
       </div>

@@ -30,7 +30,7 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
     <div>
       <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
         Ubicación en el mapa
-        <span className="ml-2 normal-case tracking-normal font-normal text-[#E5E2E3]/25">— hacé click para marcar</span>
+        <span className="ml-2 normal-case tracking-normal font-normal text-[#E5E2E3]/50">— hacé click para marcar</span>
       </label>
       <div className="rounded-lg overflow-hidden border border-[#E5E2E3]/10" style={{height: 260}}>
         <MapContainer center={center} zoom={hasPin ? 15 : 12} style={{height:'100%',width:'100%'}} key={`${lat},${lng}`}>
@@ -48,7 +48,7 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
           <button type="button" onClick={() => onChange(0, 0)} className="ml-3 text-red-400/60 hover:text-red-400 transition-colors">Quitar pin</button>
         </p>
       )}
-      {!hasPin && <p className="text-[#E5E2E3]/20 text-[10px] mt-1.5">Sin ubicación marcada — tocá el mapa para fijar el pin</p>}
+      {!hasPin && <p className="text-[#E5E2E3]/45 text-[10px] mt-1.5">Sin ubicación marcada — tocá el mapa para fijar el pin</p>}
     </div>
   );
 };
@@ -96,7 +96,7 @@ const DealershipSelector = ({ dealerships, onSelect }) => {
                   <div className="text-[#E5E2E3] font-headline font-bold text-base tracking-tight truncate">{d.name}</div>
                   <div className="text-[#E5E2E3]/40 text-xs">{d.city}, {d.country}</div>
                 </div>
-                <span className="material-symbols-outlined text-[#E5E2E3]/20 group-hover:text-[#D32F2F] transition-colors">
+                <span className="material-symbols-outlined text-[#E5E2E3]/45 group-hover:text-[#D32F2F] transition-colors">
                   arrow_forward
                 </span>
               </div>
@@ -326,12 +326,12 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
       <div className="flex" style={{ paddingLeft: PAD.l, paddingRight: PAD.r }}>
         {xLabels.map((lbl, xi) => (
           <div key={xi} className="flex-1 text-center">
-            <p className="text-[9px] text-[#E5E2E3]/25 mt-1">{lbl}</p>
+            <p className="text-[9px] text-[#E5E2E3]/50 mt-1">{lbl}</p>
           </div>
         ))}
       </div>
       {!hasAnyData && emptyMsg && (
-        <p className="absolute inset-0 flex items-center justify-center text-[#E5E2E3]/20 text-xs text-center px-8">
+        <p className="absolute inset-0 flex items-center justify-center text-[#E5E2E3]/45 text-xs text-center px-8">
           {emptyMsg}
         </p>
       )}
@@ -435,7 +435,7 @@ const ProfileVisitsChart = ({ dealership }) => {
               Visitas al perfil
             </h3>
           </div>
-          <p className="text-[#E5E2E3]/20 text-[10px]">{total} históricas en total</p>
+          <p className="text-[#E5E2E3]/45 text-[10px]">{total} históricas en total</p>
         </div>
         <div className="text-right">
           <p className="text-3xl font-headline font-black text-[#E5E2E3] tracking-tighter">{thisMonth}</p>
@@ -549,9 +549,9 @@ const DashboardTab = ({ vehicles, dealership }) => {
   if (!metrics) {
     return (
       <div className="text-center py-24">
-        <span className="material-symbols-outlined text-7xl text-[#E5E2E3]/10">directions_car</span>
+        <span className="material-symbols-outlined text-7xl text-[#E5E2E3]/35">directions_car</span>
         <p className="text-[#E5E2E3]/30 mt-4 text-sm">No hay vehículos en la flota todavía.</p>
-        <p className="text-[#E5E2E3]/20 text-xs mt-1">Agregá unidades desde la sección Mi Flota.</p>
+        <p className="text-[#E5E2E3]/45 text-xs mt-1">Agregá unidades desde la sección Mi Flota.</p>
       </div>
     );
   }
@@ -610,7 +610,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
             </h3>
           </div>
           {metrics.totalViews === 0 ? (
-            <p className="text-[#E5E2E3]/20 text-xs text-center py-6">
+            <p className="text-[#E5E2E3]/45 text-xs text-center py-6">
               Las vistas se registrarán cuando los clientes visiten los autos.
             </p>
           ) : (
@@ -622,7 +622,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
                   <div key={v.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#E5E2E3]/20 text-[10px] font-black w-4">{i + 1}</span>
+                        <span className="text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
                         <p className="text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
                           {v.brand} {v.model}
                         </p>
@@ -650,7 +650,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
             </h3>
           </div>
           {metrics.totalLeads === 0 ? (
-            <p className="text-[#E5E2E3]/20 text-xs text-center py-6">
+            <p className="text-[#E5E2E3]/45 text-xs text-center py-6">
               Los leads aparecerán cuando los clientes contacten vía WhatsApp.
             </p>
           ) : (
@@ -662,7 +662,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
                   <div key={v.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#E5E2E3]/20 text-[10px] font-black w-4">{i + 1}</span>
+                        <span className="text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
                         <p className="text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
                           {v.brand} {v.model}
                         </p>
@@ -780,7 +780,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
                 {v.imageUrl
                   ? <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[#E5E2E3]/10 !text-base">directions_car</span>
+                      <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-base">directions_car</span>
                     </div>
                 }
               </div>
@@ -947,7 +947,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                     value={form.brand} readOnly disabled
                     className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm opacity-40 cursor-not-allowed"
                   />
-                  <p className="text-[#E5E2E3]/20 text-[10px] mt-1">La marca no puede modificarse</p>
+                  <p className="text-[#E5E2E3]/45 text-[10px] mt-1">La marca no puede modificarse</p>
                 </>
               ) : (
                 <>
@@ -1179,7 +1179,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                           }}
                           className="text-[#E5E2E3]/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:bg-[#D32F2F]/20 file:text-[#FFB3AC] hover:file:bg-[#D32F2F]/30 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                         />
-                        <p className="text-[#E5E2E3]/20 text-[10px] mt-1">
+                        <p className="text-[#E5E2E3]/45 text-[10px] mt-1">
                           {imageFiles.length > 0
                             ? `${imageFiles.length} archivo${imageFiles.length > 1 ? 's' : ''} seleccionado${imageFiles.length > 1 ? 's' : ''}`
                             : `Hasta ${slots} imagen${slots !== 1 ? 'es' : ''} más (máx. ${MAX} en total)`
@@ -1442,7 +1442,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
         <div className="space-y-3">
           {filtered.length === 0 ? (
             <div className="text-center py-16 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg">
-              <span className="material-symbols-outlined text-5xl text-[#E5E2E3]/10">search_off</span>
+              <span className="material-symbols-outlined text-5xl text-[#E5E2E3]/35">search_off</span>
               <p className="text-[#E5E2E3]/30 mt-3 text-sm">No se encontraron vehículos</p>
             </div>
           ) : (
@@ -1456,7 +1456,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                     <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[#E5E2E3]/10 !text-3xl">
+                      <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-3xl">
                         directions_car
                       </span>
                     </div>
@@ -1495,15 +1495,15 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">visibility</span>
                           {v.viewCount || 0}
                         </span>
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">forum</span>
                           {v.leadCount || 0}
                         </span>
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/25 text-[11px]">
+                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">share</span>
                           {v.shareCount || 0}
                         </span>
@@ -1564,7 +1564,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                 }, [])
                 .map((item, idx) =>
                   item === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="text-[#E5E2E3]/20 px-1 text-sm">…</span>
+                    <span key={`ellipsis-${idx}`} className="text-[#E5E2E3]/45 px-1 text-sm">…</span>
                   ) : (
                     <button
                       key={item}
@@ -1769,7 +1769,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                   </li>
                 ))}
                 {p.notIncluded.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/25 line-through">
+                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/50 line-through">
                     <span className="material-symbols-outlined !text-base">remove_circle</span>
                     {f}
                   </li>
@@ -1857,7 +1857,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
         </div>
       )}
 
-      <p className="text-[#E5E2E3]/20 text-xs">
+      <p className="text-[#E5E2E3]/45 text-xs">
         El pago se procesa de forma segura a través de MercadoPago. Podés cancelar tu suscripción en cualquier momento.
       </p>
     </div>
@@ -1914,7 +1914,7 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
         value={form[k]}
         onChange={set(k)}
         placeholder={placeholder}
-        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm px-4 py-3 text-sm text-[#E5E2E3] placeholder-[#E5E2E3]/20 focus:outline-none focus:border-[#D32F2F]/50 transition-colors"
+        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm px-4 py-3 text-sm text-[#E5E2E3] placeholder-[#E5E2E3]/50 focus:outline-none focus:border-[#D32F2F]/50 transition-colors"
       />
     </div>
   );
@@ -2055,7 +2055,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
           {logoPreview ? (
             <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
           ) : (
-            <span className="material-symbols-outlined text-[#E5E2E3]/20 !text-3xl">garage</span>
+            <span className="material-symbols-outlined text-[#E5E2E3]/45 !text-3xl">garage</span>
           )}
         </div>
         <div>
@@ -2131,7 +2131,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
               placeholder="Contá brevemente quiénes son, su experiencia y lo que los diferencia…"
               className={`${inputCls} resize-none`}
             />
-            <p className="text-[#E5E2E3]/20 text-[10px] mt-1">{form.bio.length}/500 caracteres</p>
+            <p className="text-[#E5E2E3]/45 text-[10px] mt-1">{form.bio.length}/500 caracteres</p>
           </div>
           <div>
             <label className={labelCls}>Horarios de atención</label>
@@ -2320,7 +2320,7 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={() => navigate('/login')}
-            className="text-[#E5E2E3]/20 text-xs hover:text-[#E5E2E3]/50 transition-colors px-4"
+            className="text-[#E5E2E3]/45 text-xs hover:text-[#E5E2E3]/50 transition-colors px-4"
           >
             Cerrar sesión
           </button>

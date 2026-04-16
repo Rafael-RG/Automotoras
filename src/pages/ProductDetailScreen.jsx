@@ -145,7 +145,7 @@ const ProductDetailScreen = () => {
       <div className="bg-[#0E0E0F] min-h-screen text-[#E5E2E3]">
         <TopNavBar />
         <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6">
-          <span className="material-symbols-outlined text-7xl text-[#E5E2E3]/10">
+          <span className="material-symbols-outlined text-7xl text-[#E5E2E3]/35">
             directions_car_off
           </span>
           <p className="text-[#E5E2E3]/40 text-center max-w-sm">{error}</p>
@@ -195,7 +195,7 @@ const ProductDetailScreen = () => {
                         />
                       ) : (
                         <div className="w-full aspect-[21/10] flex items-center justify-center">
-                          <span className="material-symbols-outlined text-[#E5E2E3]/10 !text-8xl">directions_car</span>
+                          <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-8xl">directions_car</span>
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
@@ -345,7 +345,7 @@ const ProductDetailScreen = () => {
                 {dealership.logoUrl ? (
                   <img src={dealership.logoUrl} alt={dealership.name} className="w-full h-full object-cover rounded-xl" />
                 ) : (
-                  <span className="material-symbols-outlined text-[#E5E2E3]/20 !text-3xl">garage</span>
+                  <span className="material-symbols-outlined text-[#E5E2E3]/45 !text-3xl">garage</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -423,7 +423,7 @@ const ProductDetailScreen = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[#E5E2E3]/10 !text-4xl">directions_car</span>
+                        <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-4xl">directions_car</span>
                       </div>
                     )}
                   </div>

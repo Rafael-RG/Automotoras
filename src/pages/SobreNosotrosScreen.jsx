@@ -82,7 +82,7 @@ const SobreNosotrosScreen = () => {
         </div>
         {/* Scroll hint */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-          <span className="material-symbols-outlined text-[#E5E2E3]/20 !text-xl">expand_more</span>
+          <span className="material-symbols-outlined text-[#E5E2E3]/45 !text-xl">expand_more</span>
         </div>
       </section>
 
@@ -185,7 +185,7 @@ const SobreNosotrosScreen = () => {
                 ].map((car) => (
                   <div key={car.name} className="bg-[#0E0E0F] rounded-xl overflow-hidden border border-[#E5E2E3]/5 flex">
                     <div className="w-24 bg-[#E5E2E3]/3 flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-[#E5E2E3]/10 !text-3xl">directions_car</span>
+                      <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-3xl">directions_car</span>
                     </div>
                     <div className="p-3 flex-1 min-w-0">
                       <p className="text-[#E5E2E3]/80 text-sm font-semibold">{car.name}</p>

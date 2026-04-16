@@ -85,7 +85,7 @@ const LoginScreen = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@automotora.com"
-              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors"
+              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors"
             />
           </div>
 
@@ -99,7 +99,7 @@ const LoginScreen = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors"
+                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors"
               />
               <button
                 type="button"
@@ -166,7 +166,7 @@ const LoginScreen = () => {
         </div>
 
         {/* Support */}
-        <p className="text-center text-[#E5E2E3]/20 text-[10px] mt-8">
+        <p className="text-center text-[#E5E2E3]/45 text-[10px] mt-8">
           ¿Problemas para ingresar?{' '}
           <a href="mailto:kiwibyte.studio@gmail.com" className="text-primary hover:underline">
             Contactar soporte

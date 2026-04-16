@@ -36,14 +36,14 @@ const RangeInput = ({ label, minVal, maxVal, onMinChange, onMaxChange, prefix = 
         value={minVal}
         onChange={(e) => onMinChange(e.target.value)}
         placeholder={placeholder[0]}
-        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
+        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50"
       />
       <input
         type="number"
         value={maxVal}
         onChange={(e) => onMaxChange(e.target.value)}
         placeholder={placeholder[1]}
-        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
+        className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50"
       />
     </div>
   </div>
@@ -280,7 +280,7 @@ const InventoryScreen = () => {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent text-[#E5E2E3] text-sm focus:outline-none placeholder:text-[#E5E2E3]/20"
+            className="flex-1 bg-transparent text-[#E5E2E3] text-sm focus:outline-none placeholder:text-[#E5E2E3]/50"
             placeholder="Buscar por marca, modelo, año…"
             type="text"
           />
@@ -431,7 +431,7 @@ const InventoryScreen = () => {
                   value={kmMax}
                   onChange={(e) => setKmMax(e.target.value)}
                   placeholder="Ej: 50000"
-                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
+                  className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50"
                 />
               </div>
 
@@ -469,7 +469,7 @@ const InventoryScreen = () => {
                       value={distanceMax}
                       onChange={(e) => setDistanceMax(e.target.value)}
                       placeholder="Ej: 20 km"
-                      className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20"
+                      className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2 text-[#E5E2E3] text-xs focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50"
                     />
                     {distanceMax && (
                       <p className="text-[10px] text-[#E5E2E3]/30">Hasta {distanceMax} km de distancia</p>
@@ -515,7 +515,7 @@ const InventoryScreen = () => {
 
             {!loading && !error && vehicles.length === 0 && (
               <div className="text-center py-24">
-                <span className="material-symbols-outlined text-6xl text-[#E5E2E3]/10 block mb-4">search_off</span>
+                <span className="material-symbols-outlined text-6xl text-[#E5E2E3]/35 block mb-4">search_off</span>
                 <p className="text-[#E5E2E3]/30 font-bold text-sm">No hay vehículos que coincidan con los filtros.</p>
                 {hasFilters && (
                   <button onClick={clearAll} className="mt-4 text-primary text-xs font-bold uppercase tracking-wider hover:underline">
@@ -619,7 +619,7 @@ const InventoryScreen = () => {
                   value={brandSearch}
                   onChange={(e) => setBrandSearch(e.target.value)}
                   placeholder="Buscar marca..."
-                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20"
+                  className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/50"
                 />
                 {brandSearch && (
                   <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-primary">

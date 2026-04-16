@@ -18,8 +18,8 @@ const Check = ({ children }) => (
 );
 
 const Cross = ({ children }) => (
-  <li className="flex items-start gap-2.5 text-sm text-[#E5E2E3]/25 line-through">
-    <span className="material-symbols-outlined !text-base text-[#E5E2E3]/20 flex-shrink-0 mt-0.5">remove_circle</span>
+  <li className="flex items-start gap-2.5 text-sm text-[#E5E2E3]/50 line-through">
+    <span className="material-symbols-outlined !text-base text-[#E5E2E3]/45 flex-shrink-0 mt-0.5">remove_circle</span>
     {children}
   </li>
 );
@@ -141,7 +141,7 @@ const ContactForm = () => {
             value={form.name}
             onChange={set('name')}
             placeholder="Ej: Carlos García"
-            className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/20 focus:border-[#D32F2F]/50 focus:outline-none transition-colors"
+            className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/50 focus:border-[#D32F2F]/50 focus:outline-none transition-colors"
           />
         </div>
         <div>
@@ -152,7 +152,7 @@ const ContactForm = () => {
             value={form.phone}
             onChange={set('phone')}
             placeholder="Ej: 099 123 456"
-            className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/20 focus:border-[#D32F2F]/50 focus:outline-none transition-colors"
+            className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/50 focus:border-[#D32F2F]/50 focus:outline-none transition-colors"
           />
         </div>
       </div>
@@ -165,7 +165,7 @@ const ContactForm = () => {
           onChange={set('message')}
           rows={4}
           placeholder="Contanos sobre tu automotora o hacenos tu pregunta…"
-          className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/20 focus:border-[#D32F2F]/50 focus:outline-none transition-colors resize-none"
+          className="w-full bg-[#0E0E0F] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm placeholder-[#E5E2E3]/50 focus:border-[#D32F2F]/50 focus:outline-none transition-colors resize-none"
         />
       </div>
       <button
@@ -177,7 +177,7 @@ const ContactForm = () => {
         </svg>
         Enviar consulta por WhatsApp
       </button>
-      <p className="text-[#E5E2E3]/20 text-[10px] text-center">
+      <p className="text-[#E5E2E3]/45 text-[10px] text-center">
         Al enviar, se abrirá WhatsApp con tu mensaje listo. Respondemos en el día.
       </p>
     </form>
@@ -402,7 +402,7 @@ const PaginaAterrizajeScreen = () => {
                 <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$2590</span>
                 <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
               </div>
-              <p className="text-[#E5E2E3]/25 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
+              <p className="text-[#E5E2E3]/50 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>1 sucursal</Check>
                 <Check>Autos ilimitados</Check>
@@ -429,7 +429,7 @@ const PaginaAterrizajeScreen = () => {
                 <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$3990</span>
                 <span className="text-[#E5E2E3]/30 text-sm mb-1.5">/mes</span>
               </div>
-              <p className="text-[#E5E2E3]/25 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
+              <p className="text-[#E5E2E3]/50 text-xs mb-8">Pesos Uruguayos · IVA incluido</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>Sucursales ilimitadas</Check>
                 <Check>Autos ilimitados</Check>
@@ -452,7 +452,7 @@ const PaginaAterrizajeScreen = () => {
               <div className="flex items-end gap-2 mb-2">
                 <span className="font-headline font-black text-3xl text-[#E5E2E3] tracking-tighter">A medida</span>
               </div>
-              <p className="text-[#E5E2E3]/25 text-xs mb-8">Para grupos automotrices y flotas grandes</p>
+              <p className="text-[#E5E2E3]/50 text-xs mb-8">Para grupos automotrices y flotas grandes</p>
               <ul className="space-y-3 flex-1 mb-8">
                 <Check>Todo lo del Plan Pro</Check>
                 <Check>Onboarding personalizado</Check>
@@ -470,7 +470,7 @@ const PaginaAterrizajeScreen = () => {
             </div>
           </div>
 
-          <p className="text-center text-[#E5E2E3]/20 text-xs mt-10">
+          <p className="text-center text-[#E5E2E3]/45 text-xs mt-10">
             Todos los planes incluyen acceso completo al panel · El pago se procesa de forma segura vía MercadoPago
           </p>
         </div>

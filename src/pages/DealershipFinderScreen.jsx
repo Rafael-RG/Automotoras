@@ -97,7 +97,7 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
               value={brandSearch}
               onChange={(e) => setBrandSearch(e.target.value)}
               placeholder="Buscar marca..."
-              className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/20"
+              className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/50"
             />
             {brandSearch && (
               <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-[#D32F2F]">
@@ -383,7 +383,7 @@ const DealershipFinderScreen = () => {
                   ) : (
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full border-2 border-[#2196F3] border-t-transparent animate-spin" />
-                      <span className="text-[#E5E2E3]/20 text-[10px]">Localizando…</span>
+                      <span className="text-[#E5E2E3]/45 text-[10px]">Localizando…</span>
                     </div>
                   )}
                 </div>
@@ -432,7 +432,7 @@ const DealershipFinderScreen = () => {
               </div>
             ) : filteredDealerships.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-[#E5E2E3]/20 text-xs">
+                <p className="text-[#E5E2E3]/45 text-xs">
                   No hay automotoras con {selectedBrand}
                 </p>
               </div>
@@ -459,7 +459,7 @@ const DealershipFinderScreen = () => {
                           {d.logoUrl ? (
                             <img src={d.logoUrl} alt={d.name} className="w-full h-full object-cover rounded-lg" />
                           ) : (
-                            <span className="material-symbols-outlined !text-sm text-[#E5E2E3]/20">garage</span>
+                            <span className="material-symbols-outlined !text-sm text-[#E5E2E3]/45">garage</span>
                           )}
                         </div>
                         <div className="min-w-0">
@@ -580,7 +580,7 @@ const DealershipFinderScreen = () => {
                 {selectedDealership.logoUrl ? (
                   <img src={selectedDealership.logoUrl} alt={selectedDealership.name} className="w-full h-full object-cover rounded-xl" />
                 ) : (
-                  <span className="material-symbols-outlined text-[#E5E2E3]/20">garage</span>
+                  <span className="material-symbols-outlined text-[#E5E2E3]/45">garage</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">

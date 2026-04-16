@@ -126,7 +126,7 @@ const RegisterScreen = () => {
               onChange={handleChange}
               disabled={loading}
               placeholder="Ej: Automotora San José"
-              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -142,7 +142,7 @@ const RegisterScreen = () => {
               onChange={handleChange}
               disabled={loading}
               placeholder="tu@automotora.com"
-              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -158,7 +158,7 @@ const RegisterScreen = () => {
               onChange={handleChange}
               disabled={loading}
               placeholder="+598 99 000 000"
-              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -175,7 +175,7 @@ const RegisterScreen = () => {
                 onChange={handleChange}
                 disabled={loading}
                 placeholder="Mínimo 6 caracteres"
-                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               />
               <button
                 type="button"
@@ -202,7 +202,7 @@ const RegisterScreen = () => {
                 onChange={handleChange}
                 disabled={loading}
                 placeholder="Repetí tu contraseña"
-                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-[#1C1B1F] border border-[#353436] rounded-sm px-4 py-3 pr-12 text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               />
               <button
                 type="button"
@@ -246,7 +246,7 @@ const RegisterScreen = () => {
           </button>
         </div>
 
-        <p className="text-center text-[#E5E2E3]/20 text-[10px] mt-6">
+        <p className="text-center text-[#E5E2E3]/45 text-[10px] mt-6">
           ¿Problemas?{' '}
           <a href="mailto:kiwibyte.studio@gmail.com" className="text-primary hover:underline">
             Contactar soporte
