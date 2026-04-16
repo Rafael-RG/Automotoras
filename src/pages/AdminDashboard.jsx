@@ -1622,7 +1622,7 @@ const PLANS = [
     price: '$3990',
     period: '/mes',
     currency: 'UYU',
-    features: ['Sucursales ilimitadas', 'Autos ilimitados', 'Panel de métricas', 'Soporte prioritario', 'Gestión centralizada'],
+    features: ['Hasta 10 sucursales', 'Autos ilimitados', 'Panel de métricas', 'Soporte prioritario', 'Gestión centralizada'],
     notIncluded: [],
     highlight: true,
   },
@@ -1866,6 +1866,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
 
 // ─── Sucursales Tab ───────────────────────────────────────────────────────────
 const SucursalesTab = ({ dealerships, onCreated }) => {
+  const MAX_PRO_DEALERSHIPS = 10;
   const EMPTY = { name: '', address: '', city: '', country: '', phone: '', email: '', latitude: '', longitude: '' };
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -1945,6 +1946,13 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
       </div>
 
       {/* Formulario nueva sucursal */}
+      {dealerships.length >= MAX_PRO_DEALERSHIPS ? (
+        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8 flex flex-col items-center gap-3 text-center">
+          <span className="material-symbols-outlined !text-4xl text-[#D32F2F]/50">store_off</span>
+          <p className="text-[#E5E2E3] font-bold">Límite alcanzado</p>
+          <p className="text-[#E5E2E3]/40 text-sm">El Plan Pro permite hasta {MAX_PRO_DEALERSHIPS} sucursales. Eliminá una para poder agregar otra.</p>
+        </div>
+      ) : (
       <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8">
         <h2 className="text-lg font-headline font-bold text-[#E5E2E3] tracking-tight mb-6">+ Nueva Sucursal</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -1980,6 +1988,7 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
           </button>
         </form>
       </div>
+      )}
     </div>
   );
 };
