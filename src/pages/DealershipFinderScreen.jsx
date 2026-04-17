@@ -8,20 +8,16 @@ import 'leaflet/dist/leaflet.css';
 import TopNavBar from '../components/TopNavBar';
 import { getDealerships, getVehicles } from '../services/api';
 
+import mapPointImg from '../assets/MapPoint.png';
+
 // ─── Custom map marker ────────────────────────────────────────────────────────
 const createPin = (active = false) =>
   L.divIcon({
     className: '',
-    html: `<svg width="30" height="38" viewBox="0 0 30 38" xmlns="http://www.w3.org/2000/svg">
-      <path d="M15 0C6.716 0 0 6.716 0 15c0 5.083 2.568 9.568 6.486 12.283L15 38l8.514-10.717C27.432 24.568 30 20.083 30 15 30 6.716 23.284 0 15 0z"
-        fill="${active ? '#D32F2F' : '#1C1C1E'}"
-        stroke="${active ? '#FF5252' : '#555'}"
-        stroke-width="1.5"/>
-      <circle cx="15" cy="15" r="6" fill="white"/>
-    </svg>`,
-    iconSize: [30, 38],
-    iconAnchor: [15, 38],
-    popupAnchor: [0, -40],
+    html: `<img src="${mapPointImg}" style="width:40px;height:40px;mix-blend-mode:multiply;${active ? 'filter:drop-shadow(0 0 6px rgba(211,47,47,0.8)) brightness(1.1);transform:scale(1.15);' : 'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));'}" />`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -44],
   });
 
 // ─── Haversine distance (km) ─────────────────────────────────────────────────

@@ -45,6 +45,17 @@
   .map-overlay { 
     background: radial-gradient(circle, transparent 20%, #0b0e11 100%); 
   }
+
+  .map-pin {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    transition: filter 0.15s, transform 0.15s;
+  }
+
+  .map-pin-active {
+    filter: drop-shadow(0 0 8px rgba(211,47,47,0.7)) brightness(1.15);
+    transform: scale(1.15);
+    transition: filter 0.15s, transform 0.15s;
+  }
   
   .apex-gradient-text {
     background: linear-gradient(135deg, #FFB3AC 0%, #D32F2F 100%);
