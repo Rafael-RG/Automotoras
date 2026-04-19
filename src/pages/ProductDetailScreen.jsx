@@ -250,7 +250,8 @@ const ProductDetailScreen = () => {
                 <h1 className="text-3xl md:text-4xl font-headline font-black tracking-tighter leading-none mb-2">
                   {vehicle.model}
                 </h1>
-                <p className="text-[#E5E2E3]/30 text-sm mb-6">{vehicle.year}</p>
+                <p className="text-[#E5E2E3]/30 text-sm mb-2">{vehicle.year}</p>
+                <p className="text-[#E5E2E3]/25 text-[10px] font-mono tracking-wider mb-6">Ref: #{vehicle.id.slice(0, 8).toUpperCase()}</p>
 
                 <div className="flex items-baseline gap-2 mb-8">
                   <span className="text-3xl md:text-4xl font-headline font-black text-[#D32F2F]">
@@ -322,6 +323,7 @@ const ProductDetailScreen = () => {
             <Spec icon="local_gas_station" label="Combustible" value={vehicle.fuel} />
             <Spec icon="speed" label="Kilometraje" value={`${Number(vehicle.mileage).toLocaleString()} km`} />
             <Spec icon="calendar_month" label="Año" value={String(vehicle.year)} />
+            <Spec icon="tag" label="Referencia" value={`#${vehicle.id.slice(0, 8).toUpperCase()}`} />
           </div>
 
           {vehicle.description && (

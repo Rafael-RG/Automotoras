@@ -458,7 +458,6 @@ const PaginaAterrizajeScreen = () => {
                 <Check>Onboarding personalizado</Check>
                 <Check>Capacitación para el equipo</Check>
                 <Check>Gestión de cuentas dedicada</Check>
-                <Check>Facturación empresarial</Check>
                 <Check>Precio negociado por volumen</Check>
               </ul>
               <a

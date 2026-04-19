@@ -1482,6 +1482,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         </span>
                       </div>
                       <div className="flex gap-3 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">
+                        <span className="font-mono text-[#D32F2F]/70">#{v.id.slice(0, 8).toUpperCase()}</span>
                         <span>{v.year}</span>
                         <span>{Number(v.mileage).toLocaleString()} km</span>
                         <span className="hidden sm:inline">{v.transmission}</span>
