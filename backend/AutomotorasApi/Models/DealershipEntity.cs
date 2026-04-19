@@ -25,7 +25,7 @@ public class DealershipEntity : ITableEntity
     public double Longitude { get; set; }
 
     // Subscription
-    public string Plan { get; set; } = "basic";            // "basic" | "pro"
+    public string Plan { get; set; } = "basic";            // "basic" | "plus"
     public string SubscriptionId { get; set; } = string.Empty;
     public string SubscriptionStatus { get; set; } = string.Empty; // "authorized" | "paused" | "cancelled" | "pending"
 

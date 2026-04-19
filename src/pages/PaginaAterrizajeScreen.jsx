@@ -564,7 +564,7 @@ const PaginaAterrizajeScreen = () => {
             />
             <FaqItem
               question="¿Puedo tener más de una sucursal?"
-              answer="Con el Plan Pro podés agregar sucursales ilimitadas y gestionarlas desde un solo panel. Con el Plan Básico podés operar una sucursal."
+              answer="Con el Plan Plus podés agregar sucursales ilimitadas y gestionarlas desde un solo panel. Con el Plan Básico podés operar una sucursal."
             />
           </div>
         </div>

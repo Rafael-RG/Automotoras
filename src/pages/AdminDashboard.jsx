@@ -1617,8 +1617,8 @@ const PLANS = [
     notIncluded: ['Múltiples sucursales'],
   },
   {
-    id: 'pro',
-    name: 'Plan Pro',
+    id: 'plus',
+    name: 'Plan Plus',
     price: '$3990',
     period: '/mes',
     currency: 'UYU',
@@ -1950,7 +1950,7 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
         <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8 flex flex-col items-center gap-3 text-center">
           <span className="material-symbols-outlined !text-4xl text-[#D32F2F]/50">store_off</span>
           <p className="text-[#E5E2E3] font-bold">Límite alcanzado</p>
-          <p className="text-[#E5E2E3]/40 text-sm">El Plan Pro permite hasta {MAX_PRO_DEALERSHIPS} sucursales. Eliminá una para poder agregar otra.</p>
+          <p className="text-[#E5E2E3]/40 text-sm">El Plan Plus permite hasta {MAX_PRO_DEALERSHIPS} sucursales. Eliminá una para poder agregar otra.</p>
         </div>
       ) : (
       <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8">
@@ -2379,13 +2379,13 @@ const AdminDashboard = () => {
               <FleetTab vehicles={vehicles} dealershipId={selectedId} dealerships={dealerships} onRefresh={loadVehicles} />
             )}
             {activeTab === 'sucursales' && (
-              currentDealership?.plan === 'pro' && currentDealership?.subscriptionStatus === 'authorized'
+              currentDealership?.plan === 'plus' && currentDealership?.subscriptionStatus === 'authorized'
                 ? <SucursalesTab dealerships={dealerships} onCreated={loadDealerships} />
                 : (
                   <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
                     <span className="material-symbols-outlined !text-5xl text-[#D32F2F]/40">lock</span>
-                    <h2 className="text-[#E5E2E3] font-headline font-black text-xl">Plan Pro requerido</h2>
-                    <p className="text-[#E5E2E3]/40 text-sm max-w-xs">La gestión de múltiples sucursales está disponible en el Plan Pro.</p>
+                    <h2 className="text-[#E5E2E3] font-headline font-black text-xl">Plan Plus requerido</h2>
+                    <p className="text-[#E5E2E3]/40 text-sm max-w-xs">La gestión de múltiples sucursales está disponible en el Plan Plus.</p>
                     <button
                       onClick={() => setActiveTab('suscripcion')}
                       className="bg-[#D32F2F] text-white px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:bg-[#B71C1C] transition-colors"

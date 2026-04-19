@@ -15,7 +15,7 @@ public class SubscriptionService
     {
         ["test"]  = ("Plan Test RedAutos – prueba", 15m),
         ["basic"] = ("Plan Básico RedAutos – 1 sucursal", 2590m),
-        ["pro"]   = ("Plan Pro RedAutos – Hasta 10 sucursales", 3990m),
+        ["plus"]  = ("Plan Plus RedAutos – Hasta 10 sucursales", 3990m),
     };
 
     public SubscriptionService(IConfiguration config)
