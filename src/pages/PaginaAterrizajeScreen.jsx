@@ -424,7 +424,7 @@ const PaginaAterrizajeScreen = () => {
               <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D32F2F] text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-[#D32F2F]/30">
                 Más popular
               </span>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D32F2F]/70 mb-4">Plan Pro</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D32F2F]/70 mb-4">Plan Plus</p>
               <div className="flex items-end gap-2 mb-2">
                 <span className="font-headline font-black text-5xl text-[#E5E2E3] tracking-tighter">$3990</span>
                 <span className="text-[#E5E2E3]/50 text-sm mb-1.5">/mes</span>
@@ -454,7 +454,7 @@ const PaginaAterrizajeScreen = () => {
               </div>
               <p className="text-[#E5E2E3]/65 text-xs mb-8">Para grupos automotrices y flotas grandes</p>
               <ul className="space-y-3 flex-1 mb-8">
-                <Check>Todo lo del Plan Pro</Check>
+                <Check>Todo lo del Plan Plus</Check>
                 <Check>Onboarding personalizado</Check>
                 <Check>Capacitación para el equipo</Check>
                 <Check>Gestión de cuentas dedicada</Check>
