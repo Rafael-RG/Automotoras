@@ -2,6 +2,7 @@ namespace AutomotorasApi.Models;
 
 // --- Response DTOs ---
 
+/// <summary>DTO público — no incluye matrícula ni padrón.</summary>
 public record VehicleDto(
     string Id,
     string Brand,
@@ -22,7 +23,40 @@ public record VehicleDto(
     int ShareCount,
     string CreatedAt,
     string SoldAt,
-    bool IsSold
+    bool IsSold,
+    string Color,
+    int Doors,
+    string Engine
+);
+
+/// <summary>DTO extendido para la automotora — incluye campos privados.</summary>
+public record VehicleDealershipDto(
+    string Id,
+    string Brand,
+    string Model,
+    int Year,
+    double Price,
+    int Mileage,
+    string Transmission,
+    string Fuel,
+    string BodyType,
+    string DealershipId,
+    string ImageUrl,
+    string[] ImageUrls,
+    string Description,
+    bool IsAvailable,
+    int ViewCount,
+    int LeadCount,
+    int ShareCount,
+    string CreatedAt,
+    string SoldAt,
+    bool IsSold,
+    string Color,
+    int Doors,
+    string Engine,
+    // Campos privados
+    string Matricula,
+    string Padron
 );
 
 public record DealershipDto(
@@ -64,7 +98,14 @@ public record CreateVehicleRequest(
     string ImageUrl = "",
     bool IsAvailable = true,
     string[]? ImageUrls = null,
-    bool IsSold = false
+    bool IsSold = false,
+    // Opcionales públicos
+    string Color = "",
+    int Doors = 0,
+    string Engine = "",
+    // Privados (solo automotora)
+    string Matricula = "",
+    string Padron = ""
 );
 
 public record CreateDealershipRequest(

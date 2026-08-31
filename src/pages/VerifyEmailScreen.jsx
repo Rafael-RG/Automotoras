@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 import { verifyEmail } from '../services/api';
 
 const VerifyEmailScreen = () => {

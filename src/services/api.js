@@ -38,6 +38,9 @@ export const deleteVehicle = (brand, id) =>
     method: 'DELETE',
   }).then(handleResponse);
 
+export const getDealershipVehicles = (dealershipId) =>
+  fetch(`${BASE_URL}/dealership/${encodeURIComponent(dealershipId)}/vehicles`).then(handleResponse);
+
 export const trackVehicleEvent = (brand, id, type) =>
   fetch(`${BASE_URL}/vehicles/${encodeURIComponent(brand)}/${id}/event`, {
     method: 'POST',

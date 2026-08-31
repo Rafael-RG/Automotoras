@@ -1,5 +1,5 @@
 import React from 'react';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 
 const PagoExitosoScreen = () => {
   const adminUrl = `${window.location.origin}/admin`;

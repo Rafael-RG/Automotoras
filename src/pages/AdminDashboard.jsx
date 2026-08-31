@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
@@ -35,8 +35,8 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
       <div className="rounded-lg overflow-hidden border border-[#E5E2E3]/10" style={{height: 260}}>
         <MapContainer center={center} zoom={hasPin ? 15 : 12} style={{height:'100%',width:'100%'}} key={`${lat},${lng}`}>
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; OpenStreetMap &copy; CARTO'
+            url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=cb1_2oah_1_a15a9338220f91742b854dcb"
+            attribution='&copy; OpenStreetMap contributors &copy; CARTO'
           />
           <ClickHandler onPick={onChange} />
           {hasPin && <Marker position={[lat, lng]} icon={redIcon} />}
@@ -61,6 +61,10 @@ const EMPTY_VEHICLE = {
   brand: '', model: '', year: new Date().getFullYear(), price: '',
   mileage: 0, transmission: 'Automática', fuel: 'Gasolina', bodyType: 'Sedán',
   description: '', isAvailable: true, isSold: false,
+  // Opcionales públicos
+  color: '', doors: '', engine: '',
+  // Privados (solo automotora)
+  matricula: '', padron: '',
 };
 
 // ─── Dealership Selector ──────────────────────────────────────────────────────
@@ -832,7 +836,10 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
       ? {
           brand: vehicle.brand, model: vehicle.model, year: vehicle.year,
           price: vehicle.price, mileage: vehicle.mileage, transmission: vehicle.transmission,
-          fuel: vehicle.fuel, bodyType: vehicle.bodyType || 'Sedán', description: vehicle.description, isAvailable: vehicle.isAvailable, isSold: vehicle.isSold || false,
+          fuel: vehicle.fuel, bodyType: vehicle.bodyType || 'Sedán', description: vehicle.description,
+          isAvailable: vehicle.isAvailable, isSold: vehicle.isSold || false,
+          color: vehicle.color || '', doors: vehicle.doors || '', engine: vehicle.engine || '',
+          matricula: vehicle.matricula || '', padron: vehicle.padron || '',
         }
       : { ...EMPTY_VEHICLE }
   );
@@ -876,6 +883,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
         year: Number.parseInt(form.year, 10),
         price: Number.parseFloat(form.price),
         mileage: Number.parseInt(form.mileage, 10),
+        doors: form.doors !== '' ? Number.parseInt(form.doors, 10) : 0,
         dealershipId: selectedDealershipId,
       };
 
@@ -1111,6 +1119,55 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               placeholder="Descripción del vehículo..."
               className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none resize-none"
             />
+          </div>
+
+          {/* Datos opcionales públicos */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Color</label>
+              <input
+                value={form.color} onChange={set('color')} placeholder="Ej: Rojo"
+                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Puertas</label>
+              <input
+                type="number" value={form.doors} onChange={set('doors')} placeholder="4" min="1" max="8"
+                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Motor</label>
+              <input
+                value={form.engine} onChange={set('engine')} placeholder="Ej: 2.0L Turbo"
+                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Datos privados — solo visibles para la automotora */}
+          <div className="border border-[#E5E2E3]/5 rounded-xl p-4 bg-[#0E0E0F]/60">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/25 mb-3 flex items-center gap-2">
+              <span className="material-symbols-outlined !text-sm">lock</span>
+              Datos internos — no visibles al público
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Matrícula</label>
+                <input
+                  value={form.matricula} onChange={set('matricula')} placeholder="Ej: ABC 1234"
+                  className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Padrón</label>
+                <input
+                  value={form.padron} onChange={set('padron')} placeholder="Nro. de padrón"
+                  className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
+                />
+              </div>
+            </div>
           </div>
           {/* Existing images */}
           {isEdit && existingUrls.length > 0 && (

@@ -47,40 +47,58 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
         var seedVehicles = new[]
         {
             new CreateVehicleRequest(
-                "Porsche", "911 Carrera S", 2022, 132500, 8400, "PDK 8-Speed", "Gasoline",
-                apex.RowKey,
-                "Porsche 911 Carrera S en estado impecable. Un ícono de la ingeniería alemana.",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuCOMbAZQgMf0QYqRi-TWzuu-0S06hRccKupQavtyC1E_61NdVLcUlGHNDjej0783zwcy3taLC17vUtumi7XRaKJsG-UL5fbVuXB1I7uIuY-zOglAhMKFZpabKWw-W2A2ipVggA07g1Pvnp2gynlt9Y9YK4N0DGA5Gq2x-OEli5w3p_cq2AktcA0H4vNsEGw16rw8pWr3rN6Qe5HM3WsViRLHXWiCwWC9v8LVC0bKvHBxDqb-nFi-zSHjc5cYTkuZQ9ewmrseIgGaPg"),
+                Brand: "Porsche", Model: "911 Carrera S", Year: 2022, Price: 132500, Mileage: 8400,
+                Transmission: "PDK 8-Speed", Fuel: "Gasoline", BodyType: "Coupé",
+                DealershipId: apex.RowKey,
+                Description: "Porsche 911 Carrera S en estado impecable. Un ícono de la ingeniería alemana.",
+                ImageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCOMbAZQgMf0QYqRi-TWzuu-0S06hRccKupQavtyC1E_61NdVLcUlGHNDjej0783zwcy3taLC17vUtumi7XRaKJsG-UL5fbVuXB1I7uIuY-zOglAhMKFZpabKWw-W2A2ipVggA07g1Pvnp2gynlt9Y9YK4N0DGA5Gq2x-OEli5w3p_cq2AktcA0H4vNsEGw16rw8pWr3rN6Qe5HM3WsViRLHXWiCwWC9v8LVC0bKvHBxDqb-nFi-zSHjc5cYTkuZQ9ewmrseIgGaPg",
+                Color: "Plata GT", Doors: 2, Engine: "3.0L 450 CV Biturbo",
+                Matricula: "POR-001-STU", Padron: "PAD-2022-9110"),
 
             new CreateVehicleRequest(
-                "Mercedes-Benz", "AMG GT 63 S", 2023, 158900, 1200, "Automatic", "V8 Biturbo",
-                luxury.RowKey,
-                "El AMG GT 63 S combina lujo y rendimiento extremo. Solo 1.200 km.",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuC4yyetjeKOHFljyzV3v-YtnorbPOxvXE_8cCfxXVZKsF_BlnPxjPYDlGXyutOEIi0hPwAV8ay_g3Cfu93mjjcNZ4yy9WS5ul38gf9beZBQ-62BEcYV1cbmUHD2nBaD0J1JKWtNhwOPeMy5kVNy2LLb1ci2qoZs8Tf6fLggseIDEPtN9haQ8Q5Y-jXCQwV7n3nE0z0mXErlTrffu6gORnvGnA5InZYoUbUVFmdtAeIEEOwdlvHXROVZjfx_MdRQ7XckENojZHghklE"),
+                Brand: "Mercedes-Benz", Model: "AMG GT 63 S", Year: 2023, Price: 158900, Mileage: 1200,
+                Transmission: "Automático 9G-Tronic", Fuel: "Nafta", BodyType: "Sedán",
+                DealershipId: luxury.RowKey,
+                Description: "El AMG GT 63 S combina lujo y rendimiento extremo. Solo 1.200 km.",
+                ImageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuC4yyetjeKOHFljyzV3v-YtnorbPOxvXE_8cCfxXVZKsF_BlnPxjPYDlGXyutOEIi0hPwAV8ay_g3Cfu93mjjcNZ4yy9WS5ul38gf9beZBQ-62BEcYV1cbmUHD2nBaD0J1JKWtNhwOPeMy5kVNy2LLb1ci2qoZs8Tf6fLggseIDEPtN9haQ8Q5Y-jXCQwV7n3nE0z0mXErlTrffu6gORnvGnA5InZYoUbUVFmdtAeIEEOwdlvHXROVZjfx_MdRQ7XckENojZHghklE",
+                Color: "Negro Obsidiana", Doors: 4, Engine: "4.0L V8 Biturbo 639 CV",
+                Matricula: "AMG-063-MAD", Padron: "PAD-2023-6300"),
 
             new CreateVehicleRequest(
-                "Porsche", "911 GT3 RS", 2023, 245000, 500, "PDK 7-Speed", "Gasoline",
-                apex.RowKey,
-                "El 911 GT3 RS es la versión más extrema de la calle. Listo para pista.",
-                "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop"),
+                Brand: "Porsche", Model: "911 GT3 RS", Year: 2023, Price: 245000, Mileage: 500,
+                Transmission: "PDK 7-Speed", Fuel: "Gasoline", BodyType: "Coupé",
+                DealershipId: apex.RowKey,
+                Description: "El 911 GT3 RS es la versión más extrema de la calle. Listo para pista.",
+                ImageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop",
+                Color: "Blanco Carrara", Doors: 2, Engine: "4.0L 525 CV Atmosférico",
+                Matricula: "GT3-RS-STU", Padron: "PAD-2023-9113"),
 
             new CreateVehicleRequest(
-                "Chevrolet", "Corvette Z06", 2023, 115000, 2100, "DCT 8-Speed", "V8 LT6",
-                luxury.RowKey,
-                "El Corvette Z06 con motor V8 LT6 de 670 CV. Pura emoción americana.",
-                "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop"),
+                Brand: "Chevrolet", Model: "Corvette Z06", Year: 2023, Price: 115000, Mileage: 2100,
+                Transmission: "DCT 8-Speed", Fuel: "Nafta", BodyType: "Coupé",
+                DealershipId: luxury.RowKey,
+                Description: "El Corvette Z06 con motor V8 LT6 de 670 CV. Pura emoción americana.",
+                ImageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop",
+                Color: "Rojo Torch", Doors: 2, Engine: "5.5L V8 LT6 670 CV",
+                Matricula: "CVT-Z06-MAD", Padron: "PAD-2023-Z060"),
 
             new CreateVehicleRequest(
-                "BMW", "M4 Competition", 2022, 98500, 12000, "xDrive M-Steptronic", "I6 Twin Turbo",
-                luxury.RowKey,
-                "BMW M4 Competition xDrive, la berlina deportiva definitiva con tracción integral.",
-                "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=2070&auto=format&fit=crop"),
+                Brand: "BMW", Model: "M4 Competition", Year: 2022, Price: 98500, Mileage: 12000,
+                Transmission: "xDrive M-Steptronic", Fuel: "Nafta", BodyType: "Coupé",
+                DealershipId: luxury.RowKey,
+                Description: "BMW M4 Competition xDrive, la berlina deportiva definitiva con tracción integral.",
+                ImageUrl: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=2070&auto=format&fit=crop",
+                Color: "Azul Portimao", Doors: 2, Engine: "3.0L I6 Twin Turbo 530 CV",
+                Matricula: "BMW-M4-MAD", Padron: "PAD-2022-M400"),
 
             new CreateVehicleRequest(
-                "Audi", "RS e-tron GT", 2024, 142200, 0, "Single-Speed", "Electric",
-                apex.RowKey,
-                "El Audi RS e-tron GT es el futuro del rendimiento. 0 km, entrega inmediata.",
-                "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070&auto=format&fit=crop"),
+                Brand: "Audi", Model: "RS e-tron GT", Year: 2024, Price: 142200, Mileage: 0,
+                Transmission: "Single-Speed", Fuel: "Eléctrico", BodyType: "Sedán",
+                DealershipId: apex.RowKey,
+                Description: "El Audi RS e-tron GT es el futuro del rendimiento. 0 km, entrega inmediata.",
+                ImageUrl: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070&auto=format&fit=crop",
+                Color: "Gris Daytona", Doors: 4, Engine: "Dual Motor 646 CV",
+                Matricula: "AUD-RSE-STU", Padron: "PAD-2024-RSE0"),
         };
 
         foreach (var v in seedVehicles)

@@ -68,7 +68,12 @@ public class VehicleStorageService
             IsAvailable = request.IsAvailable,
             IsSold = request.IsSold,
             SoldAt = request.IsSold ? DateTime.UtcNow.ToString("yyyy-MM-dd") : string.Empty,
-            CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd")
+            CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+            Color = request.Color,
+            Doors = request.Doors,
+            Engine = request.Engine,
+            Matricula = request.Matricula,
+            Padron = request.Padron
         };
 
         await _tableClient.AddEntityAsync(entity);
@@ -90,6 +95,11 @@ public class VehicleStorageService
         existing.BodyType = request.BodyType;
         existing.DealershipId = request.DealershipId;
         existing.Description = request.Description;
+        existing.Color = request.Color;
+        existing.Doors = request.Doors;
+        existing.Engine = request.Engine;
+        existing.Matricula = request.Matricula;
+        existing.Padron = request.Padron;
 
         // Sold: mark date when first sold; clear when un-sold
         if (request.IsSold && !existing.IsSold)
@@ -178,7 +188,23 @@ public class VehicleStorageService
             urls.Length > 0 ? urls[0] : string.Empty, urls,
             e.Description, e.IsAvailable,
             e.ViewCount, e.LeadCount, e.ShareCount,
-            e.CreatedAt, e.SoldAt, e.IsSold);
+            e.CreatedAt, e.SoldAt, e.IsSold,
+            e.Color, e.Doors, e.Engine);
+    }
+
+    /// <summary>DTO completo para endpoints de la automotora — incluye matrícula y padrón.</summary>
+    public VehicleDealershipDto ToDealershipDto(VehicleEntity e)
+    {
+        var urls = ParseImageUrls(e);
+        return new VehicleDealershipDto(
+            e.RowKey, e.Brand, e.Model, e.Year, e.Price, e.Mileage,
+            e.Transmission, e.Fuel, e.BodyType, e.DealershipId,
+            urls.Length > 0 ? urls[0] : string.Empty, urls,
+            e.Description, e.IsAvailable,
+            e.ViewCount, e.LeadCount, e.ShareCount,
+            e.CreatedAt, e.SoldAt, e.IsSold,
+            e.Color, e.Doors, e.Engine,
+            e.Matricula, e.Padron);
     }
 
     private static string[] ParseImageUrls(VehicleEntity e)

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 import { resetPassword } from '../services/api';
 
 const ResetPasswordScreen = () => {

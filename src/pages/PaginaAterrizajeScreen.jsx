@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 import useSEO from '../hooks/useSEO';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

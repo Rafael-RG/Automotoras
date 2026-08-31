@@ -22,6 +22,17 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         return new OkObjectResult(vehicles.Select(vehicleService.ToDto));
     }
 
+    // GET /api/dealership/{dealershipId}/vehicles  — devuelve datos completos incluyendo matrícula y padrón
+    [Function("GetDealershipVehicles")]
+    public async Task<IActionResult> GetDealershipVehicles(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dealership/{dealershipId}/vehicles")] HttpRequest req,
+        string dealershipId)
+    {
+        var all = await vehicleService.GetAllAsync();
+        var filtered = all.Where(v => v.DealershipId == dealershipId);
+        return new OkObjectResult(filtered.Select(vehicleService.ToDealershipDto));
+    }
+
     // GET /api/vehicles/{brand}/{id}
     [Function("GetVehicleById")]
     public async Task<IActionResult> GetVehicleById(

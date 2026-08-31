@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 
 const TopNavBar = () => {
   const location = useLocation();
@@ -17,11 +17,11 @@ const TopNavBar = () => {
     <header className="fixed top-0 w-full z-50 bg-[#131314]/90 backdrop-blur-xl shadow-[0_20px_50px_rgba(211,47,47,0.05)] overflow-visible">
       <div className="flex justify-between items-center px-4 md:px-12 py-3 w-full max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-6 md:gap-16">
-          <Link to="/" className="relative flex items-center group h-14 w-32 md:w-40">
+          <a href="/" className="relative flex items-center group h-14 w-32 md:w-40">
             {logoSrc && (
               <img src={logoSrc} alt="RedAutos" className="absolute top-1/2 left-0 -translate-y-1/2 h-24 md:h-28 w-auto object-contain transition-opacity duration-300 group-hover:opacity-80 z-10" />
             )}
-          </Link>
+          </a>
           <nav className="hidden md:flex gap-10">
             <Link to="/" className={navLinkClass('/')}>Garage</Link>
             <Link to="/dealerships" className={navLinkClass('/dealerships')}>Buscar Automotoras</Link>

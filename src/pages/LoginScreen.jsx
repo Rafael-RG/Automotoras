@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoSrc from '../assets/Logo.png';
+import logoSrc from '../assets/Logo.svg';
 import { loginDealership } from '../services/api';
 
 const LoginScreen = () => {

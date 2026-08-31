@@ -62,7 +62,7 @@ const ProductDetailScreen = () => {
           all.filter((x) => x.dealershipId === v.dealershipId && x.id !== v.id).slice(0, 4)
         );
       } catch {
-        setError('No se pudo cargar el vehículo. Verifica que la API esté corriendo.');
+        setError('No pudimos cargar la información de este vehículo. Por favor intentá de nuevo en unos momentos.');
       } finally {
         setLoading(false);
       }
@@ -323,6 +323,9 @@ const ProductDetailScreen = () => {
             <Spec icon="local_gas_station" label="Combustible" value={vehicle.fuel} />
             <Spec icon="speed" label="Kilometraje" value={`${Number(vehicle.mileage).toLocaleString()} km`} />
             <Spec icon="calendar_month" label="Año" value={String(vehicle.year)} />
+            {vehicle.color && <Spec icon="palette" label="Color" value={vehicle.color} />}
+            {vehicle.doors > 0 && <Spec icon="sensor_door" label="Puertas" value={String(vehicle.doors)} />}
+            {vehicle.engine && <Spec icon="settings" label="Motor" value={vehicle.engine} />}
             <Spec icon="tag" label="Referencia" value={`#${vehicle.id.slice(0, 8).toUpperCase()}`} />
           </div>
 

@@ -33,4 +33,13 @@ public class VehicleEntity : ITableEntity
     public string CreatedAt { get; set; } = string.Empty;
     public string SoldAt { get; set; } = string.Empty;
     public bool IsSold { get; set; }
+
+    // Campos opcionales públicos
+    public string Color { get; set; } = string.Empty;
+    public int Doors { get; set; } = 0;
+    public string Engine { get; set; } = string.Empty; // ej: "2.0L Turbo"
+
+    // Campos privados (solo visibles para la automotora)
+    public string Matricula { get; set; } = string.Empty;
+    public string Padron { get; set; } = string.Empty;
 }

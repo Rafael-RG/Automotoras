@@ -134,7 +134,7 @@ const InventoryScreen = () => {
         dealerships.forEach(d => { map[d.id] = d; });
         setDealershipMap(map);
       })
-      .catch(() => setError('No se pudo conectar con el servidor. Verifica que la API esté corriendo.'))
+      .catch(() => setError('Ocurrió un problema al cargar el inventario. Por favor intentá de nuevo en unos momentos.'))
       .finally(() => setLoading(false));
   }, []);
 
