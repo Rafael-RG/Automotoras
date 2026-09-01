@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import InventoryScreen from './pages/InventoryScreen';
 import DealershipFinderScreen from './pages/DealershipFinderScreen';
 import DealershipProfileScreen from './pages/DealershipProfileScreen';
@@ -17,6 +18,7 @@ import ResetPasswordScreen from './pages/ResetPasswordScreen';
 
 function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<InventoryScreen />} />
@@ -39,6 +41,7 @@ function App() {
         <Route path="/bespoke" element={<InventoryScreen />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

@@ -2,9 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme CSS Variables ─────────────────────────────────────────────────── */
+:root {
+  --bg: #F5F4F4;
+  --bg-card: #FFFFFF;
+  --bg-input: #EBEBEB;
+  --fg: #141414;
+  --fg-muted: rgba(20, 20, 20, 0.55);
+  --border: #D8D8D8;
+  --frame-low: #FFFFFF;
+  --frame-mid: #F0EEEE;
+  --frame-high: #E6E4E4;
+  --shadow-frame: rgba(0,0,0,0.12);
+}
+
+html.dark {
+  --bg: #0E0E0F;
+  --bg-card: #131314;
+  --bg-input: #1C1B1F;
+  --fg: #E5E2E3;
+  --fg-muted: rgba(229, 226, 227, 0.55);
+  --border: #353436;
+  --frame-low: #131314;
+  --frame-mid: #1C1B1F;
+  --frame-high: #2B2930;
+  --shadow-frame: rgba(0,0,0,0.45);
+}
+
 @layer base {
   body {
-    @apply bg-[#0E0E0F] font-body text-on-surface antialiased overflow-x-hidden;
+    @apply font-body antialiased overflow-x-hidden;
+    background-color: var(--bg);
+    color: var(--fg);
   }
   
   ::selection {

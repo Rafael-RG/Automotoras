@@ -76,24 +76,26 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
       onClick={onClose}
     >
       <div
-        className="bg-[#131314] border border-[#353436] rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl"
+        className="rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl border"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#353436]">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Seleccionar Marca</p>
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: 'var(--fg)' }}>Seleccionar Marca</p>
           <button onClick={onClose} className="text-[#E5E2E3]/40 hover:text-[#D32F2F] transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div className="px-6 py-3 border-b border-[#353436]">
-          <div className="flex items-center gap-2 bg-[#1C1B1F] border border-[#353436] rounded-sm px-3 py-2">
+        <div className="px-6 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2 border" style={{ background: 'var(--bg-input)', borderColor: 'var(--border)' }}>
             <span className="material-symbols-outlined text-[#D32F2F]/40 !text-sm">search</span>
             <input
               autoFocus
               value={brandSearch}
               onChange={(e) => setBrandSearch(e.target.value)}
               placeholder="Buscar marca..."
-              className="flex-1 bg-transparent text-[#E5E2E3] text-xs focus:outline-none placeholder:text-[#E5E2E3]/50"
+              className="flex-1 bg-transparent text-xs focus:outline-none"
+              style={{ color: 'var(--fg)' }}
             />
             {brandSearch && (
               <button onClick={() => setBrandSearch('')} className="text-[#E5E2E3]/30 hover:text-[#D32F2F]">
@@ -110,7 +112,7 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
                 <div className="flex flex-wrap gap-2">
                   {filtered.map(b => (
                     <button key={b} onClick={() => onSelect(b)}
-                      className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F]' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70'}`}>
+                      className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-gray-200 dark:border-[#353436] bg-gray-100 dark:bg-[#1C1B1F]/50 text-gray-400 dark:text-[#E5E2E3]/40 hover:border-primary hover:text-primary'}`}>
                       {b}
                     </button>
                   ))}
@@ -126,7 +128,7 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
             const letters = Object.keys(grouped).sort();
             return (
               <div className="space-y-5">
-                <div className="flex flex-wrap gap-1 pb-3 border-b border-[#353436]/50">
+                <div className="flex flex-wrap gap-1 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
                   {letters.map(l => (
                     <button key={l}
                       onClick={() => document.getElementById(`df-brand-letter-${l}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
@@ -141,7 +143,7 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
                     <div className="flex flex-wrap gap-2">
                       {grouped[l].map(b => (
                         <button key={b} onClick={() => onSelect(b)}
-                          className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-[#D32F2F] bg-[#D32F2F]/10 text-[#D32F2F]' : 'border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70'}`}>
+                          className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-sm border transition-all ${selectedBrand === b ? 'border-primary bg-primary/10 text-primary' : 'border-gray-200 dark:border-[#353436] bg-gray-100 dark:bg-[#1C1B1F]/50 text-gray-400 dark:text-[#E5E2E3]/40 hover:border-primary hover:text-primary'}`}>
                           {b}
                         </button>
                       ))}
@@ -153,8 +155,8 @@ const BrandPickerModal = memo(({ allBrands, selectedBrand, onSelect, onClose }) 
           })()}
         </div>
         {selectedBrand && (
-          <div className="px-6 py-4 border-t border-[#353436] flex justify-between items-center">
-            <span className="text-[10px] text-[#E5E2E3]/40">Seleccionada: <span className="text-[#D32F2F] font-bold">{selectedBrand}</span></span>
+          <div className="px-6 py-4 border-t flex justify-between items-center" style={{ borderColor: 'var(--border)' }}>
+            <span className="text-[10px]" style={{ color: 'var(--fg-muted)' }}>Seleccionada: <span className="text-primary font-bold">{selectedBrand}</span></span>
             <button onClick={() => onSelect(null)}
               className="text-[9px] font-black uppercase tracking-widest text-[#D32F2F] hover:underline">
               Quitar filtro
@@ -282,15 +284,15 @@ const DealershipFinderScreen = () => {
   }, [userLocation, mappableDealerships]);
 
   return (
-    <div className="bg-[#0E0E0F] text-[#E5E2E3] flex flex-col" style={{ height: '100dvh' }}>
+    <div className="flex flex-col" style={{ height: '100dvh', background: 'var(--bg)', color: 'var(--fg)' }}>
       <TopNavBar />
 
       {/* Mobile tab bar */}
-      <div className="lg:hidden fixed top-20 left-0 right-0 z-40 flex bg-[#131314] border-b border-[#E5E2E3]/10">
+      <div className="lg:hidden fixed top-20 left-0 right-0 z-40 flex border-b" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
         <button
           onClick={() => setMobileTab('map')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
-            mobileTab === 'map' ? 'text-primary border-b-2 border-primary' : 'text-[#E5E2E3]/40'
+            mobileTab === 'map' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 dark:text-[#E5E2E3]/40'
           }`}
         >
           <span className="material-symbols-outlined !text-sm">map</span>
@@ -299,7 +301,7 @@ const DealershipFinderScreen = () => {
         <button
           onClick={() => setMobileTab('list')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
-            mobileTab === 'list' ? 'text-primary border-b-2 border-primary' : 'text-[#E5E2E3]/40'
+            mobileTab === 'list' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 dark:text-[#E5E2E3]/40'
           }`}
         >
           <span className="material-symbols-outlined !text-sm">list</span>
@@ -311,20 +313,20 @@ const DealershipFinderScreen = () => {
         {/* ── Sidebar ───────────────────────────────── */}
         <aside className={`${
           mobileTab === 'list' ? 'flex' : 'hidden'
-        } lg:flex w-full lg:w-72 flex-shrink-0 bg-[#0E0E0F] border-r border-[#E5E2E3]/10 flex-col overflow-y-auto`}>
+        } lg:flex w-full lg:w-72 flex-shrink-0 flex-col overflow-y-auto border-r`} style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
 
           {/* Header — desktop only */}
-          <div className="hidden lg:block p-6 border-b border-[#E5E2E3]/10">
-            <h2 className="font-headline text-lg font-extrabold tracking-tight text-[#E5E2E3]">
+          <div className="hidden lg:block p-6 border-b" style={{ borderColor: 'var(--border)' }}>
+            <h2 className="font-headline text-lg font-extrabold tracking-tight" style={{ color: 'var(--fg)' }}>
               Localizador
             </h2>
-            <p className="text-[#E5E2E3]/30 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1" style={{ color: 'var(--fg-muted)' }}>
               Red Global de Automotoras
             </p>
           </div>
 
           {/* ── Filtros colapsables (mobile) / siempre visibles (desktop) ── */}
-          <div className="border-b border-[#E5E2E3]/10">
+          <div className="border-b" style={{ borderColor: 'var(--border)' }}>
 
             {/* Barra toggle — solo mobile */}
             <button
@@ -333,7 +335,7 @@ const DealershipFinderScreen = () => {
             >
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined !text-sm text-[#D32F2F]">tune</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#E5E2E3]/60">Filtros</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.25em]" style={{ color: 'var(--fg-muted)' }}>Filtros</span>
                 {/* Badges de filtros activos */}
                 {maxDistance && (
                   <span className="px-1.5 py-0.5 bg-[#2196F3]/20 text-[#2196F3] text-[9px] font-bold rounded">
@@ -346,7 +348,7 @@ const DealershipFinderScreen = () => {
                   </span>
                 )}
               </div>
-              <span className={`material-symbols-outlined !text-sm text-[#E5E2E3]/30 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}>
+              <span className={`material-symbols-outlined !text-sm transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--fg-muted)' }}>
                 expand_more
               </span>
             </button>
@@ -356,7 +358,7 @@ const DealershipFinderScreen = () => {
 
               {/* Distance filter */}
               {!geoError && (
-                <div className="px-4 py-3 lg:p-6 border-t lg:border-t-0 border-[#E5E2E3]/10 lg:border-b">
+                <div className="px-4 py-3 lg:p-6 border-t lg:border-t-0 lg:border-b" style={{ borderColor: 'var(--border)' }}>
                   <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D32F2F] mb-2">
                     {userLocation ? 'Distancia' : 'Obteniendo ubicación…'}
                   </p>
@@ -369,7 +371,7 @@ const DealershipFinderScreen = () => {
                           className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-colors ${
                             maxDistance === km
                               ? 'bg-[#2196F3]/20 text-[#2196F3] border border-[#2196F3]/30'
-                              : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
+                              : 'border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-400 dark:text-[#E5E2E3]/40 hover:text-primary bg-gray-100 dark:bg-[#1C1C1E]'
                           }`}
                         >
                           {km ? `< ${km} km` : 'Todas'}
@@ -403,14 +405,14 @@ const DealershipFinderScreen = () => {
                     <button
                       key={brand}
                       onClick={() => setSelectedBrand((b) => (b === brand ? null : brand))}
-                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-[#353436] bg-[#1C1B1F]/50 text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-gray-200 dark:border-[#353436] bg-gray-100 dark:bg-[#1C1B1F]/50 text-gray-500 dark:text-[#E5E2E3]/40 hover:border-primary hover:text-primary transition-all"
                     >
                       {brand}
                     </button>
                   ))}
                   <button
                     onClick={() => { setBrandSearch(''); setShowBrandModal(true); }}
-                    className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-dashed border-[#353436] text-[#E5E2E3]/40 hover:border-[#D32F2F]/50 hover:text-[#D32F2F]/70 transition-all"
+                    className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm border border-dashed border-gray-300 dark:border-[#353436] text-gray-400 dark:text-[#E5E2E3]/40 hover:border-primary hover:text-primary transition-all"
                   >
                     Ver más…
                   </button>
@@ -441,8 +443,8 @@ const DealershipFinderScreen = () => {
                     key={d.id}
                     className={`w-full text-left rounded-lg transition-all border overflow-hidden ${
                       isSelected
-                        ? 'bg-[#D32F2F]/10 border-[#D32F2F]/30'
-                        : 'bg-[#1C1C1E] border-[#E5E2E3]/5 hover:border-[#E5E2E3]/15'
+                        ? 'border-primary/30 bg-red-50 dark:bg-[#D32F2F]/10'
+                        : 'border-gray-100 dark:border-[#E5E2E3]/5 hover:border-gray-200 dark:hover:border-[#E5E2E3]/15 bg-gray-50 dark:bg-[#1C1C1E]'
                     }`}
                   >
                     {/* Clickable area → select on map */}
@@ -451,7 +453,7 @@ const DealershipFinderScreen = () => {
                       onClick={() => handleSelectDealership(d)}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#0E0E0F] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border" style={{ background: 'var(--bg-input)', borderColor: 'var(--border)' }}>
                           {d.logoUrl ? (
                             <img src={d.logoUrl} alt={d.name} className="w-full h-full object-cover rounded-lg" />
                           ) : (
@@ -459,8 +461,8 @@ const DealershipFinderScreen = () => {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[#E5E2E3] font-bold text-sm truncate">{d.name}</p>
-                          <p className="text-[#E5E2E3]/30 text-xs">{d.city}, {d.country}</p>
+                          <p className="font-bold text-sm truncate" style={{ color: 'var(--fg)' }}>{d.name}</p>
+                          <p className="text-xs" style={{ color: 'var(--fg-muted)' }}>{d.city}, {d.country}</p>
                           {dealershipDistances[d.id] !== undefined && (
                             <p className="text-[#2196F3] text-[10px] font-bold mt-0.5">
                               {dealershipDistances[d.id] < 1
@@ -475,7 +477,7 @@ const DealershipFinderScreen = () => {
                           {brands.map((b) => (
                             <span
                               key={b}
-                              className="px-2 py-0.5 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 text-[9px] font-bold uppercase tracking-wider rounded"
+                              className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-400 dark:text-[#E5E2E3]/40"
                             >
                               {b}
                             </span>
@@ -485,7 +487,7 @@ const DealershipFinderScreen = () => {
                     </div>
 
                     {/* Ver perfil link */}
-                    <div className="px-4 pb-3 flex justify-end border-t border-[#E5E2E3]/5">
+                    <div className="px-4 pb-3 flex justify-end border-t" style={{ borderColor: 'var(--border)' }}>
                       <Link
                         to={`/dealerships/${d.id}`}
                         className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline flex items-center gap-1"
@@ -563,7 +565,7 @@ const DealershipFinderScreen = () => {
               </MapContainer>
             )}
             {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]">
+              <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'var(--bg)' }}>
                 <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
               </div>
             )}
@@ -571,8 +573,8 @@ const DealershipFinderScreen = () => {
 
           {/* Selected dealership detail panel */}
           {selectedDealership && (
-            <div className="bg-[#131314] border-t border-[#E5E2E3]/10 p-3 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-wrap overflow-y-auto max-h-[45vh] sm:max-h-none">
-              <div className="w-12 h-12 rounded-xl bg-[#0E0E0F] border border-[#E5E2E3]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="border-t p-3 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-wrap overflow-y-auto max-h-[45vh] sm:max-h-none" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden border" style={{ background: 'var(--bg-input)', borderColor: 'var(--border)' }}>
                 {selectedDealership.logoUrl ? (
                   <img src={selectedDealership.logoUrl} alt={selectedDealership.name} className="w-full h-full object-cover rounded-xl" />
                 ) : (
@@ -580,13 +582,13 @@ const DealershipFinderScreen = () => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-[#E5E2E3] font-headline font-bold text-xl tracking-tight">
+                <h3 className="font-headline font-bold text-xl tracking-tight" style={{ color: 'var(--fg)' }}>
                   {selectedDealership.name}
                 </h3>
-                <p className="text-[#E5E2E3]/40 text-sm">
+                <p className="text-sm" style={{ color: 'var(--fg-muted)' }}>
                   {selectedDealership.address}, {selectedDealership.city}, {selectedDealership.country}
                 </p>
-                <div className="flex items-center gap-4 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">
+                <div className="flex items-center gap-4 mt-1 text-xs flex-wrap" style={{ color: 'var(--fg-muted)' }}>
                   {selectedDealership.phone && (
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined !text-sm">phone</span>

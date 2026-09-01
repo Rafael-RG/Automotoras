@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
-import logoSrc from '../assets/Logo.svg';
+import logoSrc from '../assets/Logo2.svg';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,

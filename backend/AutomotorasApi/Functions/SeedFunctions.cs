@@ -52,6 +52,13 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
                 DealershipId: apex.RowKey,
                 Description: "Porsche 911 Carrera S en estado impecable. Un ícono de la ingeniería alemana.",
                 ImageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCOMbAZQgMf0QYqRi-TWzuu-0S06hRccKupQavtyC1E_61NdVLcUlGHNDjej0783zwcy3taLC17vUtumi7XRaKJsG-UL5fbVuXB1I7uIuY-zOglAhMKFZpabKWw-W2A2ipVggA07g1Pvnp2gynlt9Y9YK4N0DGA5Gq2x-OEli5w3p_cq2AktcA0H4vNsEGw16rw8pWr3rN6Qe5HM3WsViRLHXWiCwWC9v8LVC0bKvHBxDqb-nFi-zSHjc5cYTkuZQ9ewmrseIgGaPg",
+                ImageUrls: new[] {
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuCOMbAZQgMf0QYqRi-TWzuu-0S06hRccKupQavtyC1E_61NdVLcUlGHNDjej0783zwcy3taLC17vUtumi7XRaKJsG-UL5fbVuXB1I7uIuY-zOglAhMKFZpabKWw-W2A2ipVggA07g1Pvnp2gynlt9Y9YK4N0DGA5Gq2x-OEli5w3p_cq2AktcA0H4vNsEGw16rw8pWr3rN6Qe5HM3WsViRLHXWiCwWC9v8LVC0bKvHBxDqb-nFi-zSHjc5cYTkuZQ9ewmrseIgGaPg",
+                    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=2074&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1584345604476-8ec5e12e42dd?q=80&w=2070&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1611821064430-0d40291d0f0b?q=80&w=2073&auto=format&fit=crop"
+                },
                 Color: "Plata GT", Doors: 2, Engine: "3.0L 450 CV Biturbo",
                 Matricula: "POR-001-STU", Padron: "PAD-2022-9110"),
 
