@@ -7,6 +7,7 @@ import DealershipProfileScreen from './pages/DealershipProfileScreen';
 import ProductDetailScreen from './pages/ProductDetailScreen';
 import RegisterScreen from './pages/RegisterScreen';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminAdsScreen from './pages/AdminAdsScreen';
 import PrivacyScreen from './pages/PrivacyScreen';
 import LoginScreen from './pages/LoginScreen';
 import PagoExitosoScreen from './pages/PagoExitosoScreen';
@@ -27,6 +28,7 @@ function App() {
         <Route path="/product/:brand/:id" element={<ProductDetailScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-ads" element={<AdminAdsScreen />} />
         <Route path="/pago-exitoso" element={<PagoExitosoScreen />} />
         <Route path="/sobre-nosotros" element={<SobreNosotrosScreen />} />
         <Route path="/unirse" element={<PaginaAterrizajeScreen />} />

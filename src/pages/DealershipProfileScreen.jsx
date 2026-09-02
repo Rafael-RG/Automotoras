@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
+import AdBanner from '../components/AdBanner';
 import { getDealershipById, getVehicles, trackDealershipProfileVisit } from '../services/api';
 import { VEHICLE_MODELS } from '../constants/vehicles';
 import useSEO from '../hooks/useSEO';
@@ -238,9 +239,11 @@ const DealershipProfileScreen = () => {
               {dealership.bio && (
                 <p className="text-sm leading-relaxed mt-4" style={{ color: 'var(--fg-muted)' }}>{dealership.bio}</p>
               )}
+
+              <AdBanner className="mt-4" />
             </div>
 
-            {/* Frame 2 â€” search + filters + vehicles */}
+            {/* Frame 2 — search + filters + vehicles */}
             <div className="flex-1 rounded-t-[28px] -mt-3 relative z-20 pb-8"
               style={{ background: 'var(--frame-low)', boxShadow: '0 -6px 20px var(--shadow-frame)' }}>
               <div className="w-10 h-1 rounded-full mx-auto mt-3 mb-4" style={{ background: 'var(--border)' }} />
@@ -498,9 +501,13 @@ const DealershipProfileScreen = () => {
                   {dealership.bio && <p className="text-sm leading-relaxed mt-3 max-w-2xl" style={{ color: 'var(--fg-muted)' }}>{dealership.bio}</p>}
                 </div>
               </div>
+
+              <div className="max-w-screen-2xl mx-auto mt-6">
+                <AdBanner />
+              </div>
             </div>
 
-            {/* Frame 2 â€” sidebar + grid */}
+            {/* Frame 2 — sidebar + grid */}
             <div className="rounded-t-[36px] -mt-4 relative z-20 px-12 pt-8 pb-20"
               style={{ background: 'var(--frame-low)', boxShadow: '0 -8px 30px var(--shadow-frame)' }}>
               <div className="max-w-screen-2xl mx-auto flex gap-10">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
+import AdBanner from '../components/AdBanner';
 import { getVehicleById, getDealershipById, getVehicles, trackVehicleEvent } from '../services/api';
 import useSEO from '../hooks/useSEO';
 
@@ -224,6 +225,22 @@ const ProductDetailScreen = () => {
                 <div className="w-12 h-1.5 rounded-full mx-auto mt-3 mb-5" style={{ background: 'var(--border)' }} />
 
                 <div className="px-5 flex flex-col gap-5">
+                  {/* Thumbnail strip — right below hero, easy to reach */}
+                  {imgs.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                      {imgs.map((url, i) => (
+                        <button
+                          key={`thumb-${url}`}
+                          onClick={() => setActiveImg(i)}
+                          className="flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden transition-all"
+                          style={{ border: `2px solid ${i === activeImg ? '#D32F2F' : 'transparent'}`, opacity: i === activeImg ? 1 : 0.5 }}
+                        >
+                          <img src={url} alt={`${vehicle.model} ${i + 1}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Brand + model + price */}
                   <div>
                     <p className="text-primary text-[11px] font-black uppercase tracking-widest mb-1">{vehicle.brand}</p>
@@ -286,22 +303,6 @@ const ProductDetailScreen = () => {
                     </div>
                   )}
 
-                  {/* Thumbnail strip */}
-                  {imgs.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                      {imgs.map((url, i) => (
-                        <button
-                          key={`thumb-${url}`}
-                          onClick={() => setActiveImg(i)}
-                          className="flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden transition-all"
-                          style={{ border: `2px solid ${i === activeImg ? '#D32F2F' : 'transparent'}`, opacity: i === activeImg ? 1 : 0.5 }}
-                        >
-                          <img src={url} alt={`${vehicle.model} ${i + 1}`} className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
                   {/* Vendido por */}
                   {dealership && (
                     <div>
@@ -323,6 +324,8 @@ const ProductDetailScreen = () => {
                       </div>
                     </div>
                   )}
+
+                  <AdBanner />
                 </div>
               </div>
 
@@ -523,6 +526,8 @@ const ProductDetailScreen = () => {
                         </div>
                       </div>
                     )}
+
+                    <AdBanner className="mt-8" />
 
                     {/* Related vehicles */}
                     {relatedVehicles.length > 0 && (

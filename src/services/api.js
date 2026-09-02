@@ -169,3 +169,46 @@ export const resetPassword = (token, newPassword) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, newPassword }),
   }).then(handleResponse);
+
+// ─── Ads (banners publicitarios) ─────────────────────────────────────────────
+
+// Público — usado por AdBanner para mostrar los banners vigentes
+export const getActiveAds = () =>
+  fetch(`${BASE_URL}/ads/active`).then(handleResponse).catch(() => []); // fire-and-forget, no rompe la UI
+
+// Privado — requiere adminKey (panel /admin-ads)
+export const getAds = (adminKey) =>
+  fetch(`${BASE_URL}/ads`, { headers: { 'X-Admin-Key': adminKey } }).then(handleResponse);
+
+export const getAdById = (id, adminKey) =>
+  fetch(`${BASE_URL}/ads/${id}`, { headers: { 'X-Admin-Key': adminKey } }).then(handleResponse);
+
+export const createAd = (data, adminKey) =>
+  fetch(`${BASE_URL}/ads`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const updateAd = (id, data, adminKey) =>
+  fetch(`${BASE_URL}/ads/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteAd = (id, adminKey) =>
+  fetch(`${BASE_URL}/ads/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  }).then(handleResponse);
+
+export const uploadAdImage = (id, file, adminKey) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return fetch(`${BASE_URL}/ads/${id}/image`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+    body: formData,
+  }).then(handleResponse);
+};

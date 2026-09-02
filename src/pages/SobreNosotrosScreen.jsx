@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
+import AdBanner from '../components/AdBanner';
 import logoSrc from '../assets/Logo2.svg';
 import useSEO from '../hooks/useSEO';
 
@@ -210,6 +211,10 @@ const SobreNosotrosScreen = () => {
           </div>
         </div>
       </section>
+
+      <div className="max-w-screen-xl mx-auto px-5 md:px-6 py-8">
+        <AdBanner />
+      </div>
 
       {/* ── CTA FINAL ──────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#131314] border-t border-[#E5E2E3]/8">

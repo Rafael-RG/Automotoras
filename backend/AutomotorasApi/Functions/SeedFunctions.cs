@@ -3,6 +3,7 @@ using AutomotorasApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using System.Linq;
 
 namespace AutomotorasApi.Functions;
 
@@ -96,7 +97,7 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
                 Description: "BMW M4 Competition xDrive, la berlina deportiva definitiva con tracción integral.",
                 ImageUrl: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=2070&auto=format&fit=crop",
                 Color: "Azul Portimao", Doors: 2, Engine: "3.0L I6 Twin Turbo 530 CV",
-                Matricula: "BMW-M4-MAD", Padron: "PAD-2022-M400"),
+                Matricula: "BMW-M4-MAD", Padron: "PAD-2022-M400", IsSold: true),
 
             new CreateVehicleRequest(
                 Brand: "Audi", Model: "RS e-tron GT", Year: 2024, Price: 142200, Mileage: 0,
@@ -108,14 +109,81 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
                 Matricula: "AUD-RSE-STU", Padron: "PAD-2024-RSE0"),
         };
 
+        var createdVehicles = new List<AutomotorasApi.Models.VehicleEntity>();
         foreach (var v in seedVehicles)
-            await vehicleService.CreateAsync(v);
+            createdVehicles.Add(await vehicleService.CreateAsync(v));
+
+        // Simular actividad (vistas / leads / compartidos) en algunos vehículos de Apex
+        var apexVehicles = createdVehicles.Where(v => v.DealershipId == apex.RowKey).ToList();
+        if (apexVehicles.Count > 0)
+        {
+            var featured = apexVehicles[0]; // Porsche 911 Carrera S
+            for (var i = 0; i < 42; i++)
+                await vehicleService.IncrementEventAsync(featured.Brand, featured.RowKey, "view");
+            for (var i = 0; i < 6; i++)
+                await vehicleService.IncrementEventAsync(featured.Brand, featured.RowKey, "lead");
+            for (var i = 0; i < 3; i++)
+                await vehicleService.IncrementEventAsync(featured.Brand, featured.RowKey, "share");
+        }
+        if (apexVehicles.Count > 1)
+        {
+            var second = apexVehicles[1]; // Porsche 911 GT3 RS
+            for (var i = 0; i < 15; i++)
+                await vehicleService.IncrementEventAsync(second.Brand, second.RowKey, "view");
+            for (var i = 0; i < 2; i++)
+                await vehicleService.IncrementEventAsync(second.Brand, second.RowKey, "lead");
+        }
+
+        // Completar perfil de Apex (bio, redes, horario, logo)
+        await dealershipService.UpdateAsync(apex.RowKey, new UpdateDealershipRequest(
+            Name: apex.Name,
+            Address: apex.Address,
+            City: apex.City,
+            Country: apex.Country,
+            Phone: apex.Phone,
+            Email: "admin@apexporsche.com",
+            Latitude: apex.Latitude,
+            Longitude: apex.Longitude,
+            Bio: "Concesionario oficial especializado en Porsche de alto rendimiento. Más de 15 años ofreciendo vehículos deportivos certificados en Stuttgart.",
+            BusinessHours: "Lun a Vie 09:00-18:00, Sáb 10:00-14:00",
+            Instagram: "@apexporschestuttgart",
+            TikTok: "@apexporsche",
+            Website: "https://apexvelocity.de"));
+        await dealershipService.UpdateLogoUrlAsync(
+            apex.RowKey,
+            "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400&auto=format&fit=crop");
+
+        // Credenciales de prueba para Apex Porsche Stuttgart (con plan activo)
+        await dealershipService.SetTestCredentialsAsync(
+            apex.RowKey,
+            "admin@apexporsche.com",
+            "Test1234");
+        await dealershipService.UpdatePlanAsync(apex.RowKey, "plus", "sim-seed-" + Guid.NewGuid(), "authorized");
+
+        // Simular vistas de perfil de los últimos meses para Apex
+        for (var i = 0; i < 27; i++)
+            await dealershipService.TrackProfileVisitAsync(apex.RowKey);
+
+        // Credenciales de prueba para Luxury Motors Madrid (sin plan activo, para probar el bloqueo por suscripción)
+        await dealershipService.SetTestCredentialsAsync(
+            luxury.RowKey,
+            "admin@luxurymotors.es",
+            "Test1234");
+
+        // Releer de storage para devolver el estado final (no el objeto en memoria desactualizado)
+        var apexFinal = await dealershipService.GetByIdAsync(apex.RowKey) ?? apex;
+        var luxuryFinal = await dealershipService.GetByIdAsync(luxury.RowKey) ?? luxury;
 
         return new OkObjectResult(new
         {
             message = "Datos de prueba creados exitosamente.",
-            dealerships = new[] { DealershipStorageService.ToDto(apex), DealershipStorageService.ToDto(luxury) },
-            vehiclesCreated = seedVehicles.Length
+            dealerships = new[] { DealershipStorageService.ToDto(apexFinal), DealershipStorageService.ToDto(luxuryFinal) },
+            vehiclesCreated = seedVehicles.Length,
+            testCredentials = new[]
+            {
+                new { dealership = "Apex Porsche Stuttgart", email = "admin@apexporsche.com", password = "Test1234", subscriptionStatus = "authorized (plan plus)" },
+                new { dealership = "Luxury Motors Madrid", email = "admin@luxurymotors.es", password = "Test1234", subscriptionStatus = "sin plan activo" }
+            }
         });
     }
 

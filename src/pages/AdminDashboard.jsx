@@ -4,6 +4,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo2.svg';
+import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
@@ -28,11 +30,11 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
   const center = hasPin ? [lat, lng] : [-34.9011, -56.1645]; // Montevideo default
   return (
     <div>
-      <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+      <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
         Ubicación en el mapa
-        <span className="ml-2 normal-case tracking-normal font-normal text-[#E5E2E3]/50">— hacé click para marcar</span>
+        <span className="ml-2 normal-case tracking-normal font-normal text-gray-500 dark:text-[#E5E2E3]/50">— hacé click para marcar</span>
       </label>
-      <div className="rounded-lg overflow-hidden border border-[#E5E2E3]/10" style={{height: 260}}>
+      <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-[#E5E2E3]/10" style={{height: 260}}>
         <MapContainer center={center} zoom={hasPin ? 15 : 12} style={{height:'100%',width:'100%'}} key={`${lat},${lng}`}>
           <TileLayer
             url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=cb1_2oah_1_a15a9338220f91742b854dcb"
@@ -43,12 +45,12 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
         </MapContainer>
       </div>
       {hasPin && (
-        <p className="text-[#E5E2E3]/30 text-[10px] mt-1.5">
+        <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-[10px] mt-1.5">
           Lat: {lat.toFixed(5)} · Lng: {lng.toFixed(5)}
           <button type="button" onClick={() => onChange(0, 0)} className="ml-3 text-red-400/60 hover:text-red-400 transition-colors">Quitar pin</button>
         </p>
       )}
-      {!hasPin && <p className="text-[#E5E2E3]/45 text-[10px] mt-1.5">Sin ubicación marcada — tocá el mapa para fijar el pin</p>}
+      {!hasPin && <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] mt-1.5">Sin ubicación marcada — tocá el mapa para fijar el pin</p>}
     </div>
   );
 };
@@ -71,15 +73,15 @@ const EMPTY_VEHICLE = {
 const DealershipSelector = ({ dealerships, onSelect }) => {
   const multi = dealerships.length > 1;
   return (
-    <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
       <div className="max-w-lg w-full mx-4">
         <div className="flex justify-center mb-8">
           <img src={logoSrc} alt="RedAutos" className="h-20 object-contain" />
         </div>
-        <p className="text-[#E5E2E3]/40 text-center text-sm mb-2">
+        <p className="text-gray-500 dark:text-[#E5E2E3]/40 text-center text-sm mb-2">
           {multi ? `Seleccioná tu sucursal (${dealerships.length} disponibles)` : 'Seleccioná tu automotora para continuar'}
         </p>
-        <h2 className="text-[#E5E2E3] font-headline font-black text-2xl text-center tracking-tighter mb-8">
+        <h2 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-black text-2xl text-center tracking-tighter mb-8">
           {multi ? '¿Desde qué sucursal vas a trabajar?' : dealerships[0]?.name}
         </h2>
         <div className="space-y-3">
@@ -87,7 +89,7 @@ const DealershipSelector = ({ dealerships, onSelect }) => {
             <button
               key={d.id}
               onClick={() => onSelect(d.id)}
-              className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-5 text-left hover:border-[#D32F2F]/50 hover:bg-[#D32F2F]/5 transition-all group"
+              className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-sm p-5 text-left hover:border-[#D32F2F]/50 hover:bg-[#D32F2F]/5 transition-all group"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-[#D32F2F]/10 rounded-sm flex items-center justify-center group-hover:bg-[#D32F2F]/20 transition-colors flex-shrink-0">
@@ -97,10 +99,10 @@ const DealershipSelector = ({ dealerships, onSelect }) => {
                   }
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[#E5E2E3] font-headline font-bold text-base tracking-tight truncate">{d.name}</div>
-                  <div className="text-[#E5E2E3]/40 text-xs">{d.city}, {d.country}</div>
+                  <div className="text-gray-900 dark:text-[#E5E2E3] font-headline font-bold text-base tracking-tight truncate">{d.name}</div>
+                  <div className="text-gray-500 dark:text-[#E5E2E3]/40 text-xs">{d.city}, {d.country}</div>
                 </div>
-                <span className="material-symbols-outlined text-[#E5E2E3]/45 group-hover:text-[#D32F2F] transition-colors">
+                <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/45 group-hover:text-[#D32F2F] transition-colors">
                   arrow_forward
                 </span>
               </div>
@@ -122,17 +124,17 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
     { id: 'config', icon: 'tune', label: 'Configuración' },
   ];
   return (
-    <aside className={`fixed left-0 top-0 h-full w-64 border-r border-[#E5E2E3]/10 bg-[#0E0E0F] flex flex-col py-8 z-40 transition-transform duration-300 ${
+    <aside className={`fixed left-0 top-0 h-full w-64 border-r border-gray-200 dark:border-[#E5E2E3]/10 bg-gray-50 dark:bg-[#0E0E0F] flex flex-col py-8 z-40 transition-transform duration-300 ${
       mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
     }`}>
       <div className="px-6 mb-10">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3">
           <img src={logoSrc} alt="RedAutos" className="h-10 w-auto object-contain flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-[#E5E2E3] font-headline font-bold text-sm tracking-tight leading-tight truncate">
+            <p className="text-gray-900 dark:text-[#E5E2E3] font-headline font-bold text-sm tracking-tight leading-tight truncate">
               {dealership?.name ?? '...'}
             </p>
-            <p className="text-[#E5E2E3]/35 text-[10px] mt-0.5 truncate">
+            <p className="text-gray-500 dark:text-[#E5E2E3]/35 text-[10px] mt-0.5 truncate">
               {dealership?.city ?? ''}
             </p>
           </div>
@@ -145,8 +147,8 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
             onClick={() => setActiveTab(n.id)}
             className={`w-full flex items-center gap-3 px-6 py-4 text-[11px] font-semibold uppercase tracking-wider transition-all ${
               activeTab === n.id
-                ? 'bg-gradient-to-r from-[#D32F2F]/10 to-transparent text-[#FFB3AC] border-l-4 border-[#D32F2F]'
-                : 'text-[#E5E2E3]/50 hover:text-[#E5E2E3] border-l-4 border-transparent'
+                ? 'bg-gradient-to-r from-[#D32F2F]/10 to-transparent text-primary dark:text-[#FFB3AC] border-l-4 border-[#D32F2F]'
+                : 'text-gray-500 dark:text-[#E5E2E3]/50 hover:text-gray-900 hover:dark:text-[#E5E2E3] border-l-4 border-transparent'
             }`}
           >
             <span className="material-symbols-outlined !text-xl">{n.icon}</span>
@@ -155,16 +157,20 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
         ))}
         <button
           onClick={onChangeDealership}
-          className="w-full flex items-center gap-3 px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-[#E5E2E3]/50 hover:text-[#E5E2E3] border-l-4 border-transparent transition-all"
+          className="w-full flex items-center gap-3 px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-[#E5E2E3]/50 hover:text-gray-900 hover:dark:text-[#E5E2E3] border-l-4 border-transparent transition-all"
         >
           <span className="material-symbols-outlined !text-xl">swap_horiz</span>
           Cambiar sucursal
         </button>
       </nav>
-      <div className="px-6 mt-auto">
+      <div className="px-6 mt-auto space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-[#E5E2E3]/40">Tema</span>
+          <ThemeToggleButton />
+        </div>
         <button
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 border border-[#E5E2E3]/10 text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/30 py-3 rounded-sm text-[11px] font-semibold uppercase tracking-wider transition-all"
+          className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] hover:border-gray-200 hover:dark:border-[#E5E2E3]/30 py-3 rounded-sm text-[11px] font-semibold uppercase tracking-wider transition-all"
         >
           <span className="material-symbols-outlined !text-base">logout</span>
           Cerrar sesión
@@ -177,24 +183,24 @@ const Sidebar = ({ activeTab, setActiveTab, dealership, onChangeDealership, onLo
 // ─── Metric Card ──────────────────────────────────────────────────────────────
 const MetricCard = ({ label, value, sub, icon, highlight }) => (
   <div
-    className={`bg-[#1C1C1E] border rounded-lg p-6 ${
-      highlight ? 'border-[#D32F2F]/40' : 'border-[#E5E2E3]/10'
+    className={`bg-white dark:bg-[#1C1C1E] border rounded-lg p-6 ${
+      highlight ? 'border-[#D32F2F]/40' : 'border-gray-200 dark:border-[#E5E2E3]/10'
     }`}
   >
     <div className="flex items-start justify-between">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40 mb-3">{label}</p>
-        <p className="text-3xl md:text-4xl font-headline font-black text-[#E5E2E3] tracking-tighter">{value}</p>
-        {sub && <p className="text-xs text-[#E5E2E3]/40 mt-1">{sub}</p>}
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40 mb-3">{label}</p>
+        <p className="text-3xl md:text-4xl font-headline font-black text-gray-900 dark:text-[#E5E2E3] tracking-tighter">{value}</p>
+        {sub && <p className="text-xs text-gray-500 dark:text-[#E5E2E3]/40 mt-1">{sub}</p>}
       </div>
       <div
         className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-          highlight ? 'bg-[#D32F2F]/20' : 'bg-[#E5E2E3]/5'
+          highlight ? 'bg-[#D32F2F]/20' : 'bg-gray-100 dark:bg-[#E5E2E3]/5'
         }`}
       >
         <span
           className={`material-symbols-outlined !text-xl ${
-            highlight ? 'text-[#D32F2F]' : 'text-[#E5E2E3]/40'
+            highlight ? 'text-[#D32F2F]' : 'text-gray-500 dark:text-[#E5E2E3]/40'
           }`}
         >
           {icon}
@@ -207,14 +213,14 @@ const MetricCard = ({ label, value, sub, icon, highlight }) => (
 // ─── Distribution Bar ─────────────────────────────────────────────────────────
 const DistBar = ({ label, count, max, color = 'bg-[#D32F2F]' }) => (
   <div className="flex items-center gap-3">
-    <span className="text-[#E5E2E3]/50 text-xs w-24 truncate flex-shrink-0">{label}</span>
-    <div className="flex-1 h-1.5 bg-[#E5E2E3]/5 rounded-full overflow-hidden">
+    <span className="text-gray-500 dark:text-[#E5E2E3]/50 text-xs w-24 truncate flex-shrink-0">{label}</span>
+    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-[#E5E2E3]/5 rounded-full overflow-hidden">
       <div
         className={`h-full ${color} rounded-full transition-all duration-700`}
         style={{ width: max > 0 ? `${(count / max) * 100}%` : '0%' }}
       />
     </div>
-    <span className="text-[#E5E2E3]/40 text-xs w-5 text-right flex-shrink-0">{count}</span>
+    <span className="text-gray-500 dark:text-[#E5E2E3]/40 text-xs w-5 text-right flex-shrink-0">{count}</span>
   </div>
 );
 
@@ -224,7 +230,15 @@ const cw = W - PAD.l - PAD.r;
 const ch = H - PAD.t - PAD.b;
 
 const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
+  const { dark } = useTheme();
   const [hovered, setHovered] = useState(null); // { xi, serieIdx }
+
+  const gridColor = dark ? 'rgba(229,226,227,0.06)' : 'rgba(20,20,20,0.08)';
+  const axisTextColor = dark ? 'rgba(229,226,227,0.25)' : 'rgba(20,20,20,0.35)';
+  const hoverLineColor = dark ? 'rgba(229,226,227,0.15)' : 'rgba(20,20,20,0.2)';
+  const tooltipBg = dark ? '#0E0E0F' : '#ffffff';
+  const tooltipLabelColor = dark ? 'rgba(229,226,227,0.4)' : 'rgba(20,20,20,0.5)';
+  const dotFill = dark ? '#1C1C1E' : '#ffffff';
 
   const allVals = series.flatMap(s => s.values);
   const maxVal = Math.max(1, ...allVals);
@@ -246,9 +260,9 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
         {yTicks.map(tick => (
           <g key={tick}>
             <line x1={PAD.l} x2={W - PAD.r} y1={py(tick)} y2={py(tick)}
-              stroke="rgba(229,226,227,0.06)" strokeWidth="1" />
+              stroke={gridColor} strokeWidth="1" />
             <text x={PAD.l - 6} y={py(tick) + 4} textAnchor="end"
-              fill="rgba(229,226,227,0.25)" fontSize="10" fontFamily="monospace">
+              fill={axisTextColor} fontSize="10" fontFamily="monospace">
               {formatY(tick)}
             </text>
           </g>
@@ -283,7 +297,7 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
               const isHov = hovered?.xi === xi;
               return (
                 <circle key={si} cx={px(xi)} cy={py(v)} r={isHov ? 5 : 3}
-                  fill={isHov ? s.color : '#1C1C1E'} stroke={s.color} strokeWidth="2"
+                  fill={isHov ? s.color : dotFill} stroke={s.color} strokeWidth="2"
                   style={{ transition: 'r 0.15s' }} />
               );
             })}
@@ -298,7 +312,7 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
             {hovered?.xi === xi && (
               <g>
                 <line x1={px(xi)} x2={px(xi)} y1={PAD.t} y2={py(0)}
-                  stroke="rgba(229,226,227,0.15)" strokeWidth="1" strokeDasharray="4 3" />
+                  stroke={hoverLineColor} strokeWidth="1" strokeDasharray="4 3" />
                 {series.map((s, si) => {
                   const v = s.values[xi];
                   const bw = 82; const bh = 14 + series.length * 12;
@@ -308,8 +322,8 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
                   return si === 0 ? (
                     <g key="tip">
                       <rect x={bx} y={by} width={bw} height={bh}
-                        rx={3} fill="#0E0E0F" stroke="rgba(229,226,227,0.15)" strokeWidth="1" />
-                      <text x={bx + 6} y={by + 9} fill="rgba(229,226,227,0.4)" fontSize="7" fontWeight="bold">
+                        rx={3} fill={tooltipBg} stroke={hoverLineColor} strokeWidth="1" />
+                      <text x={bx + 6} y={by + 9} fill={tooltipLabelColor} fontSize="7" fontWeight="bold">
                         {lbl}
                       </text>
                       {series.map((s2, si2) => (
@@ -330,12 +344,12 @@ const LineChart = ({ series, xLabels, formatY = (v) => v, emptyMsg }) => {
       <div className="flex" style={{ paddingLeft: PAD.l, paddingRight: PAD.r }}>
         {xLabels.map((lbl, xi) => (
           <div key={xi} className="flex-1 text-center">
-            <p className="text-[9px] text-[#E5E2E3]/50 mt-1">{lbl}</p>
+            <p className="text-[9px] text-gray-500 dark:text-[#E5E2E3]/50 mt-1">{lbl}</p>
           </div>
         ))}
       </div>
       {!hasAnyData && emptyMsg && (
-        <p className="absolute inset-0 flex items-center justify-center text-[#E5E2E3]/45 text-xs text-center px-8">
+        <p className="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-[#E5E2E3]/45 text-xs text-center px-8">
           {emptyMsg}
         </p>
       )}
@@ -378,12 +392,12 @@ const PriceHistogram = ({ vehicles, fmt }) => {
   const seriesLine = [{ label: 'Autos', color: '#D32F2F', values: data.values }];
 
   return (
-    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+    <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
           Distribución de Precios
         </h3>
-        <div className="flex items-center gap-3 text-[10px] text-[#E5E2E3]/30">
+        <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-[#E5E2E3]/30">
           <span>Min: {fmt(Math.min(...vehicles.map(v => v.price)))}</span>
           <span>·</span>
           <span>Max: {fmt(Math.max(...vehicles.map(v => v.price)))}</span>
@@ -430,20 +444,20 @@ const ProfileVisitsChart = ({ dealership }) => {
   const total = dealership?.profileViews ?? 0;
 
   return (
-    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+    <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
       <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">store</span>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">store</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
               Visitas al perfil
             </h3>
           </div>
-          <p className="text-[#E5E2E3]/45 text-[10px]">{total} históricas en total</p>
+          <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px]">{total} históricas en total</p>
         </div>
         <div className="text-right">
-          <p className="text-3xl font-headline font-black text-[#E5E2E3] tracking-tighter">{thisMonth}</p>
-          <p className="text-[10px] text-[#E5E2E3]/30 capitalize">
+          <p className="text-3xl font-headline font-black text-gray-900 dark:text-[#E5E2E3] tracking-tighter">{thisMonth}</p>
+          <p className="text-[10px] text-gray-500 dark:text-[#E5E2E3]/30 capitalize">
             {new Date().toLocaleDateString('es-UY', { month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -481,16 +495,16 @@ const MonthlyActivityChart = ({ vehicles }) => {
   }, [months, vehicles]);
 
   return (
-    <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+    <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
           Actividad mensual — Añadidos vs. Vendidos
         </h3>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-[10px] text-[#E5E2E3]/40">
+          <span className="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-[#E5E2E3]/40">
             <span className="inline-block w-6 h-0.5 bg-[#D32F2F] rounded" />Añadidos
           </span>
-          <span className="flex items-center gap-1.5 text-[10px] text-[#E5E2E3]/40">
+          <span className="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-[#E5E2E3]/40">
             <span className="inline-block w-6 h-0.5 bg-[#1565C0] rounded" />Vendidos
           </span>
         </div>
@@ -553,9 +567,9 @@ const DashboardTab = ({ vehicles, dealership }) => {
   if (!metrics) {
     return (
       <div className="text-center py-24">
-        <span className="material-symbols-outlined text-7xl text-[#E5E2E3]/35">directions_car</span>
-        <p className="text-[#E5E2E3]/30 mt-4 text-sm">No hay vehículos en la flota todavía.</p>
-        <p className="text-[#E5E2E3]/45 text-xs mt-1">Agregá unidades desde la sección Mi Flota.</p>
+        <span className="material-symbols-outlined text-7xl text-gray-500 dark:text-[#E5E2E3]/35">directions_car</span>
+        <p className="text-gray-500 dark:text-[#E5E2E3]/30 mt-4 text-sm">No hay vehículos en la flota todavía.</p>
+        <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs mt-1">Agregá unidades desde la sección Mi Flota.</p>
       </div>
     );
   }
@@ -565,10 +579,10 @@ const DashboardTab = ({ vehicles, dealership }) => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">
+        <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
           Panel General
         </h1>
-        <p className="text-[#E5E2E3]/30 text-sm mt-1">{dealership?.name}</p>
+        <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-sm mt-1">{dealership?.name}</p>
       </div>
 
       {/* KPIs */}
@@ -606,15 +620,15 @@ const DashboardTab = ({ vehicles, dealership }) => {
 
       {/* Engagement: most viewed + most leads */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
           <div className="flex items-center gap-2 mb-5">
-            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">visibility</span>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">visibility</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
               Autos más buscados
             </h3>
           </div>
           {metrics.totalViews === 0 ? (
-            <p className="text-[#E5E2E3]/45 text-xs text-center py-6">
+            <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs text-center py-6">
               Las vistas se registrarán cuando los clientes visiten los autos.
             </p>
           ) : (
@@ -626,14 +640,14 @@ const DashboardTab = ({ vehicles, dealership }) => {
                   <div key={v.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
-                        <p className="text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
+                        <span className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
+                        <p className="text-gray-900 dark:text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
                           {v.brand} {v.model}
                         </p>
                       </div>
-                      <span className="text-[#E5E2E3]/50 text-xs tabular-nums">{v.viewCount || 0}</span>
+                      <span className="text-gray-500 dark:text-[#E5E2E3]/50 text-xs tabular-nums">{v.viewCount || 0}</span>
                     </div>
-                    <div className="h-1.5 bg-[#E5E2E3]/5 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-100 dark:bg-[#E5E2E3]/5 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-[#D32F2F] rounded-full transition-all duration-500"
                         style={{ width: `${Math.max(pct, 2)}%` }}
@@ -646,15 +660,15 @@ const DashboardTab = ({ vehicles, dealership }) => {
           )}
         </div>
 
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
           <div className="flex items-center gap-2 mb-5">
-            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">forum</span>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">forum</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
               Autos con más leads
             </h3>
           </div>
           {metrics.totalLeads === 0 ? (
-            <p className="text-[#E5E2E3]/45 text-xs text-center py-6">
+            <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs text-center py-6">
               Los leads aparecerán cuando los clientes contacten vía WhatsApp.
             </p>
           ) : (
@@ -666,14 +680,14 @@ const DashboardTab = ({ vehicles, dealership }) => {
                   <div key={v.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
-                        <p className="text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
+                        <span className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] font-black w-4">{i + 1}</span>
+                        <p className="text-gray-900 dark:text-[#E5E2E3] text-xs font-semibold truncate max-w-[160px]">
                           {v.brand} {v.model}
                         </p>
                       </div>
-                      <span className="text-[#E5E2E3]/50 text-xs tabular-nums">{v.leadCount || 0}</span>
+                      <span className="text-gray-500 dark:text-[#E5E2E3]/50 text-xs tabular-nums">{v.leadCount || 0}</span>
                     </div>
-                    <div className="h-1.5 bg-[#E5E2E3]/5 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-100 dark:bg-[#E5E2E3]/5 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-[#1565C0] rounded-full transition-all duration-500"
                         style={{ width: `${Math.max(pct, 2)}%` }}
@@ -690,45 +704,45 @@ const DashboardTab = ({ vehicles, dealership }) => {
       {/* Shares + Fleet status + Brand */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Shares leaderboard */}
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">share</span>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">Compartidos</h3>
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">share</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">Compartidos</h3>
           </div>
           <div className="flex items-baseline gap-2 mb-5">
-            <span className="text-3xl font-headline font-black text-[#E5E2E3]">{metrics.totalShares}</span>
-            <span className="text-[#E5E2E3]/30 text-xs">veces en total</span>
+            <span className="text-3xl font-headline font-black text-gray-900 dark:text-[#E5E2E3]">{metrics.totalShares}</span>
+            <span className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs">veces en total</span>
           </div>
           <div className="space-y-1">
             {metrics.topShared.map((v, i) => (
-              <div key={v.id} className="flex items-center justify-between py-1.5 border-b border-[#E5E2E3]/5 last:border-0">
+              <div key={v.id} className="flex items-center justify-between py-1.5 border-b border-gray-200 dark:border-[#E5E2E3]/5 last:border-0">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-black ${
-                    i === 0 ? 'text-yellow-400' : i === 1 ? 'text-[#E5E2E3]/40' : 'text-amber-700/70'
+                    i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-500 dark:text-[#E5E2E3]/40' : 'text-amber-700/70'
                   }`}>
                     #{i + 1}
                   </span>
-                  <p className="text-[#E5E2E3]/70 text-xs truncate max-w-[110px]">{v.brand} {v.model}</p>
+                  <p className="text-gray-500 dark:text-[#E5E2E3]/70 text-xs truncate max-w-[110px]">{v.brand} {v.model}</p>
                 </div>
-                <span className="text-[#E5E2E3]/50 text-xs font-bold tabular-nums">{v.shareCount || 0}</span>
+                <span className="text-gray-500 dark:text-[#E5E2E3]/50 text-xs font-bold tabular-nums">{v.shareCount || 0}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Fleet status + fuel */}
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
           <div className="flex items-center gap-2 mb-5">
-            <span className="material-symbols-outlined text-[#E5E2E3]/30 !text-lg">donut_large</span>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">Estado de Flota</h3>
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">donut_large</span>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">Estado de Flota</h3>
           </div>
           <div className="space-y-3 mb-6">
             <div>
               <div className="flex justify-between text-xs mb-1.5">
                 <span className="text-green-400 font-semibold">Disponibles</span>
-                <span className="text-[#E5E2E3]/50">{metrics.available}</span>
+                <span className="text-gray-500 dark:text-[#E5E2E3]/50">{metrics.available}</span>
               </div>
-              <div className="h-2 bg-[#E5E2E3]/5 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 dark:bg-[#E5E2E3]/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-green-500 rounded-full"
                   style={{ width: `${(metrics.available / vehicles.length) * 100}%` }}
@@ -738,9 +752,9 @@ const DashboardTab = ({ vehicles, dealership }) => {
             <div>
               <div className="flex justify-between text-xs mb-1.5">
                 <span className="text-yellow-400 font-semibold">Reservados</span>
-                <span className="text-[#E5E2E3]/50">{vehicles.length - metrics.available}</span>
+                <span className="text-gray-500 dark:text-[#E5E2E3]/50">{vehicles.length - metrics.available}</span>
               </div>
-              <div className="h-2 bg-[#E5E2E3]/5 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 dark:bg-[#E5E2E3]/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-yellow-500 rounded-full"
                   style={{ width: `${((vehicles.length - metrics.available) / vehicles.length) * 100}%` }}
@@ -748,7 +762,7 @@ const DashboardTab = ({ vehicles, dealership }) => {
               </div>
             </div>
           </div>
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40 mb-3">Por Combustible</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40 mb-3">Por Combustible</h3>
           <div className="space-y-2">
             {metrics.fuels.map(([fuel, count]) => (
               <DistBar key={fuel} label={fuel} count={count} max={metrics.fuels[0][1]} color="bg-[#1565C0]" />
@@ -757,8 +771,8 @@ const DashboardTab = ({ vehicles, dealership }) => {
         </div>
 
         {/* Brand distribution */}
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40 mb-5">Por Marca</h3>
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40 mb-5">Por Marca</h3>
           <div className="space-y-3">
             {metrics.brands.map(([brand, count]) => (
               <DistBar key={brand} label={brand} count={count} max={metrics.brands[0][1]} />
@@ -771,35 +785,35 @@ const DashboardTab = ({ vehicles, dealership }) => {
       <PriceHistogram vehicles={vehicles} fmt={fmt} />
 
       {/* Vehicles — engagement performance */}
-      <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#E5E2E3]/10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+      <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#E5E2E3]/10">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
             Vehículos — Rendimiento
           </h3>
         </div>
-        <div className="divide-y divide-[#E5E2E3]/5">
+        <div className="divide-y divide-gray-200 dark:divide-[#E5E2E3]/5">
           {vehicles.slice(0, 6).map((v) => (
             <div key={v.id} className="flex items-center gap-2 md:gap-4 px-4 md:px-6 py-3">
-              <div className="w-12 h-8 rounded bg-[#0E0E0F] overflow-hidden flex-shrink-0">
+              <div className="w-12 h-8 rounded bg-gray-50 dark:bg-[#0E0E0F] overflow-hidden flex-shrink-0">
                 {v.imageUrl
                   ? <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-base">directions_car</span>
+                      <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/35 !text-base">directions_car</span>
                     </div>
                 }
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[#E5E2E3] text-sm font-semibold truncate">{v.brand} {v.model}</p>
+                <p className="text-gray-900 dark:text-[#E5E2E3] text-sm font-semibold truncate">{v.brand} {v.model}</p>
                 <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                  <span className="flex items-center gap-1 text-[#E5E2E3]/30 text-[11px]">
+                  <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/30 text-[11px]">
                     <span className="material-symbols-outlined !text-[12px]">visibility</span>
                     {v.viewCount || 0}
                   </span>
-                  <span className="flex items-center gap-1 text-[#E5E2E3]/30 text-[11px]">
+                  <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/30 text-[11px]">
                     <span className="material-symbols-outlined !text-[12px]">forum</span>
                     {v.leadCount || 0}
                   </span>
-                  <span className="flex items-center gap-1 text-[#E5E2E3]/30 text-[11px]">
+                  <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/30 text-[11px]">
                     <span className="material-symbols-outlined !text-[12px]">share</span>
                     {v.shareCount || 0}
                   </span>
@@ -925,20 +939,20 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="relative bg-[#141415] border border-[#E5E2E3]/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white dark:bg-[#141415] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {saving && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/60">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
-              <span className="text-[#E5E2E3]/60 text-sm">Guardando…</span>
+              <div className="w-10 h-10 border-4 border-gray-200 dark:border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
+              <span className="text-gray-500 dark:text-[#E5E2E3]/60 text-sm">Guardando…</span>
             </div>
           </div>
         )}
-        <div className="flex items-center justify-between p-6 border-b border-[#E5E2E3]/10">
-          <h2 className="text-xl font-headline font-black text-[#E5E2E3] uppercase tracking-tight">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-[#E5E2E3]/10">
+          <h2 className="text-xl font-headline font-black text-gray-900 dark:text-[#E5E2E3] uppercase tracking-tight">
             {isEdit ? 'Editar Vehículo' : 'Nueva Unidad'}
           </h2>
-          <button onClick={onClose} disabled={saving} className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+          <button onClick={onClose} disabled={saving} className="text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -946,16 +960,16 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
         <fieldset disabled={saving} className="contents">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Marca
               </label>
               {isEdit ? (
                 <>
                   <input
                     value={form.brand} readOnly disabled
-                    className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm opacity-40 cursor-not-allowed"
+                    className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm opacity-40 cursor-not-allowed"
                   />
-                  <p className="text-[#E5E2E3]/45 text-[10px] mt-1">La marca no puede modificarse</p>
+                  <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] mt-1">La marca no puede modificarse</p>
                 </>
               ) : (
                 <>
@@ -974,7 +988,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                       }
                     }}
                     required={brandMode !== 'other'}
-                    className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+                    className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
                   >
                     <option value="" disabled>Seleccionar marca…</option>
                     {VEHICLE_BRANDS.map((b) => (
@@ -991,14 +1005,14 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                       }}
                       required
                       placeholder="Escribí la marca"
-                      className="w-full mt-2 bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
+                      className="w-full mt-2 bg-white dark:bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
                     />
                   )}
                 </>
               )}
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Modelo
               </label>
               {(() => {
@@ -1018,7 +1032,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                           }
                         }}
                         required={modelMode !== 'other'}
-                        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+                        className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
                       >
                         <option value="" disabled>Seleccionar modelo…</option>
                         {modelOptions.map((m) => (
@@ -1033,7 +1047,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                           required
                           autoFocus
                           placeholder="Escribí el modelo"
-                          className="w-full mt-2 bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
+                          className="w-full mt-2 bg-white dark:bg-[#1C1C1E] border border-[#D32F2F]/40 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/80 focus:outline-none"
                         />
                       )}
                     </>
@@ -1042,7 +1056,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                 return (
                   <input
                     value={form.model} onChange={set('model')} required placeholder="Ej: Corolla"
-                    className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                    className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
                   />
                 );
               })()}
@@ -1050,121 +1064,121 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Año</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Año</label>
               <input
                 type="number" value={form.year} onChange={set('year')} required min="1990" max="2030"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Precio (USD)
               </label>
               <input
                 type="number" value={form.price} onChange={set('price')} required min="0" placeholder="145900"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Kilometraje
               </label>
               <input
                 type="number" value={form.mileage} onChange={set('mileage')} required min="0" placeholder="0"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Transmisión
               </label>
               <select
                 value={form.transmission} onChange={set('transmission')}
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               >
                 {TRANSMISSIONS.map((t) => <option key={t}>{t}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Combustible
               </label>
               <select
                 value={form.fuel} onChange={set('fuel')}
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               >
                 {FUELS.map((f) => <option key={f}>{f}</option>)}
               </select>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
               Tipo de Carrocería
             </label>
             <select
               value={form.bodyType} onChange={set('bodyType')}
-              className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+              className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
             >
               {BODY_TYPES.map((b) => <option key={b}>{b}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
               Descripción
             </label>
             <textarea
               value={form.description} onChange={set('description')} rows={3}
               placeholder="Descripción del vehículo..."
-              className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none resize-none"
+              className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none resize-none"
             />
           </div>
 
           {/* Datos opcionales públicos */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Color</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Color</label>
               <input
                 value={form.color} onChange={set('color')} placeholder="Ej: Rojo"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Puertas</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Puertas</label>
               <input
                 type="number" value={form.doors} onChange={set('doors')} placeholder="4" min="1" max="8"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Motor</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Motor</label>
               <input
                 value={form.engine} onChange={set('engine')} placeholder="Ej: 2.0L Turbo"
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Datos privados — solo visibles para la automotora */}
-          <div className="border border-[#E5E2E3]/5 rounded-xl p-4 bg-[#0E0E0F]/60">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/25 mb-3 flex items-center gap-2">
+          <div className="border border-gray-200 dark:border-[#E5E2E3]/5 rounded-xl p-4 bg-gray-100 dark:bg-[#0E0E0F]/60">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/25 mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined !text-sm">lock</span>
               Datos internos — no visibles al público
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Matrícula</label>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Matrícula</label>
                 <input
                   value={form.matricula} onChange={set('matricula')} placeholder="Ej: ABC 1234"
-                  className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
+                  className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Padrón</label>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Padrón</label>
                 <input
                   value={form.padron} onChange={set('padron')} placeholder="Nro. de padrón"
-                  className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
+                  className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
                 />
               </div>
             </div>
@@ -1172,7 +1186,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           {/* Existing images */}
           {isEdit && existingUrls.length > 0 && (
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Imágenes actuales ({existingUrls.length})
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1180,7 +1194,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                   const markedForRemoval = urlsToRemove.includes(url);
                   return (
                     <div key={url} className={`relative group/img w-20 h-14 rounded-lg overflow-hidden border transition-opacity ${
-                      markedForRemoval ? 'border-red-500/60 opacity-40' : 'border-[#E5E2E3]/10'
+                      markedForRemoval ? 'border-red-500/60 opacity-40' : 'border-gray-200 dark:border-[#E5E2E3]/10'
                     }`}>
                       <img src={url} alt="" className="w-full h-full object-cover" />
                       <button
@@ -1212,11 +1226,11 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                 return (
                   <>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40">
+                      <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40">
                         {isEdit ? 'Agregar imágenes' : 'Imágenes'}
                       </label>
                       <span className={`text-[10px] font-bold tabular-nums ${
-                        atLimit ? 'text-red-400' : existingUrls.length >= 8 ? 'text-yellow-400' : 'text-[#E5E2E3]/30'
+                        atLimit ? 'text-red-400' : existingUrls.length >= 8 ? 'text-yellow-400' : 'text-gray-500 dark:text-[#E5E2E3]/30'
                       }`}>
                         {existingUrls.length + imageFiles.length} / {MAX}
                       </span>
@@ -1234,9 +1248,9 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                             const picked = Array.from(e.target.files).slice(0, slots);
                             setImageFiles(picked);
                           }}
-                          className="text-[#E5E2E3]/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:bg-[#D32F2F]/20 file:text-[#FFB3AC] hover:file:bg-[#D32F2F]/30 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:bg-[#D32F2F]/20 file:text-primary dark:file:text-[#FFB3AC] hover:file:bg-[#D32F2F]/30 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                         />
-                        <p className="text-[#E5E2E3]/45 text-[10px] mt-1">
+                        <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] mt-1">
                           {imageFiles.length > 0
                             ? `${imageFiles.length} archivo${imageFiles.length > 1 ? 's' : ''} seleccionado${imageFiles.length > 1 ? 's' : ''}`
                             : `Hasta ${slots} imagen${slots !== 1 ? 'es' : ''} más (máx. ${MAX} en total)`
@@ -1251,13 +1265,13 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
             {/* Sucursal */}
           {dealerships && dealerships.length > 1 && (
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Sucursal
               </label>
               <select
                 value={selectedDealershipId}
                 onChange={(e) => setSelectedDealershipId(e.target.value)}
-                className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+                className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
               >
                 {dealerships.map((d) => (
                   <option key={d.id} value={d.id}>{d.name} — {d.city}</option>
@@ -1266,7 +1280,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
             </div>
           )}
           <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2">Estado</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Estado</label>
               <div className="flex gap-2">
                 {[
                   { label: 'Disponible', key: 'available', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
@@ -1284,7 +1298,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                         isSold: key === 'sold',
                       }))}
                       className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
-                        current === key ? activeClass : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
+                        current === key ? activeClass : 'bg-white dark:bg-[#1C1C1E] text-gray-500 dark:text-[#E5E2E3]/40 border-gray-200 dark:border-[#E5E2E3]/10 hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 hover:text-gray-500 hover:dark:text-[#E5E2E3]/60'
                       }`}
                     >
                       {label}
@@ -1298,7 +1312,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           <div className="flex gap-3 pt-2">
             <button
               type="button" onClick={onClose}
-              className="flex-1 py-3 border border-[#E5E2E3]/10 text-[#E5E2E3]/50 rounded-lg text-sm font-semibold hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3] transition-colors"
+              className="flex-1 py-3 border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-500 dark:text-[#E5E2E3]/50 rounded-lg text-sm font-semibold hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
             >
               Cancelar
             </button>
@@ -1386,24 +1400,24 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
     <>
       {confirmDeleteVehicle && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#141415] border border-[#E5E2E3]/10 rounded-xl w-full max-w-sm">
-            <div className="flex items-center justify-between p-6 border-b border-[#E5E2E3]/10">
-              <h2 className="text-xl font-headline font-black text-[#E5E2E3] uppercase tracking-tight">Eliminar vehículo</h2>
-              <button onClick={() => setConfirmDeleteVehicle(null)} className="text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors">
+          <div className="bg-white dark:bg-[#141415] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-[#E5E2E3]/10">
+              <h2 className="text-xl font-headline font-black text-gray-900 dark:text-[#E5E2E3] uppercase tracking-tight">Eliminar vehículo</h2>
+              <button onClick={() => setConfirmDeleteVehicle(null)} className="text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <p className="text-[#E5E2E3]/70 text-sm">
+              <p className="text-gray-500 dark:text-[#E5E2E3]/70 text-sm">
                 ¿Eliminarsás{' '}
-                <span className="text-[#E5E2E3] font-semibold">{confirmDeleteVehicle.brand} {confirmDeleteVehicle.model} {confirmDeleteVehicle.year}</span>?
+                <span className="text-gray-900 dark:text-[#E5E2E3] font-semibold">{confirmDeleteVehicle.brand} {confirmDeleteVehicle.model} {confirmDeleteVehicle.year}</span>?
                 Esta acción no se puede deshacer.
               </p>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setConfirmDeleteVehicle(null)}
-                  className="flex-1 py-3 border border-[#E5E2E3]/10 text-[#E5E2E3]/50 rounded-lg text-sm font-semibold hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3] transition-colors"
+                  className="flex-1 py-3 border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-500 dark:text-[#E5E2E3]/50 rounded-lg text-sm font-semibold hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
                 >
                   Cancelar
                 </button>
@@ -1431,10 +1445,10 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">
+            <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
               Mi Flota
             </h1>
-            <p className="text-[#E5E2E3]/30 text-sm mt-1">
+            <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-sm mt-1">
               {filtered.length !== vehicles.length
                 ? `${filtered.length} de ${vehicles.length} unidades`
                 : `${vehicles.length} unidades en total`}
@@ -1451,20 +1465,20 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
         {/* Filters */}
         <div className="flex gap-3 flex-wrap">
           <div className="relative flex-1 min-w-48">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#E5E2E3]/30 !text-lg">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#E5E2E3]/30 !text-lg">
               search
             </span>
             <input
               value={search} onChange={(e) => { setSearch(e.target.value); resetPage(); }}
               placeholder="Buscar por marca o modelo..."
-              className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg pl-11 pr-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
+              className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg pl-11 pr-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
             />
           </div>
           {brandOptions.length > 1 && (
             <select
               value={filterBrand}
               onChange={(e) => { setFilterBrand(e.target.value); resetPage(); }}
-              className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+              className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
             >
               <option value="all">Todas las marcas</option>
               {brandOptions.map((b) => <option key={b} value={b}>{b}</option>)}
@@ -1474,7 +1488,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
             <select
               value={filterYear}
               onChange={(e) => { setFilterYear(e.target.value); resetPage(); }}
-              className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
+              className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
             >
               <option value="all">Todos los años</option>
               {yearOptions.map((y) => <option key={y} value={String(y)}>{y}</option>)}
@@ -1486,8 +1500,8 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
               onClick={() => { setFilterAvail(f); resetPage(); }}
               className={`px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
                 filterAvail === f
-                  ? 'bg-[#D32F2F]/20 text-[#FFB3AC] border border-[#D32F2F]/30'
-                  : 'bg-[#1C1C1E] text-[#E5E2E3]/40 border border-[#E5E2E3]/10 hover:border-[#E5E2E3]/20 hover:text-[#E5E2E3]/60'
+                  ? 'bg-[#D32F2F]/20 text-primary dark:text-[#FFB3AC] border border-[#D32F2F]/30'
+                  : 'bg-white dark:bg-[#1C1C1E] text-gray-500 dark:text-[#E5E2E3]/40 border border-gray-200 dark:border-[#E5E2E3]/10 hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 hover:text-gray-500 hover:dark:text-[#E5E2E3]/60'
               }`}
             >
               {f === 'all' ? 'Todos' : f === 'available' ? 'Disponibles' : f === 'reserved' ? 'Reservados' : 'Vendidos'}
@@ -1498,22 +1512,22 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
         {/* Vehicle list */}
         <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="text-center py-16 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg">
-              <span className="material-symbols-outlined text-5xl text-[#E5E2E3]/35">search_off</span>
-              <p className="text-[#E5E2E3]/30 mt-3 text-sm">No se encontraron vehículos</p>
+            <div className="text-center py-16 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg">
+              <span className="material-symbols-outlined text-5xl text-gray-500 dark:text-[#E5E2E3]/35">search_off</span>
+              <p className="text-gray-500 dark:text-[#E5E2E3]/30 mt-3 text-sm">No se encontraron vehículos</p>
             </div>
           ) : (
             paginated.map((v) => (
               <div
                 key={v.id}
-                className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-4 flex items-start gap-4 hover:border-[#E5E2E3]/20 transition-colors"
+                className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-4 flex items-start gap-4 hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 transition-colors"
               >
-                <div className="w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden bg-[#0E0E0F] flex-shrink-0 mt-0.5">
+                <div className="w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden bg-gray-50 dark:bg-[#0E0E0F] flex-shrink-0 mt-0.5">
                   {v.imageUrl ? (
                     <img src={v.imageUrl} alt={v.model} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[#E5E2E3]/35 !text-3xl">
+                      <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/35 !text-3xl">
                         directions_car
                       </span>
                     </div>
@@ -1523,7 +1537,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-[#E5E2E3] font-headline font-bold tracking-tight text-sm md:text-base">
+                        <h3 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-bold tracking-tight text-sm md:text-base">
                           {v.brand} {v.model}
                         </h3>
                         <span
@@ -1538,7 +1552,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                           {v.isSold ? 'Vendido' : v.isAvailable ? 'Disponible' : 'Reservado'}
                         </span>
                       </div>
-                      <div className="flex gap-3 mt-1 text-xs text-[#E5E2E3]/30 flex-wrap">
+                      <div className="flex gap-3 mt-1 text-xs text-gray-500 dark:text-[#E5E2E3]/30 flex-wrap">
                         <span className="font-mono text-[#D32F2F]/70">#{v.id.slice(0, 8).toUpperCase()}</span>
                         <span>{v.year}</span>
                         <span>{Number(v.mileage).toLocaleString()} km</span>
@@ -1553,15 +1567,15 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
+                        <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">visibility</span>
                           {v.viewCount || 0}
                         </span>
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
+                        <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">forum</span>
                           {v.leadCount || 0}
                         </span>
-                        <span className="flex items-center gap-1 text-[#E5E2E3]/50 text-[11px]">
+                        <span className="flex items-center gap-1 text-gray-500 dark:text-[#E5E2E3]/50 text-[11px]">
                           <span className="material-symbols-outlined !text-[12px]">share</span>
                           {v.shareCount || 0}
                         </span>
@@ -1572,21 +1586,21 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         href={`/product/${v.brand}/${v.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#E5E2E3]/10 hover:text-[#E5E2E3] transition-colors"
+                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
                         title="Ver publicación"
                       >
                         <span className="material-symbols-outlined !text-base">open_in_new</span>
                       </a>
                       <button
                         onClick={() => openEdit(v)}
-                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
+                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
                       >
                         <span className="material-symbols-outlined !text-base">edit</span>
                       </button>
                       <button
                         onClick={() => handleDelete(v)}
                         disabled={deleting === v.id}
-                        className="p-2 bg-[#E5E2E3]/5 text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
+                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
                       >
                         <span className="material-symbols-outlined !text-base">delete</span>
                       </button>
@@ -1602,14 +1616,14 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between gap-3 pt-2">
-            <span className="text-[#E5E2E3]/30 text-xs">
+            <span className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs">
               Página {page} de {totalPages} &middot; {filtered.length} resultados
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-2 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined !text-base">chevron_left</span>
               </button>
@@ -1622,7 +1636,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                 }, [])
                 .map((item, idx) =>
                   item === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="text-[#E5E2E3]/45 px-1 text-sm">…</span>
+                    <span key={`ellipsis-${idx}`} className="text-gray-500 dark:text-[#E5E2E3]/45 px-1 text-sm">…</span>
                   ) : (
                     <button
                       key={item}
@@ -1630,7 +1644,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                       className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors ${
                         page === item
                           ? 'bg-[#D32F2F] text-white'
-                          : 'bg-[#1C1C1E] border border-[#E5E2E3]/10 text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20'
+                          : 'bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] hover:border-gray-200 hover:dark:border-[#E5E2E3]/20'
                       }`}
                     >
                       {item}
@@ -1641,7 +1655,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-2 bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg text-[#E5E2E3]/40 hover:text-[#E5E2E3] hover:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-2 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined !text-base">chevron_right</span>
               </button>
@@ -1755,8 +1769,8 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">Suscripción</h1>
-        <p className="text-[#E5E2E3]/30 text-sm mt-1">Administrá tu plan de RedAutos</p>
+        <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">Suscripción</h1>
+        <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-sm mt-1">Administrá tu plan de RedAutos</p>
       </div>
 
       {/* Current status */}
@@ -1778,7 +1792,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                 try { await verifySubscription(dealership.id); } catch {}
                 await onRefresh();
               }}
-              className="text-xs text-[#E5E2E3]/40 hover:text-[#E5E2E3] transition-colors flex items-center gap-1 shrink-0"
+              className="text-xs text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors flex items-center gap-1 shrink-0"
             >
               <span className="material-symbols-outlined !text-sm">refresh</span> Verificar ahora
             </button>
@@ -1799,7 +1813,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                   ? 'border-[#D32F2F]/50 bg-[#D32F2F]/5'
                   : p.testOnly
                   ? 'border-yellow-500/20 bg-yellow-500/5'
-                  : 'border-[#E5E2E3]/10 bg-[#1C1C1E]'
+                  : 'border-gray-200 dark:border-[#E5E2E3]/10 bg-white dark:bg-[#1C1C1E]'
               }`}
             >
               {p.highlight && (
@@ -1813,21 +1827,21 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                 </span>
               )}
               <div>
-                <h2 className="text-[#E5E2E3] font-headline font-black text-xl tracking-tight">{p.name}</h2>
+                <h2 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-black text-xl tracking-tight">{p.name}</h2>
                 <div className="flex items-end gap-1 mt-2">
-                  <span className="text-4xl font-headline font-black text-[#E5E2E3]">{p.price}</span>
-                  <span className="text-[#E5E2E3]/40 text-sm mb-1">{p.period} · {p.currency}</span>
+                  <span className="text-4xl font-headline font-black text-gray-900 dark:text-[#E5E2E3]">{p.price}</span>
+                  <span className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm mb-1">{p.period} · {p.currency}</span>
                 </div>
               </div>
               <ul className="space-y-2 flex-1">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/70">
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-500 dark:text-[#E5E2E3]/70">
                     <span className="material-symbols-outlined !text-base text-green-400">check_circle</span>
                     {f}
                   </li>
                 ))}
                 {p.notIncluded.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-[#E5E2E3]/50 line-through">
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-500 dark:text-[#E5E2E3]/50 line-through">
                     <span className="material-symbols-outlined !text-base">remove_circle</span>
                     {f}
                   </li>
@@ -1844,7 +1858,7 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                   className={`w-full py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest transition-colors disabled:opacity-50 ${
                     p.highlight
                       ? 'bg-[#D32F2F] text-white hover:bg-[#B71C1C]'
-                      : 'border border-[#E5E2E3]/20 text-[#E5E2E3] hover:border-[#E5E2E3]/40'
+                      : 'border border-gray-200 dark:border-[#E5E2E3]/20 text-gray-900 dark:text-[#E5E2E3] hover:border-gray-200 hover:dark:border-[#E5E2E3]/40'
                   }`}
                 >
                   {loading ? 'Redirigiendo…' : 'Suscribirme'}
@@ -1863,13 +1877,13 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
 
       {/* Billing info */}
       {currentStatus === 'authorized' && (
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6 space-y-5">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
             Facturación
           </h3>
           {subInfoLoading ? (
-            <div className="flex items-center gap-2 text-[#E5E2E3]/30 text-sm">
-              <div className="w-4 h-4 border-2 border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
+            <div className="flex items-center gap-2 text-gray-500 dark:text-[#E5E2E3]/30 text-sm">
+              <div className="w-4 h-4 border-2 border-gray-200 dark:border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
               Cargando información…
             </div>
           ) : subInfo ? (
@@ -1878,8 +1892,8 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[#D32F2F] !text-xl">calendar_month</span>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40">Próximo cobro</p>
-                    <p className="text-[#E5E2E3] font-semibold text-sm">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40">Próximo cobro</p>
+                    <p className="text-gray-900 dark:text-[#E5E2E3] font-semibold text-sm">
                       {new Date(subInfo.nextPaymentDate + 'T12:00:00').toLocaleDateString('es-UY', {
                         day: '2-digit', month: 'long', year: 'numeric'
                       })}
@@ -1889,17 +1903,17 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
               )}
               {subInfo.payments?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-3">Historial de pagos</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-3">Historial de pagos</p>
                   <div className="space-y-2">
                     {subInfo.payments.map((p, i) => (
-                      <div key={i} className="flex items-center justify-between py-2.5 border-b border-[#E5E2E3]/5 last:border-0">
+                      <div key={i} className="flex items-center justify-between py-2.5 border-b border-gray-200 dark:border-[#E5E2E3]/5 last:border-0">
                         <div className="flex items-center gap-3">
                           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                             p.status === 'approved' ? 'bg-green-400' : 'bg-yellow-400'
                           }`} />
-                          <span className="text-[#E5E2E3]/50 text-xs">{p.date}</span>
+                          <span className="text-gray-500 dark:text-[#E5E2E3]/50 text-xs">{p.date}</span>
                         </div>
-                        <span className="text-[#E5E2E3] text-xs font-semibold">
+                        <span className="text-gray-900 dark:text-[#E5E2E3] text-xs font-semibold">
                           {p.currency} {p.amount?.toLocaleString('es-UY')}
                         </span>
                       </div>
@@ -1908,14 +1922,14 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
                 </div>
               )}
               {!subInfo.nextPaymentDate && (!subInfo.payments || subInfo.payments.length === 0) && (
-                <p className="text-[#E5E2E3]/30 text-xs">No hay información de facturación disponible.</p>
+                <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs">No hay información de facturación disponible.</p>
               )}
             </>
           ) : null}
         </div>
       )}
 
-      <p className="text-[#E5E2E3]/45 text-xs">
+      <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs">
         El pago se procesa de forma segura a través de MercadoPago. Podés cancelar tu suscripción en cualquier momento.
       </p>
     </div>
@@ -1966,13 +1980,13 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
 
   const Field = ({ label, k, type = 'text', placeholder = '' }) => (
     <div>
-      <label className="block text-[11px] font-semibold uppercase tracking-widest text-[#E5E2E3]/40 mb-1">{label}</label>
+      <label className="block text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-[#E5E2E3]/40 mb-1">{label}</label>
       <input
         type={type}
         value={form[k]}
         onChange={set(k)}
         placeholder={placeholder}
-        className="w-full bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm px-4 py-3 text-sm text-[#E5E2E3] placeholder-[#E5E2E3]/50 focus:outline-none focus:border-[#D32F2F]/50 transition-colors"
+        className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-sm px-4 py-3 text-sm text-gray-900 dark:text-[#E5E2E3] placeholder-gray-400 dark:placeholder-[#E5E2E3]/50 focus:outline-none focus:border-[#D32F2F]/50 transition-colors"
       />
     </div>
   );
@@ -1980,14 +1994,14 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
   return (
     <div className="space-y-10 max-w-4xl">
       <div>
-        <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">Sucursales</h1>
-        <p className="text-[#E5E2E3]/30 text-sm mt-1">{dealerships.length} sucursal{dealerships.length !== 1 ? 'es' : ''} registrada{dealerships.length !== 1 ? 's' : ''}</p>
+        <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">Sucursales</h1>
+        <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-sm mt-1">{dealerships.length} sucursal{dealerships.length !== 1 ? 'es' : ''} registrada{dealerships.length !== 1 ? 's' : ''}</p>
       </div>
 
       {/* Listado */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {dealerships.map((d) => (
-          <div key={d.id} className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-5 flex gap-4 items-start">
+          <div key={d.id} className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-sm p-5 flex gap-4 items-start">
             <div className="w-10 h-10 bg-[#D32F2F]/10 rounded-sm flex items-center justify-center flex-shrink-0">
               {d.logoUrl
                 ? <img src={d.logoUrl} alt={d.name} className="w-9 h-9 object-cover rounded-sm" />
@@ -1995,9 +2009,9 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
               }
             </div>
             <div className="min-w-0">
-              <div className="text-[#E5E2E3] font-bold text-sm truncate">{d.name}</div>
-              <div className="text-[#E5E2E3]/40 text-xs mt-0.5">{d.address && `${d.address}, `}{d.city}, {d.country}</div>
-              {d.phone && <div className="text-[#E5E2E3]/30 text-xs mt-0.5">{d.phone}</div>}
+              <div className="text-gray-900 dark:text-[#E5E2E3] font-bold text-sm truncate">{d.name}</div>
+              <div className="text-gray-500 dark:text-[#E5E2E3]/40 text-xs mt-0.5">{d.address && `${d.address}, `}{d.city}, {d.country}</div>
+              {d.phone && <div className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs mt-0.5">{d.phone}</div>}
             </div>
           </div>
         ))}
@@ -2005,14 +2019,14 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
 
       {/* Formulario nueva sucursal */}
       {dealerships.length >= MAX_PRO_DEALERSHIPS ? (
-        <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8 flex flex-col items-center gap-3 text-center">
+        <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-sm p-8 flex flex-col items-center gap-3 text-center">
           <span className="material-symbols-outlined !text-4xl text-[#D32F2F]/50">store_off</span>
-          <p className="text-[#E5E2E3] font-bold">Límite alcanzado</p>
-          <p className="text-[#E5E2E3]/40 text-sm">El Plan Plus permite hasta {MAX_PRO_DEALERSHIPS} sucursales. Eliminá una para poder agregar otra.</p>
+          <p className="text-gray-900 dark:text-[#E5E2E3] font-bold">Límite alcanzado</p>
+          <p className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm">El Plan Plus permite hasta {MAX_PRO_DEALERSHIPS} sucursales. Eliminá una para poder agregar otra.</p>
         </div>
       ) : (
-      <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-sm p-8">
-        <h2 className="text-lg font-headline font-bold text-[#E5E2E3] tracking-tight mb-6">+ Nueva Sucursal</h2>
+      <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-sm p-8">
+        <h2 className="text-lg font-headline font-bold text-gray-900 dark:text-[#E5E2E3] tracking-tight mb-6">+ Nueva Sucursal</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Field label="Nombre *" k="name" placeholder="Ej: Sucursal Centro" />
@@ -2097,28 +2111,28 @@ const ConfigTab = ({ dealership, onUpdated }) => {
   };
 
   const inputCls =
-    'w-full bg-[#141415] border border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none';
+    'w-full bg-white dark:bg-[#141415] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none';
   const labelCls =
-    'block text-[10px] font-bold uppercase tracking-[0.15em] text-[#E5E2E3]/40 mb-2';
+    'block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2';
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-headline font-extrabold text-[#E5E2E3] tracking-tighter uppercase">
+      <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
         Configuración
       </h1>
 
       {/* Logo card */}
-      <div className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6 flex items-center gap-6">
-        <div className="w-20 h-20 rounded-xl bg-[#0E0E0F] border border-[#E5E2E3]/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6 flex items-center gap-6">
+        <div className="w-20 h-20 rounded-xl bg-gray-50 dark:bg-[#0E0E0F] border border-gray-200 dark:border-[#E5E2E3]/10 flex items-center justify-center overflow-hidden flex-shrink-0">
           {logoPreview ? (
             <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
           ) : (
-            <span className="material-symbols-outlined text-[#E5E2E3]/45 !text-3xl">garage</span>
+            <span className="material-symbols-outlined text-gray-500 dark:text-[#E5E2E3]/45 !text-3xl">garage</span>
           )}
         </div>
         <div>
-          <p className="text-[#E5E2E3] font-semibold text-sm">{form.name}</p>
-          <p className="text-[#E5E2E3]/30 text-xs mb-3">
+          <p className="text-gray-900 dark:text-[#E5E2E3] font-semibold text-sm">{form.name}</p>
+          <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs mb-3">
             {form.city}, {form.country}
           </p>
           <label className="cursor-pointer text-xs font-semibold text-[#D32F2F] hover:text-[#FF5252] transition-colors">
@@ -2129,7 +2143,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
             />
           </label>
           {logoFile && (
-            <p className="text-[#E5E2E3]/30 text-xs mt-1">
+            <p className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs mt-1">
               {logoFile.name} · Se guardará al confirmar
             </p>
           )}
@@ -2137,8 +2151,8 @@ const ConfigTab = ({ dealership, onUpdated }) => {
       </div>
 
       {/* Info form */}
-      <form onSubmit={handleSubmit} className="bg-[#1C1C1E] border border-[#E5E2E3]/10 rounded-lg p-6 space-y-5">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6 space-y-5">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
           Información general
         </h3>
         <div>
@@ -2175,8 +2189,8 @@ const ConfigTab = ({ dealership, onUpdated }) => {
           onChange={(lat, lng) => setForm(f => ({ ...f, latitude: lat, longitude: lng }))}
         />
 
-        <div className="border-t border-[#E5E2E3]/10 pt-5 space-y-5">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+        <div className="border-t border-gray-200 dark:border-[#E5E2E3]/10 pt-5 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
             Descripción
           </h3>
           <div>
@@ -2189,7 +2203,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
               placeholder="Contá brevemente quiénes son, su experiencia y lo que los diferencia…"
               className={`${inputCls} resize-none`}
             />
-            <p className="text-[#E5E2E3]/45 text-[10px] mt-1">{form.bio.length}/500 caracteres</p>
+            <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] mt-1">{form.bio.length}/500 caracteres</p>
           </div>
           <div>
             <label className={labelCls}>Horarios de atención</label>
@@ -2203,15 +2217,15 @@ const ConfigTab = ({ dealership, onUpdated }) => {
           </div>
         </div>
 
-        <div className="border-t border-[#E5E2E3]/10 pt-5 space-y-5">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5E2E3]/40">
+        <div className="border-t border-gray-200 dark:border-[#E5E2E3]/10 pt-5 space-y-5">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
             Redes sociales
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className={labelCls}>Instagram</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#E5E2E3]/30 text-sm">@</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#E5E2E3]/30 text-sm">@</span>
                 <input
                   value={form.instagram}
                   onChange={set('instagram')}
@@ -2223,7 +2237,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
             <div>
               <label className={labelCls}>TikTok</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#E5E2E3]/30 text-sm">@</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#E5E2E3]/30 text-sm">@</span>
                 <input
                   value={form.tiktok}
                   onChange={set('tiktok')}
@@ -2328,7 +2342,7 @@ const AdminDashboard = () => {
   // Loading screen
   if (loading && !selectedId) {
     return (
-      <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
       </div>
     );
@@ -2338,7 +2352,7 @@ const AdminDashboard = () => {
   if (!selectedId || !currentDealership) {
     return (
       dealerships.length === 0 ? (
-        <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
         </div>
       ) : (
@@ -2351,12 +2365,12 @@ const AdminDashboard = () => {
   const hasActivePlan = currentDealership?.subscriptionStatus === 'authorized';
   if (!hasActivePlan) {
     return (
-      <div className="min-h-screen bg-[#0E0E0F] flex flex-col items-center justify-center px-4 gap-6 text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex flex-col items-center justify-center px-4 gap-6 text-center">
         <img src={logoSrc} alt="RedAutos" className="h-16 object-contain mb-2" />
         <span className="material-symbols-outlined !text-6xl text-[#D32F2F]/40">lock</span>
         <div>
-          <h2 className="text-[#E5E2E3] font-headline font-black text-2xl tracking-tighter">Suscripción requerida</h2>
-          <p className="text-[#E5E2E3]/40 text-sm mt-2 max-w-sm">
+          <h2 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-black text-2xl tracking-tighter">Suscripción requerida</h2>
+          <p className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm mt-2 max-w-sm">
             Para acceder al panel de administración necesitás un plan activo de RedAutos.
           </p>
           {currentDealership?.subscriptionStatus === 'pending' && (
@@ -2372,13 +2386,13 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={loadDealerships}
-            className="border border-[#E5E2E3]/20 text-[#E5E2E3]/50 px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:text-[#E5E2E3] transition-colors flex items-center gap-2"
+            className="border border-gray-200 dark:border-[#E5E2E3]/20 text-gray-500 dark:text-[#E5E2E3]/50 px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors flex items-center gap-2"
           >
             <span className="material-symbols-outlined !text-sm">refresh</span> Actualizar
           </button>
           <button
             onClick={() => navigate('/login')}
-            className="text-[#E5E2E3]/45 text-xs hover:text-[#E5E2E3]/50 transition-colors px-4"
+            className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs hover:text-gray-500 hover:dark:text-[#E5E2E3]/50 transition-colors px-4"
           >
             Cerrar sesión
           </button>
@@ -2394,7 +2408,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="bg-[#0E0E0F] font-body text-[#E5E2E3] antialiased flex min-h-screen">
+    <div className="bg-gray-50 dark:bg-[#0E0E0F] font-body text-gray-900 dark:text-[#E5E2E3] antialiased flex min-h-screen">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
@@ -2411,10 +2425,10 @@ const AdminDashboard = () => {
         mobileOpen={mobileMenuOpen}
       />
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-[#0E0E0F] border-b border-[#E5E2E3]/10 flex items-center gap-3 px-4 h-14">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-gray-50 dark:bg-[#0E0E0F] border-b border-gray-200 dark:border-[#E5E2E3]/10 flex items-center gap-3 px-4 h-14">
         <button
           onClick={() => setMobileMenuOpen((o) => !o)}
-          className="text-[#E5E2E3]/60 hover:text-[#E5E2E3] transition-colors"
+          className="text-gray-500 dark:text-[#E5E2E3]/60 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
         >
           <span className="material-symbols-outlined">menu</span>
         </button>
@@ -2442,8 +2456,8 @@ const AdminDashboard = () => {
                 : (
                   <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
                     <span className="material-symbols-outlined !text-5xl text-[#D32F2F]/40">lock</span>
-                    <h2 className="text-[#E5E2E3] font-headline font-black text-xl">Plan Plus requerido</h2>
-                    <p className="text-[#E5E2E3]/40 text-sm max-w-xs">La gestión de múltiples sucursales está disponible en el Plan Plus.</p>
+                    <h2 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-black text-xl">Plan Plus requerido</h2>
+                    <p className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm max-w-xs">La gestión de múltiples sucursales está disponible en el Plan Plus.</p>
                     <button
                       onClick={() => setActiveTab('suscripcion')}
                       className="bg-[#D32F2F] text-white px-6 py-3 rounded-sm font-headline font-black text-[11px] uppercase tracking-widest hover:bg-[#B71C1C] transition-colors"

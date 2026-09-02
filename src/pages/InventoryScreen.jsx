@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
+import AdBanner from '../components/AdBanner';
 import { getVehicles, getDealerships } from '../services/api';
 import { VEHICLE_MODELS, VEHICLE_BRANDS } from '../constants/vehicles';
 import useSEO from '../hooks/useSEO';
@@ -281,8 +282,8 @@ const InventoryScreen = () => {
               {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
             {[
-              { label: 'Precio â†‘', value: 'price-asc' },
-              { label: 'Precio â†“', value: 'price-desc' },
+              { label: 'Precio ↑', value: 'price-asc' },
+              { label: 'Precio ↓', value: 'price-desc' },
               { label: 'Más nuevo', value: 'year-desc' },
               { label: 'Menos km', value: 'km-asc' },
             ].map(opt => (
@@ -478,9 +479,13 @@ const InventoryScreen = () => {
               {loading ? 'Cargando…' : `${vehicles.length} vehículo${vehicles.length !== 1 ? 's' : ''}`}
             </p>
           </div>
+
+          <div className="px-4 mb-2">
+            <AdBanner />
+          </div>
         </div>
 
-        {/* Frame 2 â€” vehicle cards */}
+        {/* Frame 2 — vehicle cards */}
         <div
           className="flex-1 rounded-t-[32px] -mt-3 relative z-20 pb-8"
           style={{
@@ -529,7 +534,7 @@ const InventoryScreen = () => {
                     <div className="p-3 flex flex-col gap-1 flex-1">
                       <p className="text-[9px] font-black uppercase tracking-wider text-primary">{vehicle.brand}</p>
                       <p className="font-black text-sm leading-tight tracking-tight" style={{ color: 'var(--fg)' }}>{vehicle.model}</p>
-                      <p className="text-[10px]" style={{ color: 'var(--fg-muted)' }}>{vehicle.year} Â· {(vehicle.mileage/1000).toFixed(0)}k km</p>
+                      <p className="text-[10px]" style={{ color: 'var(--fg-muted)' }}>{vehicle.year} · {(vehicle.mileage/1000).toFixed(0)}k km</p>
                       <p className="font-black text-primary text-sm mt-auto">${vehicle.price.toLocaleString('es-CL')}</p>
                     </div>
                   </div>
@@ -638,9 +643,13 @@ const InventoryScreen = () => {
               {loading ? '…' : `${vehicles.length} vehículos`}
             </span>
           </div>
+
+          <div className="max-w-screen-2xl mx-auto mt-6">
+            <AdBanner />
+          </div>
         </div>
 
-        {/* Frame 2 â€” sidebar + grid */}
+        {/* Frame 2 — sidebar + grid */}
         <div
           className="rounded-t-[36px] -mt-4 relative z-20 px-8 pt-8 pb-20"
           style={{ background: 'var(--frame-low)', boxShadow: '0 -8px 30px var(--shadow-frame)' }}

@@ -7,6 +7,7 @@ public class BlobStorageService
     private readonly BlobServiceClient _blobServiceClient;
     private const string VehicleImagesContainer = "vehicle-images";
     private const string DealershipLogosContainer = "dealership-logos";
+    private const string AdBannersContainer = "ad-banners";
 
     public BlobStorageService(BlobServiceClient blobServiceClient)
     {
@@ -41,6 +42,15 @@ public class BlobStorageService
     {
         var container = await GetContainerAsync(DealershipLogosContainer);
         var blobName = $"{dealershipId}{GetExtension(contentType)}";
+        var blob = container.GetBlobClient(blobName);
+        await blob.UploadAsync(imageStream, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = contentType } });
+        return blob.Uri.ToString();
+    }
+
+    public async Task<string> UploadAdImageAsync(string adId, Stream imageStream, string contentType)
+    {
+        var container = await GetContainerAsync(AdBannersContainer);
+        var blobName = $"{adId}/{Guid.NewGuid()}{GetExtension(contentType)}";
         var blob = container.GetBlobClient(blobName);
         await blob.UploadAsync(imageStream, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = contentType } });
         return blob.Uri.ToString();

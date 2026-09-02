@@ -3,11 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import logoLight from '../assets/Logo1.svg';
 import logoDark from '../assets/Logo2.svg';
 import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggleButton from './ThemeToggleButton';
 
 const TopNavBar = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { dark, toggle } = useTheme();
+  const { dark } = useTheme();
 
   const navLinkClass = (path) =>
     `font-['Manrope'] tracking-tighter uppercase font-bold text-sm ${
@@ -37,13 +38,7 @@ const TopNavBar = () => {
 
         {/* Theme toggle + hamburger */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={toggle}
-            className="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 dark:text-[#E5E2E3]/60 hover:text-primary transition-all"
-            aria-label={dark ? 'Modo claro' : 'Modo oscuro'}
-          >
-            <span className="material-symbols-outlined !text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
-          </button>
+          <ThemeToggleButton />
 
           {/* Hamburger button — mobile only */}
           <button

@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import TopNavBar from '../components/TopNavBar';
+import AdBanner from '../components/AdBanner';
 import { getDealerships, getVehicles } from '../services/api';
 
 import mapPointImg from '../assets/MapPoint.png';
@@ -420,6 +421,10 @@ const DealershipFinderScreen = () => {
               </div>
 
             </div>
+          </div>
+
+          <div className="px-4 pt-3">
+            <AdBanner />
           </div>
 
           {/* Dealership list */}

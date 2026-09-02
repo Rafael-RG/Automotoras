@@ -34,3 +34,9 @@ backend/**/publish/
 
 # Azure Functions
 backend/**/bin/publish/
+
+# Local Azurite storage emulator data
+azurite/
+
+# Local scratch notes
+text.txt

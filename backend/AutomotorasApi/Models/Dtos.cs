@@ -170,3 +170,30 @@ public record CreateCheckoutRequest(string DealershipId, string Plan, string Bac
 public record CheckoutResponse(string CheckoutUrl);
 public record SubscriptionWebhookPayload(string? Id, string? Type, string? Topic, WebhookData? Data);
 public record WebhookData(string? Id);
+
+// --- Ads DTOs ---
+public record AdDto(
+    string Id,
+    string Title,
+    string ImageUrl,
+    string LinkUrl,
+    bool IsActive,
+    DateTimeOffset? StartDate,
+    DateTimeOffset? EndDate
+);
+
+public record CreateAdRequest(
+    string Title,
+    string LinkUrl,
+    bool IsActive = true,
+    DateTimeOffset? StartDate = null,
+    DateTimeOffset? EndDate = null
+);
+
+public record UpdateAdRequest(
+    string Title,
+    string LinkUrl,
+    bool IsActive = true,
+    DateTimeOffset? StartDate = null,
+    DateTimeOffset? EndDate = null
+);

@@ -278,6 +278,21 @@ public class DealershipStorageService
             System.Text.Encoding.UTF8.GetBytes(hash));
     }
 
+    /// <summary>Asigna credenciales de prueba a una automotora existente y marca el email como verificado.</summary>
+    public async Task SetTestCredentialsAsync(string id, string email, string password)
+    {
+        var entity = await GetByIdAsync(id);
+        if (entity is null) return;
+        var (hash, salt) = HashPassword(password);
+        entity.Email = email;
+        entity.PasswordHash = hash;
+        entity.PasswordSalt = salt;
+        entity.IsEmailVerified = true;
+        entity.EmailVerificationToken = string.Empty;
+        entity.EmailVerificationTokenExpiry = null;
+        await _tableClient.UpdateEntityAsync(entity, entity.ETag);
+    }
+
     private static (string hash, string salt) HashPassword(string password)
     {
         var saltBytes = new byte[16];

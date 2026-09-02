@@ -36,6 +36,7 @@ var host = new HostBuilder()
         services.AddSingleton<BlobStorageService>();
         services.AddSingleton<SubscriptionService>();
         services.AddSingleton<EmailService>();
+        services.AddSingleton<AdStorageService>();
     })
     .Build();
 

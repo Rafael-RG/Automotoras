@@ -8,7 +8,8 @@ namespace AutomotorasApi.Functions;
 public class ImageFunctions(
     BlobStorageService blobService,
     VehicleStorageService vehicleService,
-    DealershipStorageService dealershipService)
+    DealershipStorageService dealershipService,
+    AdStorageService adService)
 {
     private static readonly string[] AllowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -105,6 +106,45 @@ public class ImageFunctions(
         using var stream = file.OpenReadStream();
         var url = await blobService.UploadDealershipLogoAsync(id, stream, file.ContentType);
         await dealershipService.UpdateLogoUrlAsync(id, url);
+
+        return new OkObjectResult(new { url });
+    }
+
+    // POST /api/ads/{id}/image  (multipart/form-data, campo: "file") — requiere X-Admin-Key
+    [Function("UploadAdImage")]
+    public async Task<IActionResult> UploadAdImage(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "ads/{id}/image")] HttpRequest req,
+        string id)
+    {
+        if (!AdminAuthHelper.IsValidAdminKey(req))
+            return new UnauthorizedResult();
+
+        IFormFile? file;
+        try
+        {
+            var form = await req.ReadFormAsync();
+            file = form.Files.GetFile("file") ?? (form.Files.Count > 0 ? form.Files[0] : null);
+        }
+        catch
+        {
+            return new BadRequestObjectResult("No se pudo leer el formulario.");
+        }
+
+        if (file is null || file.Length == 0)
+            return new BadRequestObjectResult("Se requiere un archivo en el campo 'file'.");
+
+        if (!AllowedTypes.Contains(file.ContentType))
+            return new BadRequestObjectResult("Solo se permiten imágenes JPEG, PNG o WebP.");
+
+        if (file.Length > 5 * 1024 * 1024)
+            return new BadRequestObjectResult("El archivo supera el límite de 5 MB.");
+
+        var ad = await adService.GetByIdAsync(id);
+        if (ad is null) return new NotFoundResult();
+
+        using var stream = file.OpenReadStream();
+        var url = await blobService.UploadAdImageAsync(id, stream, file.ContentType);
+        await adService.UpdateImageUrlAsync(id, url);
 
         return new OkObjectResult(new { url });
     }
