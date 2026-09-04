@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Logo2.svg';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeToggleButton from '../components/ThemeToggleButton';
+import VehicleQrModal from '../components/VehicleQrModal';
+import DealershipQrModal from '../components/DealershipQrModal';
 import {
   getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
   getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
@@ -1341,6 +1343,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [deleting, setDeleting] = useState(null);
   const [confirmDeleteVehicle, setConfirmDeleteVehicle] = useState(null);
+  const [qrVehicle, setQrVehicle] = useState(null);
   const [filterAvail, setFilterAvail] = useState('all');
   const [filterBrand, setFilterBrand] = useState('all');
   const [filterYear, setFilterYear] = useState('all');
@@ -1398,6 +1401,13 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
 
   return (
     <>
+      {qrVehicle && (
+        <VehicleQrModal
+          vehicle={qrVehicle}
+          dealership={dealershipMap[qrVehicle.dealershipId]}
+          onClose={() => setQrVehicle(null)}
+        />
+      )}
       {confirmDeleteVehicle && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#141415] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-xl w-full max-w-sm">
@@ -1591,6 +1601,13 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                       >
                         <span className="material-symbols-outlined !text-base">open_in_new</span>
                       </a>
+                      <button
+                        onClick={() => setQrVehicle(v)}
+                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
+                        title="Generar QR"
+                      >
+                        <span className="material-symbols-outlined !text-base">qr_code_2</span>
+                      </button>
                       <button
                         onClick={() => openEdit(v)}
                         className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
@@ -1944,6 +1961,7 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [qrDealership, setQrDealership] = useState(null);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -2008,14 +2026,26 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
                 : <span className="material-symbols-outlined text-[#D32F2F]">store</span>
               }
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="text-gray-900 dark:text-[#E5E2E3] font-bold text-sm truncate">{d.name}</div>
               <div className="text-gray-500 dark:text-[#E5E2E3]/40 text-xs mt-0.5">{d.address && `${d.address}, `}{d.city}, {d.country}</div>
               {d.phone && <div className="text-gray-500 dark:text-[#E5E2E3]/30 text-xs mt-0.5">{d.phone}</div>}
             </div>
+            <button
+              type="button"
+              onClick={() => setQrDealership(d)}
+              title="Generar QR"
+              className="flex-shrink-0 text-gray-500 dark:text-[#E5E2E3]/40 hover:text-[#D32F2F] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-xl">qr_code_2</span>
+            </button>
           </div>
         ))}
       </div>
+
+      {qrDealership && (
+        <DealershipQrModal dealership={qrDealership} onClose={() => setQrDealership(null)} />
+      )}
 
       {/* Formulario nueva sucursal */}
       {dealerships.length >= MAX_PRO_DEALERSHIPS ? (
@@ -2082,6 +2112,7 @@ const ConfigTab = ({ dealership, onUpdated }) => {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [qrOpen, setQrOpen] = useState(false);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -2117,9 +2148,23 @@ const ConfigTab = ({ dealership, onUpdated }) => {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
-        Configuración
-      </h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
+          Configuración
+        </h1>
+        <button
+          type="button"
+          onClick={() => setQrOpen(true)}
+          className="flex-shrink-0 flex items-center gap-2 border border-gray-200 dark:border-[#E5E2E3]/10 text-gray-500 dark:text-[#E5E2E3]/50 px-4 py-2 rounded-lg text-xs font-semibold hover:text-[#D32F2F] hover:border-[#D32F2F]/30 transition-colors"
+        >
+          <span className="material-symbols-outlined !text-base">qr_code_2</span>
+          Generar QR
+        </button>
+      </div>
+
+      {qrOpen && (
+        <DealershipQrModal dealership={dealership} onClose={() => setQrOpen(false)} />
+      )}
 
       {/* Logo card */}
       <div className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-6 flex items-center gap-6">

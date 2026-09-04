@@ -114,3 +114,20 @@ html.dark {
     background: linear-gradient(135deg, #1c1c1e 0%, #0e0e0f 100%);
   }
 }
+
+/* ── Impresión de tarjeta QR (VehicleQrModal) ────────────────────────────── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .qr-print-only,
+  .qr-print-only * {
+    visibility: visible;
+  }
+  .qr-print-only {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
