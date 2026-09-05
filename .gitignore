@@ -41,3 +41,6 @@ azurite/
 
 # Local scratch notes
 text.txt
+
+# Local scratch/work runners
+.tmp/
