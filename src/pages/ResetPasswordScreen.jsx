@@ -22,7 +22,7 @@ const ResetPasswordScreen = () => {
     setError('');
 
     if (!newPassword || !confirmPassword) { setError('Completá todos los campos.'); return; }
-    if (newPassword.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (newPassword.length < 8) { setError('La contraseña debe tener al menos 8 caracteres.'); return; }
     if (newPassword !== confirmPassword) { setError('Las contraseñas no coinciden.'); return; }
 
     setLoading(true);
@@ -102,7 +102,7 @@ const ResetPasswordScreen = () => {
                   type={showNew ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   className="w-full bg-gray-50 dark:bg-[#1C1B1F] border border-gray-300 dark:border-[#353436] rounded-sm px-4 py-3 pr-12 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-[#E5E2E3]/50 transition-colors"
                 />
                 <button

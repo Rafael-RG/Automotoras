@@ -4,6 +4,7 @@ import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import AdBanner from '../components/AdBanner';
 import { getDealershipById, getVehicles, trackDealershipProfileVisit } from '../services/api';
+import { safeExternalUrl } from '../services/safeExternalUrl';
 import { VEHICLE_MODELS } from '../constants/vehicles';
 import useSEO from '../hooks/useSEO';
 
@@ -88,6 +89,7 @@ const DealershipProfileScreen = () => {
     () => allVehicles.filter((v) => v.isAvailable && v.dealershipId === id),
     [allVehicles, id]
   );
+  const websiteUrl = safeExternalUrl(dealership?.website);
 
   // Derived filter options
   const brands    = useMemo(() => [...new Set(dealershipVehicles.map(v => v.brand).filter(Boolean))].sort(), [dealershipVehicles]);
@@ -228,8 +230,8 @@ const DealershipProfileScreen = () => {
                     <span className="material-symbols-outlined !text-[14px] text-primary">photo_camera</span>Instagram
                   </a>
                 )}
-                {dealership.website && (
-                  <a href={dealership.website} target="_blank" rel="noopener noreferrer"
+                {websiteUrl && (
+                  <a href={websiteUrl} target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold" style={{ background: 'var(--bg-input)', color: 'var(--fg-muted)', border: `1px solid var(--border)` }}>
                     <span className="material-symbols-outlined !text-[14px] text-primary">language</span>Sitio web
                   </a>
@@ -486,8 +488,8 @@ const DealershipProfileScreen = () => {
                         <span className="material-symbols-outlined !text-sm text-primary">photo_camera</span>@{dealership.instagram.replace('@', '')}
                       </a>
                     )}
-                    {dealership.website && (
-                      <a href={dealership.website} target="_blank" rel="noopener noreferrer"
+                    {websiteUrl && (
+                      <a href={websiteUrl} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-xs hover:text-primary transition-colors" style={{ color: 'var(--fg-muted)' }}>
                         <span className="material-symbols-outlined !text-sm text-primary">language</span>Sitio web
                       </a>

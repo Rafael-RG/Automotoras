@@ -9,6 +9,7 @@ const VerifyEmailScreen = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('');
+  const [passwordSetupToken, setPasswordSetupToken] = useState('');
   const called = useRef(false);
 
   useEffect(() => {
@@ -23,7 +24,10 @@ const VerifyEmailScreen = () => {
     }
 
     verifyEmail(token)
-      .then(() => setStatus('success'))
+      .then(() => {
+        setPasswordSetupToken(token);
+        setStatus('success');
+      })
       .catch((err) => {
         let msg = err.message || 'Token inválido o expirado.';
         try { msg = JSON.parse(msg).error ?? msg; } catch {}
@@ -57,13 +61,14 @@ const VerifyEmailScreen = () => {
                 <span className="material-symbols-outlined text-green-400 !text-3xl">verified</span>
               </div>
               <h2 className="font-headline text-2xl font-black text-gray-900 dark:text-white tracking-tighter">¡Email verificado!</h2>
-              <p className="text-gray-500 dark:text-[#E5E2E3]/60 text-sm">Tu cuenta está activa. Ya podés iniciar sesión.</p>
+              <p className="text-gray-500 dark:text-[#E5E2E3]/60 text-sm">Para proteger tu cuenta, elegí ahora una contraseña.</p>
               <button
-                onClick={() => navigate('/login')}
-                className="w-full bg-primary hover:bg-primary/80 text-white font-black text-[11px] uppercase tracking-[0.25em] py-3.5 rounded-sm transition-all flex items-center justify-center gap-2"
+                onClick={() => navigate(`/reset-password?token=${encodeURIComponent(passwordSetupToken)}`)}
+                disabled={!passwordSetupToken}
+                className="w-full bg-primary hover:bg-primary/80 disabled:bg-primary/40 text-white font-black text-[11px] uppercase tracking-[0.25em] py-3.5 rounded-sm transition-all flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined !text-sm">login</span>
-                Iniciar sesión
+                <span className="material-symbols-outlined !text-sm">lock_reset</span>
+                Crear contraseña
               </button>
             </>
           )}

@@ -9,16 +9,13 @@ const RegisterScreen = () => {
   const [form, setForm] = useState({
     name: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     phone: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [emailDeliveryPending, setEmailDeliveryPending] = useState(false);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -27,28 +24,20 @@ const RegisterScreen = () => {
     e.preventDefault();
     setError('');
 
-    if (!form.name || !form.email || !form.password) {
-      setError('Nombre, email y contraseña son obligatorios.');
-      return;
-    }
-    if (form.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+    if (!form.name || !form.email) {
+      setError('Nombre y email son obligatorios.');
       return;
     }
 
     setLoading(true);
     try {
-      await registerDealership({
+      const result = await registerDealership({
         name: form.name,
         email: form.email,
-        password: form.password,
         phone: form.phone,
       });
       setRegisteredEmail(form.email);
+      setEmailDeliveryPending(result?.emailDelivery === 'pending');
       setRegistered(true);
     } catch (err) {
       let msg = err.message || 'Error al registrarse.';
@@ -75,14 +64,22 @@ const RegisterScreen = () => {
               <span className="material-symbols-outlined text-green-400 !text-3xl">mark_email_read</span>
             </div>
             <h2 className="font-headline text-2xl font-black text-gray-900 dark:text-white tracking-tighter">¡Revisá tu email!</h2>
-            <p className="text-gray-500 dark:text-[#E5E2E3]/60 text-sm">
-              Enviamos un link de verificación a{' '}
-              <span className="text-gray-900 dark:text-white font-semibold">{registeredEmail}</span>.
-            </p>
-            <p className="text-gray-400 dark:text-[#E5E2E3]/40 text-xs">
-              Hacé click en el link del email para activar tu cuenta. El link expira en 24 horas.
-            </p>
-            <p className="text-gray-400 dark:text-[#E5E2E3]/30 text-xs">¿No llegó? Revisá la carpeta de spam.</p>
+            {emailDeliveryPending ? (
+              <p className="text-amber-700 dark:text-amber-300 text-sm">
+                La cuenta fue creada, pero no pudimos enviar el enlace. Desde el inicio de sesión podés pedir un reenvío.
+              </p>
+            ) : (
+              <>
+                <p className="text-gray-500 dark:text-[#E5E2E3]/60 text-sm">
+                  Enviamos un link de verificación a{' '}
+                  <span className="text-gray-900 dark:text-white font-semibold">{registeredEmail}</span>.
+                </p>
+                <p className="text-gray-400 dark:text-[#E5E2E3]/40 text-xs">
+                  Hacé click en el link para activar tu cuenta y elegir tu contraseña. El link expira en 24 horas.
+                </p>
+                <p className="text-gray-400 dark:text-[#E5E2E3]/30 text-xs">¿No llegó? Revisá la carpeta de spam.</p>
+              </>
+            )}
             <button
               onClick={() => navigate('/login')}
               className="w-full bg-primary hover:bg-primary/80 text-white font-black text-[11px] uppercase tracking-[0.25em] py-3.5 rounded-sm transition-all flex items-center justify-center gap-2"
@@ -167,60 +164,6 @@ const RegisterScreen = () => {
               placeholder="+598 99 000 000"
               className="w-full bg-gray-50 dark:bg-[#1C1B1F] border border-gray-300 dark:border-[#353436] rounded-sm px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             />
-          </div>
-
-          {/* Contraseña */}
-          <div>
-            <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-2">
-              Contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                disabled={loading}
-                placeholder="Mínimo 6 caracteres"
-                className="w-full bg-gray-50 dark:bg-[#1C1B1F] border border-gray-300 dark:border-[#353436] rounded-sm px-4 py-3 pr-12 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#E5E2E3]/30 hover:text-gray-600 dark:hover:text-[#E5E2E3]/60 transition-colors"
-              >
-                <span className="material-symbols-outlined !text-lg">
-                  {showPassword ? 'visibility_off' : 'visibility'}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Confirmar contraseña */}
-          <div>
-            <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-2">
-              Confirmar contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                disabled={loading}
-                placeholder="Repetí tu contraseña"
-                className="w-full bg-gray-50 dark:bg-[#1C1B1F] border border-gray-300 dark:border-[#353436] rounded-sm px-4 py-3 pr-12 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-primary/50 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-[#E5E2E3]/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#E5E2E3]/30 hover:text-gray-600 dark:hover:text-[#E5E2E3]/60 transition-colors"
-              >
-                <span className="material-symbols-outlined !text-lg">
-                  {showConfirm ? 'visibility_off' : 'visibility'}
-                </span>
-              </button>
-            </div>
           </div>
 
           <button

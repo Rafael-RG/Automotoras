@@ -7,7 +7,11 @@ using System.Text.Json;
 
 namespace AutomotorasApi.Functions;
 
-public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageService blobService)
+public class VehicleFunctions(
+    VehicleStorageService vehicleService,
+    BlobStorageService blobService,
+    IRequestAuthorizer authorizer,
+    ImageValidationService imageValidation)
 {
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
@@ -28,9 +32,9 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dealership/{dealershipId}/vehicles")] HttpRequest req,
         string dealershipId)
     {
-        var all = await vehicleService.GetAllAsync();
-        var filtered = all.Where(v => v.DealershipId == dealershipId);
-        return new OkObjectResult(filtered.Select(vehicleService.ToDealershipDto));
+        await authorizer.RequireDealershipAsync(req, dealershipId, requireActivePlan: false);
+        var vehicles = await vehicleService.GetByDealershipAsync(dealershipId);
+        return new OkObjectResult(vehicles.Select(vehicleService.ToDealershipDto));
     }
 
     // GET /api/vehicles/{brand}/{id}
@@ -48,12 +52,16 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
     public async Task<IActionResult> CreateVehicle(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles")] HttpRequest req)
     {
-        var body = await new StreamReader(req.Body).ReadToEndAsync();
-        var request = JsonSerializer.Deserialize<CreateVehicleRequest>(body, JsonOptions);
-        if (request is null) return new BadRequestObjectResult("Cuerpo de solicitud inválido.");
+        await authorizer.RequireUserAsync(req);
+        var request = await ReadRequestAsync<CreateVehicleRequest>(req);
+        VehicleStorageService.ValidateRequest(request);
+        await authorizer.RequireDealershipAsync(req, request.DealershipId, requireActivePlan: true);
+        await blobService.ValidateVehicleImageUrlsAsync(
+            VehicleStorageService.GetRequestedImageUrls(request), request.DealershipId);
 
         var entity = await vehicleService.CreateAsync(request);
-        return new CreatedResult($"/api/vehicles/{entity.Brand}/{entity.RowKey}", vehicleService.ToDto(entity));
+        return new CreatedResult($"/api/vehicles/{Uri.EscapeDataString(entity.Brand)}/{Uri.EscapeDataString(entity.RowKey)}",
+            vehicleService.ToDto(entity));
     }
 
     // PUT /api/vehicles/{brand}/{id}
@@ -62,12 +70,20 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "vehicles/{brand}/{id}")] HttpRequest req,
         string brand, string id)
     {
-        var body = await new StreamReader(req.Body).ReadToEndAsync();
-        var request = JsonSerializer.Deserialize<CreateVehicleRequest>(body, JsonOptions);
-        if (request is null) return new BadRequestObjectResult("Cuerpo de solicitud inválido.");
+        await authorizer.RequireUserAsync(req);
+        var existing = await vehicleService.GetByIdAsync(brand, id);
+        if (existing is null) return new NotFoundResult();
+        await authorizer.RequireDealershipAsync(req, existing.DealershipId, requireActivePlan: true);
 
-        var entity = await vehicleService.UpdateAsync(brand, id, request);
-        return entity is null ? new NotFoundResult() : new OkObjectResult(vehicleService.ToDto(entity));
+        var request = await ReadRequestAsync<CreateVehicleRequest>(req);
+        VehicleStorageService.ValidateRequest(request);
+        if (!string.Equals(existing.DealershipId, request.DealershipId, StringComparison.Ordinal))
+            await authorizer.RequireDealershipAsync(req, request.DealershipId, requireActivePlan: true);
+        await blobService.ValidateVehicleImageUrlsAsync(
+            VehicleStorageService.GetRequestedImageUrls(request), request.DealershipId, existing);
+
+        var entity = await vehicleService.UpdateAsync(existing, request);
+        return new OkObjectResult(vehicleService.ToDto(entity));
     }
 
     // DELETE /api/vehicles/{brand}/{id}
@@ -76,13 +92,18 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "vehicles/{brand}/{id}")] HttpRequest req,
         string brand, string id)
     {
-        // Delete blob images first
-        var urls = await vehicleService.GetImageUrlsAsync(brand, id);
-        foreach (var url in urls)
-            await blobService.DeleteBlobByUrlAsync(url);
+        await authorizer.RequireUserAsync(req);
+        var existing = await vehicleService.GetByIdAsync(brand, id);
+        if (existing is null) return new NotFoundResult();
+        await authorizer.RequireDealershipAsync(req, existing.DealershipId, requireActivePlan: true);
 
-        var deleted = await vehicleService.DeleteAsync(brand, id);
-        return deleted ? new NoContentResult() : new NotFoundResult();
+        // Commit the conditional table delete first. A conflict must not delete live images.
+        var urls = VehicleStorageService.ParseImageUrls(existing)
+            .Where(url => blobService.IsPersistedVehicleImageUrl(existing, url)).ToArray();
+        if (!await vehicleService.DeleteAsync(existing)) return new NotFoundResult();
+        foreach (var url in urls)
+            await blobService.DeleteBlobByUrlAsync(url, BlobStorageService.VehicleImagesContainer);
+        return new NoContentResult();
     }
 
     // POST /api/vehicles/{brand}/{id}/event
@@ -91,47 +112,56 @@ public class VehicleFunctions(VehicleStorageService vehicleService, BlobStorageS
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/{brand}/{id}/event")] HttpRequest req,
         string brand, string id)
     {
-        var body = await new StreamReader(req.Body).ReadToEndAsync();
-        var request = JsonSerializer.Deserialize<TrackEventRequest>(body, JsonOptions);
-        if (request is null || string.IsNullOrEmpty(request.Type))
-            return new BadRequestObjectResult("Tipo de evento requerido: view, lead, share.");
+        await authorizer.RequireTrustedWriteAsync(req);
+        var request = await ReadRequestAsync<TrackEventRequest>(req, maxBytes: 1024);
+        if (request.Type?.ToLowerInvariant() is not ("view" or "lead" or "share"))
+            throw new ApiException(400, "invalid_vehicle_event", "Tipo de evento requerido: view, lead, share.");
 
         var ok = await vehicleService.IncrementEventAsync(brand, id, request.Type);
-        return ok ? new OkResult() : new NotFoundResult();
+        return ok ? new NoContentResult() : new NotFoundResult();
     }
 
     // POST /api/vehicles/images/temp
-    // Upload image to blob BEFORE the vehicle record exists. Returns the blob URL.
+    // Multipart order: dealershipId, file. Authentication precedes any body processing.
     [Function("UploadTempVehicleImage")]
     public async Task<IActionResult> UploadTempVehicleImage(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "vehicles/images/temp")] HttpRequest req)
     {
-        IFormFile? file;
-        try
+        await authorizer.RequireUserAsync(req);
+        var upload = await imageValidation.ReadTemporaryUploadAsync(req, async dealershipId =>
         {
-            var form = await req.ReadFormAsync();
-            file = form.Files.GetFile("file");
-        }
-        catch
-        {
-            return new BadRequestObjectResult("No se pudo leer el formulario.");
-        }
-
-        if (file is null || file.Length == 0)
-            return new BadRequestObjectResult("No se recibió ningún archivo.");
-
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-        if (!allowedTypes.Contains(file.ContentType))
-            return new BadRequestObjectResult("Tipo de archivo no permitido. Usá JPG, PNG o WEBP.");
-
-        if (file.Length > 5 * 1024 * 1024)
-            return new BadRequestObjectResult("El archivo supera el límite de 5 MB.");
-
-        using var stream = file.OpenReadStream();
-        // Use "temp" as vehicleId prefix — will be stored under temp/ in the container
-        var imageUrl = await blobService.UploadVehicleImageAsync("temp", stream, file.ContentType);
+            await authorizer.RequireDealershipAsync(req, dealershipId, requireActivePlan: true);
+        });
+        using var stream = upload.Image.OpenReadStream();
+        var imageUrl = await blobService.UploadTemporaryVehicleImageAsync(
+            upload.DealershipId, stream, upload.Image.ContentType);
 
         return new OkObjectResult(new UploadImageResponse(imageUrl));
     }
 
+    private static async Task<T> ReadRequestAsync<T>(HttpRequest req, int maxBytes = 128 * 1024) where T : class
+    {
+        if (req.ContentLength > maxBytes)
+            throw new ApiException(413, "request_too_large", "La solicitud supera el tamaño permitido.");
+        using var body = new MemoryStream();
+        var buffer = new byte[8192];
+        while (true)
+        {
+            var count = (int)Math.Min(buffer.Length, maxBytes + 1L - body.Length);
+            var read = await req.Body.ReadAsync(buffer.AsMemory(0, count), req.HttpContext.RequestAborted);
+            if (read == 0) break;
+            if (body.Length + read > maxBytes)
+                throw new ApiException(413, "request_too_large", "La solicitud supera el tamaño permitido.");
+            await body.WriteAsync(buffer.AsMemory(0, read), req.HttpContext.RequestAborted);
+        }
+        try
+        {
+            return JsonSerializer.Deserialize<T>(body.ToArray(), JsonOptions)
+                ?? throw new ApiException(400, "invalid_request", "Cuerpo de solicitud inválido.");
+        }
+        catch (JsonException)
+        {
+            throw new ApiException(400, "invalid_request", "El cuerpo debe ser JSON válido con los campos y tipos requeridos.");
+        }
+    }
 }

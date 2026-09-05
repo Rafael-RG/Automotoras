@@ -2,6 +2,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using Microsoft.Extensions.Configuration;
+using System.Text.Encodings.Web;
 
 namespace AutomotorasApi.Services;
 
@@ -17,20 +18,22 @@ public class EmailService(IConfiguration config)
     public async Task SendVerificationEmailAsync(string toEmail, string toName, string token)
     {
         var link = $"{_frontendUrl}/verificar-email?token={Uri.EscapeDataString(token)}";
+        var safeName = HtmlEncoder.Default.Encode(toName);
+        var safeLink = HtmlEncoder.Default.Encode(link);
         var body = BuildEmailTemplate(
             title: "Verificá tu email",
             preheader: "Confirmá tu dirección para activar tu cuenta en RedAutos.",
             iconEmoji: "✉️",
             bodyHtml: $@"
-              <p style=""margin:0 0 12px 0;font-size:16px;color:#cccccc;"">Hola <strong style=""color:#ffffff;"">{toName}</strong>,</p>
+              <p style=""margin:0 0 12px 0;font-size:16px;color:#cccccc;"">Hola <strong style=""color:#ffffff;"">{safeName}</strong>,</p>
               <p style=""margin:0 0 24px 0;font-size:15px;color:#aaaaaa;line-height:1.6;"">
                 Gracias por registrarte en <strong style=""color:#E5E2E3;"">RedAutos</strong>. Para activar tu cuenta necesitamos confirmar tu dirección de email.
               </p>
               <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0""><tr><td align=""center"" style=""padding:8px 0 28px 0;"">
-                <a href=""{link}"" style=""display:inline-block;background:#D32F2F;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.3px;"">Activar cuenta</a>
+                <a href=""{safeLink}"" style=""display:inline-block;background:#D32F2F;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.3px;"">Activar cuenta</a>
               </td></tr></table>
               <p style=""margin:0 0 8px 0;font-size:13px;color:#888888;"">Este enlace expira en <strong style=""color:#aaaaaa;"">24 horas</strong>. Si no creaste una cuenta en RedAutos, podés ignorar este mensaje.</p>",
-            footerNote: $"O copiá este enlace en tu navegador: <a href=\"{link}\" style=\"color:#D32F2F;word-break:break-all;\">{link}</a>"
+            footerNote: $"O copiá este enlace en tu navegador: <a href=\"{safeLink}\" style=\"color:#D32F2F;word-break:break-all;\">{safeLink}</a>"
         );
         await SendAsync(toEmail, toName, "Verificá tu email en RedAutos", body);
     }
@@ -38,20 +41,22 @@ public class EmailService(IConfiguration config)
     public async Task SendPasswordResetEmailAsync(string toEmail, string toName, string token)
     {
         var link = $"{_frontendUrl}/reset-password?token={Uri.EscapeDataString(token)}";
+        var safeName = HtmlEncoder.Default.Encode(toName);
+        var safeLink = HtmlEncoder.Default.Encode(link);
         var body = BuildEmailTemplate(
             title: "Recuperar contraseña",
             preheader: "Recibimos una solicitud para restablecer tu contraseña de RedAutos.",
             iconEmoji: "🔒",
             bodyHtml: $@"
-              <p style=""margin:0 0 12px 0;font-size:16px;color:#cccccc;"">Hola <strong style=""color:#ffffff;"">{toName}</strong>,</p>
+              <p style=""margin:0 0 12px 0;font-size:16px;color:#cccccc;"">Hola <strong style=""color:#ffffff;"">{safeName}</strong>,</p>
               <p style=""margin:0 0 24px 0;font-size:15px;color:#aaaaaa;line-height:1.6;"">
                 Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong style=""color:#E5E2E3;"">RedAutos</strong>. Hacé click en el botón para elegir una nueva.
               </p>
               <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0""><tr><td align=""center"" style=""padding:8px 0 28px 0;"">
-                <a href=""{link}"" style=""display:inline-block;background:#D32F2F;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.3px;"">Restablecer contraseña</a>
+                <a href=""{safeLink}"" style=""display:inline-block;background:#D32F2F;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.3px;"">Restablecer contraseña</a>
               </td></tr></table>
               <p style=""margin:0 0 8px 0;font-size:13px;color:#888888;"">Este enlace expira en <strong style=""color:#aaaaaa;"">1 hora</strong>. Si no solicitaste esto, podés ignorar este mensaje: tu contraseña no fue modificada.</p>",
-            footerNote: $"O copiá este enlace en tu navegador: <a href=\"{link}\" style=\"color:#D32F2F;word-break:break-all;\">{link}</a>"
+            footerNote: $"O copiá este enlace en tu navegador: <a href=\"{safeLink}\" style=\"color:#D32F2F;word-break:break-all;\">{safeLink}</a>"
         );
         await SendAsync(toEmail, toName, "Recuperar contraseña - RedAutos", body);
     }
@@ -132,7 +137,7 @@ public class EmailService(IConfiguration config)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_fromName, _user));
-        message.To.Add(new MailboxAddress(toName, toEmail));
+        message.To.Add(new MailboxAddress(RemoveControlCharacters(toName), toEmail));
         message.Subject = subject;
         message.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = htmlBody };
 
@@ -142,4 +147,7 @@ public class EmailService(IConfiguration config)
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }
+
+    private static string RemoveControlCharacters(string value) =>
+        new string(value.Where(character => !char.IsControl(character)).ToArray()).Trim();
 }

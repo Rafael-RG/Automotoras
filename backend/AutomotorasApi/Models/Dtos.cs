@@ -59,7 +59,32 @@ public record VehicleDealershipDto(
     string Padron
 );
 
+/// <summary>Public dealership profile; commercial data stays private.</summary>
 public record DealershipDto(
+    string Id,
+    string Name,
+    string Address,
+    string City,
+    string Country,
+    string Phone,
+    string Email,
+    string LogoUrl,
+    double Latitude,
+    double Longitude,
+    string Bio,
+    string BusinessHours,
+    string Instagram,
+    string TikTok,
+    string Website
+);
+
+/// <summary>
+/// Contract for an authenticated account's branch list. It intentionally keeps
+/// the same public profile fields as <see cref="DealershipDto"/>, but adds the
+/// canonical account identifier used by the admin client to scope selections.
+/// LoginEmail and credentials remain server-only.
+/// </summary>
+public record AdminDealershipDto(
     string Id,
     string Name,
     string Address,
@@ -79,7 +104,8 @@ public record DealershipDto(
     string Website,
     int ProfileViews,
     int ProfileViewsThisMonth,
-    string ProfileViewsHistoryJson
+    string ProfileViewsHistoryJson,
+    string AccountId
 );
 
 // --- Request DTOs ---
@@ -104,8 +130,8 @@ public record CreateVehicleRequest(
     int Doors = 0,
     string Engine = "",
     // Privados (solo automotora)
-    string Matricula = "",
-    string Padron = ""
+    string? Matricula = null,
+    string? Padron = null
 );
 
 public record CreateDealershipRequest(
@@ -141,7 +167,9 @@ public record UploadImageResponse(string Url);
 public record RegisterRequest(
     string Name,
     string Email,
-    string Password,
+    // Kept optional for backward-compatible JSON clients. Passwords are only
+    // accepted after the holder proves email ownership through the link.
+    string? Password = null,
     string Phone = "",
     string Address = "",
     string City = "",

@@ -12,6 +12,7 @@ yarn-error.log*
 
 # Production
 /build
+/dist
 
 # Misc
 .vscode/

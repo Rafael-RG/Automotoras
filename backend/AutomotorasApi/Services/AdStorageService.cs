@@ -54,7 +54,8 @@ public class AdStorageService
         {
             RowKey = Guid.NewGuid().ToString(),
             Title = request.Title,
-            LinkUrl = request.LinkUrl,
+            LinkUrl = UrlPolicy.RequireHttpsUrl(request.LinkUrl, "ad_link_invalid",
+                "El enlace del banner debe ser una URL HTTPS valida."),
             IsActive = request.IsActive,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
@@ -70,7 +71,8 @@ public class AdStorageService
         if (existing is null) return null;
 
         existing.Title = request.Title;
-        existing.LinkUrl = request.LinkUrl;
+        existing.LinkUrl = UrlPolicy.RequireHttpsUrl(request.LinkUrl, "ad_link_invalid",
+            "El enlace del banner debe ser una URL HTTPS valida.");
         existing.IsActive = request.IsActive;
         existing.StartDate = request.StartDate;
         existing.EndDate = request.EndDate;
@@ -99,5 +101,5 @@ public class AdStorageService
     }
 
     public static AdDto ToDto(AdEntity e) =>
-        new(e.RowKey, e.Title, e.ImageUrl, e.LinkUrl, e.IsActive, e.StartDate, e.EndDate);
+        new(e.RowKey, e.Title, e.ImageUrl, UrlPolicy.SafeHttpsUrlOrEmpty(e.LinkUrl), e.IsActive, e.StartDate, e.EndDate);
 }

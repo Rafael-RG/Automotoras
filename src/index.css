@@ -115,19 +115,87 @@ html.dark {
   }
 }
 
-/* ── Impresión de tarjeta QR (VehicleQrModal) ────────────────────────────── */
+/* ── Impresión QR: solo el portal activo; el documento normal no se oculta ── */
 @media print {
-  body * {
-    visibility: hidden;
+  /* A loading/error dialog is UI, not printable content. Normal pages stay intact. */
+  .qr-modal-portal {
+    display: none !important;
   }
-  .qr-print-only,
-  .qr-print-only * {
-    visibility: visible;
+
+  body.qr-printing {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
   }
-  .qr-print-only {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+
+  /* display:none removes hidden layout too, preventing extra/blank print pages. */
+  body.qr-printing > :not(.qr-modal-print-active) {
+    display: none !important;
+  }
+
+  body.qr-printing > .qr-modal-portal.qr-modal-print-active {
+    page: redautos-qr;
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  body.qr-printing .qr-modal-print-active .qr-modal-dialog,
+  body.qr-printing .qr-modal-print-active .qr-modal-content {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.qr-printing .qr-modal-print-active .qr-modal-controls {
+    display: none !important;
+  }
+
+  body.qr-printing .qr-modal-print-active .qr-card-frame {
+    width: 130mm !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body.qr-printing .qr-modal-print-active .qr-card-image {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 245mm !important;
+    margin: 0 auto !important;
+    object-fit: contain;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Named page settings apply only to the QR portal, never to ordinary printing. */
+  @page redautos-qr {
+    size: A4 portrait;
+    margin: 12mm;
   }
 }

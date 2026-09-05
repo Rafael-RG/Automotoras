@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getActiveAds } from '../services/api';
+import { safeExternalUrl } from '../services/safeExternalUrl';
 
 /**
  * Franja de banner publicitario pago. Se auto-oculta (no renderiza nada) si no hay
@@ -31,19 +32,31 @@ const AdBanner = ({ className = '' }) => {
   if (ads.length === 0) return null;
 
   const ad = ads[index % ads.length];
+  if (!ad) return null;
+  const linkUrl = safeExternalUrl(ad.linkUrl);
 
   return (
     <div
       className={`relative w-full rounded-2xl overflow-hidden ${className}`}
       style={{ border: '1px solid var(--border)', background: 'var(--bg-card)' }}
     >
-      <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer sponsored" className="block w-full">
+      {linkUrl ? (
+      <a href={linkUrl} target="_blank" rel="noopener noreferrer sponsored" className="block w-full">
         <img
           src={ad.imageUrl}
           alt={ad.title || 'Publicidad'}
           className="w-full h-20 sm:h-28 object-cover"
         />
       </a>
+      ) : (
+        <div className="block w-full">
+          <img
+            src={ad.imageUrl}
+            alt={ad.title || 'Publicidad'}
+            className="w-full h-20 sm:h-28 object-cover"
+          />
+        </div>
+      )}
       <span
         className="absolute top-1.5 left-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded"
         style={{ background: 'var(--bg)', color: 'var(--fg-muted)' }}

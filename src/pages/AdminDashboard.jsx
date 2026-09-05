@@ -9,8 +9,8 @@ import ThemeToggleButton from '../components/ThemeToggleButton';
 import VehicleQrModal from '../components/VehicleQrModal';
 import DealershipQrModal from '../components/DealershipQrModal';
 import {
-  getDealershipById, createDealership, updateDealership, uploadDealershipLogo,
-  getVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
+  getAdminDealerships, getSession, logoutDealership, createDealership, updateDealership, uploadDealershipLogo,
+  getDealershipVehicles, createVehicle, updateVehicle, deleteVehicle, uploadVehicleImage, uploadTempVehicleImage, removeVehicleImage,
   createSubscriptionCheckout, verifySubscription, getSubscriptionInfo,
 } from '../services/api';
 import { TRANSMISSIONS, FUELS, BODY_TYPES, VEHICLE_BRANDS, VEHICLE_MODELS } from '../constants/vehicles';
@@ -61,6 +61,20 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
+const readDealershipPreference = () => {
+  try { return localStorage.getItem('adminDealershipId') || ''; }
+  catch { return ''; }
+};
+
+const saveDealershipPreference = (id) => {
+  try {
+    if (id) localStorage.setItem('adminDealershipId', id);
+    else localStorage.removeItem('adminDealershipId');
+  } catch {
+    // Es solo una preferencia; la autorización siempre viene del servidor.
+  }
+};
+
 const EMPTY_VEHICLE = {
   brand: '', model: '', year: new Date().getFullYear(), price: '',
   mileage: 0, transmission: 'Automática', fuel: 'Gasolina', bodyType: 'Sedán',
@@ -72,7 +86,7 @@ const EMPTY_VEHICLE = {
 };
 
 // ─── Dealership Selector ──────────────────────────────────────────────────────
-const DealershipSelector = ({ dealerships, onSelect }) => {
+const DealershipSelector = ({ dealerships, onSelect, onLogout }) => {
   const multi = dealerships.length > 1;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
@@ -111,6 +125,9 @@ const DealershipSelector = ({ dealerships, onSelect }) => {
             </button>
           ))}
         </div>
+        <button onClick={onLogout} className="w-full mt-6 text-sm text-gray-500 dark:text-[#E5E2E3]/60 hover:text-primary">
+          Cerrar sesión
+        </button>
       </div>
     </div>
   );
@@ -883,19 +900,33 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [tempUploads, setTempUploads] = useState([]);
+  const [saveNotice, setSaveNotice] = useState(null);
+  const savingRef = useRef(false);
+  const recordSavedRef = useRef(false);
 
   const set = (field) => (e) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [field]: val }));
   };
 
+  const handleImageSelection = (event, slots) => {
+    const picked = Array.from(event.target.files || []).slice(0, slots);
+    setImageFiles(picked);
+    setTempUploads((previous) => previous.filter((item) => picked.includes(item.file)));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (savingRef.current || recordSavedRef.current || saveNotice) return;
+    savingRef.current = true;
     setSaving(true);
     setError('');
+    let recordAttempted = false;
     try {
       const payload = {
         ...form,
+        brand: isEdit ? vehicle.brand : form.brand,
         year: Number.parseInt(form.year, 10),
         price: Number.parseFloat(form.price),
         mileage: Number.parseInt(form.mileage, 10),
@@ -904,37 +935,79 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
       };
 
       if (isEdit) {
-        // Editing: save data first, then apply image changes
-        const saved = await updateVehicle(vehicle.brand, vehicle.id, payload);
-        if (saved) {
-          // Delete staged removals
-          for (const url of urlsToRemove) {
-            try { await removeVehicleImage(vehicle.brand, vehicle.id, url); }
-            catch (imgErr) { console.error('Error eliminando imagen:', imgErr); }
+        // PUT puede devolver un cuerpo vacío. La identidad original no cambia.
+        await updateVehicle(vehicle.brand, vehicle.id, payload);
+        recordSavedRef.current = true;
+        const failures = [];
+        for (const url of urlsToRemove) {
+          try { await removeVehicleImage(vehicle.brand, vehicle.id, url); }
+          catch (imgErr) {
+            if (imgErr.status === 401 || imgErr.code === 'SESSION_CHANGED') throw imgErr;
+            failures.push(`No se pudo eliminar una imagen: ${imgErr.message}`);
           }
-          // Upload new images
-          for (const f of imageFiles) {
-            try { await uploadVehicleImage(saved.brand, saved.id, f); }
-            catch (imgErr) { console.error('Error subiendo imagen:', imgErr); }
+        }
+        for (const file of imageFiles) {
+          try { await uploadVehicleImage(vehicle.brand, vehicle.id, file); }
+          catch (imgErr) {
+            if (imgErr.status === 401 || imgErr.code === 'SESSION_CHANGED') throw imgErr;
+            failures.push(`No se pudo subir ${file.name}: ${imgErr.message}`);
           }
+        }
+        if (failures.length) {
+          setSaveNotice({
+            message: 'Los datos del vehículo se guardaron, pero algunas imágenes no se actualizaron. Cerrá y actualizá la flota; volvé a editar solo las imágenes pendientes.',
+            failures,
+          });
+          return;
         }
       } else {
-        // Creating: upload images FIRST to get URLs, then create the record with them included
+        // Conservar cada temporal correcto en memoria para no volver a subirlo.
+        // Nunca crear el vehículo si una imagen seleccionada no pudo subirse.
+        const uploads = [...tempUploads];
         const imageUrls = [];
-        for (const f of imageFiles) {
+        const failures = [];
+        for (const file of imageFiles) {
+          const uploaded = uploads.find((item) => item.file === file && item.dealershipId === selectedDealershipId);
+          if (uploaded) {
+            imageUrls.push(uploaded.url);
+            continue;
+          }
           try {
-            const res = await uploadTempVehicleImage(f);
-            if (res?.url) imageUrls.push(res.url);
+            const result = await uploadTempVehicleImage(file, selectedDealershipId);
+            if (!result?.url) throw new Error('El servidor no devolvió la URL de la imagen.');
+            uploads.push({ file, dealershipId: selectedDealershipId, url: result.url });
+            imageUrls.push(result.url);
+            setTempUploads([...uploads]);
           } catch (imgErr) {
-            console.error('Error subiendo imagen:', imgErr);
+            if (imgErr.status === 401 || imgErr.code === 'SESSION_CHANGED') throw imgErr;
+            failures.push(`${file.name}: ${imgErr.message}`);
           }
         }
+        if (failures.length) {
+          setError(`No se creó el vehículo porque fallaron imágenes. Las subidas correctas se conservan para reintentar. ${failures.join(' · ')}`);
+          return;
+        }
+        recordAttempted = true;
         await createVehicle({ ...payload, imageUrls });
+        recordSavedRef.current = true;
       }
 
       onSaved();
     } catch (err) {
-      setError(err.message);
+      const uncertainCreation = !isEdit && recordAttempted
+        && (!err.status || err.status >= 500 || err.code === 'INVALID_RESPONSE' || err.code === 'SESSION_CHANGED');
+      if (recordSavedRef.current || uncertainCreation) {
+        setSaveNotice({
+          message: recordSavedRef.current
+            ? 'Los datos se guardaron, pero no se pudieron completar todas las operaciones. Actualizá la flota antes de continuar.'
+            : 'No se pudo confirmar la respuesta de creación. El vehículo podría haberse creado: cerrá y actualizá la flota antes de volver a cargarlo para evitar duplicados.',
+          failures: [err.message],
+        });
+      } else {
+        setError(err.message || 'No se pudo guardar el vehículo. Intentá nuevamente.');
+      }
+    } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   };
@@ -954,12 +1027,21 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           <h2 className="text-xl font-headline font-black text-gray-900 dark:text-[#E5E2E3] uppercase tracking-tight">
             {isEdit ? 'Editar Vehículo' : 'Nueva Unidad'}
           </h2>
-          <button onClick={onClose} disabled={saving} className="text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+          <button onClick={saveNotice ? onSaved : onClose} disabled={saving} aria-label="Cerrar vehículo" className="text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-        <fieldset disabled={saving} className="contents">
+        {saveNotice && (
+          <div role="alert" className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 space-y-3 text-amber-800 dark:text-amber-300 text-sm">
+            <p className="font-semibold">{saveNotice.message}</p>
+            <ul className="list-disc pl-5 text-xs space-y-1">
+              {[...new Set(saveNotice.failures)].map((failure) => <li key={failure}>{failure}</li>)}
+            </ul>
+            <button type="button" onClick={onSaved} className="font-bold underline">Cerrar y actualizar la flota</button>
+          </div>
+        )}
+        <fieldset disabled={saving || !!saveNotice} className="contents">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
@@ -1147,15 +1229,17 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Puertas</label>
+              <label htmlFor="vehicle-doors" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Puertas</label>
               <input
+                id="vehicle-doors"
                 type="number" value={form.doors} onChange={set('doors')} placeholder="4" min="1" max="8"
                 className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Motor</label>
+              <label htmlFor="vehicle-engine" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Motor</label>
               <input
+                id="vehicle-engine"
                 value={form.engine} onChange={set('engine')} placeholder="Ej: 2.0L Turbo"
                 className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none"
               />
@@ -1165,20 +1249,22 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
           {/* Datos privados — solo visibles para la automotora */}
           <div className="border border-gray-200 dark:border-[#E5E2E3]/5 rounded-xl p-4 bg-gray-100 dark:bg-[#0E0E0F]/60">
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/25 mb-3 flex items-center gap-2">
-              <span className="material-symbols-outlined !text-sm">lock</span>
+              <span className="material-symbols-outlined !text-sm">lock</span>{' '}
               Datos internos — no visibles al público
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Matrícula</label>
+                <label htmlFor="vehicle-matricula" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Matrícula</label>
                 <input
+                  id="vehicle-matricula"
                   value={form.matricula} onChange={set('matricula')} placeholder="Ej: ABC 1234"
                   className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Padrón</label>
+                <label htmlFor="vehicle-padron" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Padrón</label>
                 <input
+                  id="vehicle-padron"
                   value={form.padron} onChange={set('padron')} placeholder="Nro. de padrón"
                   className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none font-mono"
                 />
@@ -1246,16 +1332,13 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                         <input
                           type="file" accept="image/jpeg,image/png,image/webp" multiple
                           disabled={atLimit}
-                          onChange={(e) => {
-                            const picked = Array.from(e.target.files).slice(0, slots);
-                            setImageFiles(picked);
-                          }}
+                          onChange={(e) => handleImageSelection(e, slots)}
                           className="text-gray-500 dark:text-[#E5E2E3]/40 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:bg-[#D32F2F]/20 file:text-primary dark:file:text-[#FFB3AC] hover:file:bg-[#D32F2F]/30 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                         />
                         <p className="text-gray-500 dark:text-[#E5E2E3]/45 text-[10px] mt-1">
                           {imageFiles.length > 0
-                            ? `${imageFiles.length} archivo${imageFiles.length > 1 ? 's' : ''} seleccionado${imageFiles.length > 1 ? 's' : ''}`
-                            : `Hasta ${slots} imagen${slots !== 1 ? 'es' : ''} más (máx. ${MAX} en total)`
+                            ? `Archivos seleccionados: ${imageFiles.length}`
+                            : `Espacios disponibles: ${slots} (máx. ${MAX} imágenes en total)`
                           }
                         </p>
                       </>
@@ -1267,12 +1350,13 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
             {/* Sucursal */}
           {dealerships && dealerships.length > 1 && (
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
+              <label htmlFor="vehicle-dealership" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">
                 Sucursal
               </label>
               <select
+                id="vehicle-dealership"
                 value={selectedDealershipId}
-                onChange={(e) => setSelectedDealershipId(e.target.value)}
+                onChange={(e) => { setSelectedDealershipId(e.target.value); setTempUploads([]); }}
                 className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg px-4 py-3 text-gray-900 dark:text-[#E5E2E3] text-sm focus:border-[#D32F2F]/50 focus:outline-none appearance-none"
               >
                 {dealerships.map((d) => (
@@ -1282,8 +1366,8 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
             </div>
           )}
           <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Estado</label>
-              <div className="flex gap-2">
+              <p id="vehicle-status-label" className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-[#E5E2E3]/40 mb-2">Estado</p>
+              <fieldset aria-labelledby="vehicle-status-label" className="flex gap-2">
                 {[
                   { label: 'Disponible', key: 'available', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
                   { label: 'Reservado',  key: 'reserved',  activeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
@@ -1294,6 +1378,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                     <button
                       key={key}
                       type="button"
+                      aria-pressed={current === key}
                       onClick={() => setForm((f) => ({
                         ...f,
                         isAvailable: key === 'available',
@@ -1307,10 +1392,10 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
                     </button>
                   );
                 })}
-              </div>
+              </fieldset>
             </div>
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button
               type="button" onClick={onClose}
@@ -1319,7 +1404,7 @@ const VehicleModal = ({ vehicle, dealershipId, dealerships, onClose, onSaved }) 
               Cancelar
             </button>
             <button
-              type="submit" disabled={saving}
+              type="submit" disabled={saving || !!saveNotice}
               className="flex-1 py-3 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:bg-[#B71C1C] transition-colors disabled:opacity-50"
             >
               {saving ? 'Guardando...' : isEdit ? 'Guardar Cambios' : 'Crear Vehículo'}
@@ -1342,6 +1427,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [actionError, setActionError] = useState('');
   const [confirmDeleteVehicle, setConfirmDeleteVehicle] = useState(null);
   const [qrVehicle, setQrVehicle] = useState(null);
   const [filterAvail, setFilterAvail] = useState('all');
@@ -1391,9 +1477,12 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
     if (!v) return;
     setConfirmDeleteVehicle(null);
     setDeleting(v.id);
+    setActionError('');
     try {
       await deleteVehicle(v.brand, v.id);
-      onRefresh();
+      await onRefresh();
+    } catch (err) {
+      setActionError(err.message || 'No se pudo eliminar el vehículo. Actualizá la flota antes de intentarlo nuevamente.');
     } finally {
       setDeleting(null);
     }
@@ -1453,6 +1542,12 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
         />
       )}
       <div className="space-y-6">
+        {actionError && (
+          <div role="alert" className="text-red-600 dark:text-red-400 text-sm space-y-2">
+            <p>{actionError}</p>
+            <button onClick={onRefresh} className="font-bold underline">Actualizar la flota</button>
+          </div>
+        )}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-headline font-extrabold text-gray-900 dark:text-[#E5E2E3] tracking-tighter uppercase">
@@ -1721,65 +1816,81 @@ const STATUS_LABELS = {
   authorized: { label: 'Activa', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
   pending:    { label: 'Pendiente de pago', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
   paused:     { label: 'Pausada', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+  canceled:   { label: 'Cancelada', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
   cancelled:  { label: 'Cancelada', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
 };
 
 const SubscriptionTab = ({ dealership, onRefresh }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [polling, setPolling] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [subInfo, setSubInfo] = useState(null);
   const [subInfoLoading, setSubInfoLoading] = useState(false);
-  const pollCountRef = useRef(0);
-  const pollTimerRef = useRef(null);
+  const [subInfoError, setSubInfoError] = useState('');
+  const [billingAttempt, setBillingAttempt] = useState(0);
+  const [checkoutNeedsVerification, setCheckoutNeedsVerification] = useState(false);
+  const verifyingRef = useRef(false);
+  const checkoutRef = useRef(false);
 
   const currentPlan = dealership?.plan || 'basic';
   const currentStatus = dealership?.subscriptionStatus || '';
 
-  // Load subscription billing info when tab mounts and status is authorized
   useEffect(() => {
+    let cancelled = false;
+    setSubInfo(null);
+    setSubInfoError('');
     if (currentStatus !== 'authorized' || !dealership?.id) return;
     setSubInfoLoading(true);
     getSubscriptionInfo(dealership.id)
-      .then((info) => setSubInfo(info))
-      .catch(() => {})
-      .finally(() => setSubInfoLoading(false));
-  }, [currentStatus, dealership?.id]);
+      .then((info) => {
+        if (cancelled) return;
+        setSubInfo(info);
+        if (info?.status && info.status !== currentStatus)
+          void onRefresh();
+      })
+      .catch((err) => { if (!cancelled) setSubInfoError(err.message || 'No se pudo cargar la facturación.'); })
+      .finally(() => { if (!cancelled) setSubInfoLoading(false); });
+    return () => { cancelled = true; };
+  }, [currentStatus, dealership?.id, billingAttempt]);
   const statusInfo = STATUS_LABELS[currentStatus] || null;
 
-  // Auto-poll when pending: check every 4s up to 3 minutes
-  useEffect(() => {
-    if (currentStatus !== 'pending') {
-      setPolling(false);
-      pollCountRef.current = 0;
-      clearInterval(pollTimerRef.current);
-      return;
-    }
-    setPolling(true);
-    pollCountRef.current = 0;
-    pollTimerRef.current = setInterval(async () => {
-      pollCountRef.current += 1;
-      // Ask backend to verify directly with MP and update DB if needed
-      try { await verifySubscription(dealership.id); } catch {}
+  // Verificación explícita: no reintentar escrituras en intervalos ni ocultar errores.
+  const handleVerify = async () => {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
+    setVerifying(true);
+    setError('');
+    try {
+      await verifySubscription(dealership.id);
       await onRefresh();
-      if (pollCountRef.current >= 45) { // 45 * 4s = 3 min
-        clearInterval(pollTimerRef.current);
-        setPolling(false);
-      }
-    }, 4000);
-    return () => clearInterval(pollTimerRef.current);
-  }, [currentStatus, onRefresh, dealership.id]);
+      setCheckoutNeedsVerification(false);
+    } catch (err) {
+      setError(err.message || 'No se pudo verificar la suscripción.');
+    } finally {
+      verifyingRef.current = false;
+      setVerifying(false);
+    }
+  };
 
   const handleSubscribe = async (planId) => {
+    if (checkoutRef.current) return;
+    checkoutRef.current = true;
     setError('');
+    setCheckoutNeedsVerification(false);
     setLoading(true);
     try {
-    const backUrl = `${window.location.origin}/pago-exitoso`;
+      const backUrl = `${window.location.origin}/pago-exitoso`;
       const { checkoutUrl } = await createSubscriptionCheckout(dealership.id, planId, backUrl);
       window.location.href = checkoutUrl;
     } catch (err) {
-      setError(err.message || 'No se pudo iniciar el pago.');
+      const needsVerification = err?.code === 'checkout_in_progress' ||
+        err?.status === 0 || err?.status === 503;
+      setCheckoutNeedsVerification(needsVerification);
+      setError(needsVerification
+        ? 'No se pudo confirmar si MercadoPago creó el intento. Verificá el intento existente antes de iniciar otro pago.'
+        : (err.message || 'No se pudo iniciar el pago.'));
       setLoading(false);
+      checkoutRef.current = false;
     }
   };
 
@@ -1793,22 +1904,20 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
       {/* Current status */}
       {statusInfo && (
         <div className={`flex flex-wrap items-center gap-3 border rounded-sm px-4 py-3 ${statusInfo.bg}`}>
-          {currentStatus === 'pending' && polling ? (
+          {verifying ? (
             <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           ) : (
             <span className="material-symbols-outlined !text-lg text-current">info</span>
           )}
           <span className={`text-sm font-semibold ${statusInfo.color} flex-1`}>
-            {currentStatus === 'pending' && polling
+            {verifying
               ? 'Verificando tu pago con MercadoPago… puede tardar unos segundos'
               : <>Tu suscripción está: <strong>{statusInfo.label}</strong></>}
           </span>
-          {currentStatus === 'pending' && (
+          {(currentStatus === 'pending' || currentStatus === 'authorized') && (
             <button
-              onClick={async () => {
-                try { await verifySubscription(dealership.id); } catch {}
-                await onRefresh();
-              }}
+              onClick={handleVerify}
+              disabled={verifying || loading}
               className="text-xs text-gray-500 dark:text-[#E5E2E3]/40 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors flex items-center gap-1 shrink-0"
             >
               <span className="material-symbols-outlined !text-sm">refresh</span> Verificar ahora
@@ -1887,9 +1996,13 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm flex items-center gap-2">
-          <span className="material-symbols-outlined !text-base">error</span>{error}
-        </p>
+        <div role="alert" className="text-red-400 text-sm flex flex-wrap items-center gap-2">
+          <span className="material-symbols-outlined !text-base">error</span><span>{error}</span>
+          {checkoutNeedsVerification && (
+            <button onClick={handleVerify} disabled={verifying || loading}
+              className="font-bold underline disabled:opacity-50">Verificar intento existente</button>
+          )}
+        </div>
       )}
 
       {/* Billing info */}
@@ -1898,6 +2011,13 @@ const SubscriptionTab = ({ dealership, onRefresh }) => {
           <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-[#E5E2E3]/40">
             Facturación
           </h3>
+          {subInfoError && (
+            <div role="alert" className="text-sm text-red-600 dark:text-red-400 space-y-2">
+              <p>{subInfoError}</p>
+              <button onClick={() => setBillingAttempt((attempt) => attempt + 1)} disabled={subInfoLoading}
+                className="font-bold underline disabled:opacity-50">Reintentar facturación</button>
+            </div>
+          )}
           {subInfoLoading ? (
             <div className="flex items-center gap-2 text-gray-500 dark:text-[#E5E2E3]/30 text-sm">
               <div className="w-4 h-4 border-2 border-gray-200 dark:border-[#E5E2E3]/20 border-t-[#D32F2F] rounded-full animate-spin" />
@@ -1989,8 +2109,8 @@ const SucursalesTab = ({ dealerships, onCreated }) => {
       setSuccess(true);
       onCreated();
       setTimeout(() => setSuccess(false), 3000);
-    } catch {
-      setError('Error al crear la sucursal. Verificá los datos.');
+    } catch (err) {
+      setError(err.message || 'Error al crear la sucursal. Verificá los datos.');
     } finally {
       setSaving(false);
     }
@@ -2327,83 +2447,211 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dealerships, setDealerships] = useState([]);
-  const [selectedId, setSelectedId] = useState(
-    () => localStorage.getItem('adminDealershipId') || ''
-  );
+  const [sessionInfo, setSessionInfo] = useState(null);
+  const [selectedId, setSelectedId] = useState('');
   const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [vehiclesError, setVehiclesError] = useState('');
+  const [logoutState, setLogoutState] = useState('');
+  const [logoutError, setLogoutError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dealershipRequestRef = useRef(0);
+  const vehicleRequestRef = useRef(0);
+  const selectedIdRef = useRef('');
+  const logoutPendingRef = useRef(false);
 
   const currentDealership = dealerships.find((d) => d.id === selectedId) || null;
 
   const loadDealerships = useCallback(async () => {
-    const storedId = localStorage.getItem('adminDealershipId');
-    if (!storedId) return;
+    if (logoutPendingRef.current) return;
+    const requestId = ++dealershipRequestRef.current;
+    vehicleRequestRef.current += 1;
+    setBootstrapping(true);
+    setLoadError('');
+    setVehiclesError('');
+    setVehicles([]);
     try {
-      const data = await getDealershipById(storedId);
-      if (data) setDealerships([data]);
-    } catch {}
-  }, []);
+      const currentSession = await getSession();
+      if (requestId !== dealershipRequestRef.current) return;
+      const data = await getAdminDealerships();
+      if (requestId !== dealershipRequestRef.current) return;
+      if (!Array.isArray(data)) throw new Error('No se pudo leer la lista de sucursales autorizadas.');
+      const authorized = data.filter((d) => d?.id && d.accountId === currentSession.accountId);
+      const preferredId = selectedIdRef.current || readDealershipPreference();
+      const selected = authorized.find((d) => d.id === preferredId)
+        || authorized.find((d) => d.id === currentSession.dealershipId)
+        || authorized[0];
+      setSessionInfo(currentSession);
+      setDealerships(authorized);
+      selectedIdRef.current = selected?.id || '';
+      setSelectedId(selectedIdRef.current);
+      saveDealershipPreference(selectedIdRef.current);
+    } catch (err) {
+      if (requestId !== dealershipRequestRef.current) return;
+      setSessionInfo(null);
+      setDealerships([]);
+      selectedIdRef.current = '';
+      setSelectedId('');
+      if (err.status === 401) {
+        navigate('/login', { replace: true, state: { from: '/admin', sessionExpired: true } });
+      } else {
+        setLoadError(err.message || 'No se pudo cargar el panel. Intentá nuevamente.');
+      }
+    } finally {
+      if (requestId === dealershipRequestRef.current) setBootstrapping(false);
+    }
+  }, [navigate]);
 
   const loadVehicles = useCallback(async () => {
-    if (!selectedId) return;
+    if (!currentDealership || logoutPendingRef.current) return;
+    const requestId = ++vehicleRequestRef.current;
     setLoading(true);
+    setVehiclesError('');
+    setVehicles([]);
     try {
-      const all = await getVehicles();
-      setVehicles(all.filter((v) => v.dealershipId === selectedId));
-    } catch {
-      setVehicles([]);
+      const data = await getDealershipVehicles(currentDealership.id);
+      if (requestId !== vehicleRequestRef.current) return;
+      if (!Array.isArray(data)) throw new Error('No se pudo leer el inventario privado de la sucursal.');
+      setVehicles(data);
+    } catch (err) {
+      if (requestId === vehicleRequestRef.current) {
+        setVehiclesError(err.message || 'No se pudo cargar la flota. Intentá nuevamente.');
+      }
     } finally {
-      setLoading(false);
+      if (requestId === vehicleRequestRef.current) setLoading(false);
     }
-  }, [selectedId]);
+  }, [currentDealership]);
 
-  useEffect(() => { loadDealerships(); }, [loadDealerships]);
-  useEffect(() => { if (selectedId) loadVehicles(); else setLoading(false); }, [selectedId, loadVehicles]);
+  useEffect(() => {
+    const expired = () => {
+      if (logoutPendingRef.current) return;
+      dealershipRequestRef.current += 1;
+      vehicleRequestRef.current += 1;
+      selectedIdRef.current = '';
+      setSessionInfo(null);
+      setSelectedId('');
+      setDealerships([]);
+      setVehicles([]);
+      saveDealershipPreference('');
+      navigate('/login', { replace: true, state: { from: '/admin', sessionExpired: true } });
+    };
+    const changed = () => {
+      selectedIdRef.current = '';
+      setActiveTab('dashboard');
+      loadDealerships();
+    };
+    window.addEventListener('redautos:session-expired', expired);
+    window.addEventListener('redautos:session-changed', changed);
+    loadDealerships();
+    return () => {
+      dealershipRequestRef.current += 1;
+      vehicleRequestRef.current += 1;
+      window.removeEventListener('redautos:session-expired', expired);
+      window.removeEventListener('redautos:session-changed', changed);
+    };
+  }, [loadDealerships, navigate]);
 
-  // If returning from MercadoPago checkout, switch to subscription tab and refresh
+  useEffect(() => {
+    if (!bootstrapping && currentDealership?.subscriptionStatus === 'authorized') loadVehicles();
+    else setLoading(false);
+    return () => { vehicleRequestRef.current += 1; };
+  }, [bootstrapping, currentDealership, loadVehicles]);
+
+  // Un parámetro de retorno solo selecciona la pestaña, nunca autoriza el plan.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('sub') === 'ok') {
       setActiveTab('suscripcion');
-      loadDealerships();
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelectDealership = (id) => {
-    localStorage.setItem('adminDealershipId', id);
+    if (!dealerships.some((d) => d.id === id && d.accountId === sessionInfo?.accountId)) return;
+    vehicleRequestRef.current += 1;
+    setVehicles([]);
+    setVehiclesError('');
+    saveDealershipPreference(id);
+    selectedIdRef.current = id;
     setSelectedId(id);
     setActiveTab('dashboard');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminDealershipId');
+  const handleChangeDealership = () => {
+    vehicleRequestRef.current += 1;
+    saveDealershipPreference('');
+    selectedIdRef.current = '';
     setSelectedId('');
     setVehicles([]);
-    setActiveTab('dashboard');
+    setVehiclesError('');
+    setMobileMenuOpen(false);
   };
 
-  // Loading screen
-  if (loading && !selectedId) {
+  const handleLogout = async () => {
+    if (logoutPendingRef.current) return;
+    logoutPendingRef.current = true;
+    dealershipRequestRef.current += 1;
+    vehicleRequestRef.current += 1;
+    setLogoutState('pending');
+    setLogoutError('');
+    setSessionInfo(null);
+    setDealerships([]);
+    setVehicles([]);
+    selectedIdRef.current = '';
+    setSelectedId('');
+    setMobileMenuOpen(false);
+    setActiveTab('dashboard');
+    try {
+      await logoutDealership();
+      navigate('/login', { replace: true, state: { from: '/admin' } });
+    } catch (err) {
+      setLogoutState('error');
+      setLogoutError(`Se borraron los datos locales, pero no se pudo confirmar el cierre en el servidor. ${err.message}`);
+    } finally {
+      logoutPendingRef.current = false;
+    }
+  };
+
+  if (logoutState) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex flex-col items-center justify-center p-6 gap-4 text-center">
+        <h1 className="text-gray-900 dark:text-[#E5E2E3] text-xl font-bold">Cerrar sesión</h1>
+        <output className="block text-gray-600 dark:text-[#E5E2E3]/60 max-w-md text-sm">
+          {logoutState === 'pending' ? 'Cerrando la sesión en el servidor…' : logoutError}
+        </output>
+        {logoutState === 'error' && <button onClick={handleLogout} className="bg-primary text-white px-6 py-3 rounded-sm font-bold">Reintentar cierre de sesión</button>}
       </div>
     );
   }
 
-  // Dealership selector
-  if (!selectedId || !currentDealership) {
+  if (bootstrapping) {
     return (
-      dealerships.length === 0 ? (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
-        </div>
-      ) : (
-        <DealershipSelector dealerships={dealerships} onSelect={handleSelectDealership} />
-      )
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex items-center justify-center">
+        <output aria-label="Verificando sesión" className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
+      </div>
     );
+  }
+
+  if (loadError || !sessionInfo || dealerships.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0E0E0F] flex flex-col items-center justify-center p-6 gap-5 text-center">
+        <img src={logoSrc} alt="RedAutos" className="h-16 object-contain" />
+        <h1 className="text-xl font-bold text-gray-900 dark:text-[#E5E2E3]">{loadError ? 'No se pudo cargar el panel' : 'Sin sucursales autorizadas'}</h1>
+        <p role="alert" className="text-gray-600 dark:text-[#E5E2E3]/60 max-w-md text-sm">
+          {loadError || 'La cuenta no tiene sucursales disponibles para administrar. Contactá a soporte si necesitás revisar el acceso.'}
+        </p>
+        <div className="flex flex-wrap gap-4 justify-center">
+          <button onClick={loadDealerships} className="bg-primary text-white px-6 py-3 rounded-sm font-bold">Reintentar</button>
+          <button onClick={handleLogout} className="text-gray-600 dark:text-[#E5E2E3]/60 text-sm">Cerrar sesión</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedId || !currentDealership) {
+    return <DealershipSelector dealerships={dealerships} onSelect={handleSelectDealership} onLogout={handleLogout} />;
   }
 
   // Subscription gate — requires at least basic plan active
@@ -2436,7 +2684,7 @@ const AdminDashboard = () => {
             <span className="material-symbols-outlined !text-sm">refresh</span> Actualizar
           </button>
           <button
-            onClick={() => navigate('/login')}
+            onClick={handleLogout}
             className="text-gray-500 dark:text-[#E5E2E3]/45 text-xs hover:text-gray-500 hover:dark:text-[#E5E2E3]/50 transition-colors px-4"
           >
             Cerrar sesión
@@ -2465,8 +2713,8 @@ const AdminDashboard = () => {
         activeTab={activeTab}
         setActiveTab={(t) => { setActiveTab(t); setMobileMenuOpen(false); }}
         dealership={currentDealership}
-        onChangeDealership={handleLogout}
-        onLogout={() => navigate('/login')}
+        onChangeDealership={handleChangeDealership}
+        onLogout={handleLogout}
         mobileOpen={mobileMenuOpen}
       />
       {/* Mobile top bar */}
@@ -2483,17 +2731,23 @@ const AdminDashboard = () => {
         </span>
       </div>
       <main className="md:ml-64 flex-1 px-4 pb-6 pt-[72px] md:p-10 min-w-0">
+        {vehiclesError && (
+          <div role="alert" className="mb-6 border border-red-400/30 rounded-lg p-4 text-red-600 dark:text-red-400 text-sm space-y-2">
+            <p>{vehiclesError}</p>
+            <button onClick={loadVehicles} disabled={loading} className="font-bold underline disabled:opacity-50">Reintentar carga de la flota</button>
+          </div>
+        )}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#D32F2F] border-t-transparent" />
           </div>
         ) : (
           <>
-            {activeTab === 'dashboard' && (
+            {activeTab === 'dashboard' && !vehiclesError && (
               <DashboardTab vehicles={vehicles} dealership={currentDealership} />
             )}
-            {activeTab === 'fleet' && (
-              <FleetTab vehicles={vehicles} dealershipId={selectedId} dealerships={dealerships} onRefresh={loadVehicles} />
+            {activeTab === 'fleet' && !vehiclesError && (
+              <FleetTab key={`${sessionInfo.accountId}:${selectedId}`} vehicles={vehicles} dealershipId={selectedId} dealerships={dealerships} onRefresh={loadVehicles} />
             )}
             {activeTab === 'sucursales' && (
               currentDealership?.plan === 'plus' && currentDealership?.subscriptionStatus === 'authorized'
@@ -2513,10 +2767,10 @@ const AdminDashboard = () => {
                 )
             )}
             {activeTab === 'suscripcion' && (
-              <SubscriptionTab dealership={currentDealership} onRefresh={loadDealerships} />
+              <SubscriptionTab key={`${sessionInfo.accountId}:${selectedId}`} dealership={currentDealership} onRefresh={loadDealerships} />
             )}
             {activeTab === 'config' && (
-              <ConfigTab dealership={currentDealership} onUpdated={loadDealerships} />
+              <ConfigTab key={`${sessionInfo.accountId}:${selectedId}`} dealership={currentDealership} onUpdated={loadDealerships} />
             )}
           </>
         )}

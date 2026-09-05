@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace AutomotorasApi.Functions;
 
-public class AdFunctions(AdStorageService adService)
+public class AdFunctions(AdStorageService adService, IRequestAuthorizer authorizer)
 {
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
@@ -21,38 +21,35 @@ public class AdFunctions(AdStorageService adService)
         return new OkObjectResult(ads.Select(AdStorageService.ToDto));
     }
 
-    // GET /api/ads — requiere X-Admin-Key; listado completo para el panel de gestión
+    // GET /api/ads — requiere sesión de administrador de plataforma.
     [Function("GetAds")]
     public async Task<IActionResult> GetAds(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ads")] HttpRequest req)
     {
-        if (!AdminAuthHelper.IsValidAdminKey(req))
-            return new UnauthorizedResult();
+        await authorizer.RequirePlatformAdminAsync(req);
 
         var ads = await adService.GetAllAsync();
         return new OkObjectResult(ads.Select(AdStorageService.ToDto));
     }
 
-    // GET /api/ads/{id} — requiere X-Admin-Key
+    // GET /api/ads/{id} — requiere sesión de administrador de plataforma.
     [Function("GetAdById")]
     public async Task<IActionResult> GetAdById(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ads/{id}")] HttpRequest req,
         string id)
     {
-        if (!AdminAuthHelper.IsValidAdminKey(req))
-            return new UnauthorizedResult();
+        await authorizer.RequirePlatformAdminAsync(req);
 
         var ad = await adService.GetByIdAsync(id);
         return ad is null ? new NotFoundResult() : new OkObjectResult(AdStorageService.ToDto(ad));
     }
 
-    // POST /api/ads — requiere X-Admin-Key
+    // POST /api/ads — requiere sesión de administrador de plataforma y CSRF.
     [Function("CreateAd")]
     public async Task<IActionResult> CreateAd(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "ads")] HttpRequest req)
     {
-        if (!AdminAuthHelper.IsValidAdminKey(req))
-            return new UnauthorizedResult();
+        await authorizer.RequirePlatformAdminAsync(req);
 
         var body = await new StreamReader(req.Body).ReadToEndAsync();
         var request = JsonSerializer.Deserialize<CreateAdRequest>(body, JsonOptions);
@@ -62,14 +59,13 @@ public class AdFunctions(AdStorageService adService)
         return new CreatedResult($"/api/ads/{entity.RowKey}", AdStorageService.ToDto(entity));
     }
 
-    // PUT /api/ads/{id} — requiere X-Admin-Key
+    // PUT /api/ads/{id} — requiere sesión de administrador de plataforma y CSRF.
     [Function("UpdateAd")]
     public async Task<IActionResult> UpdateAd(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "ads/{id}")] HttpRequest req,
         string id)
     {
-        if (!AdminAuthHelper.IsValidAdminKey(req))
-            return new UnauthorizedResult();
+        await authorizer.RequirePlatformAdminAsync(req);
 
         var body = await new StreamReader(req.Body).ReadToEndAsync();
         var request = JsonSerializer.Deserialize<UpdateAdRequest>(body, JsonOptions);
@@ -79,14 +75,13 @@ public class AdFunctions(AdStorageService adService)
         return entity is null ? new NotFoundResult() : new OkObjectResult(AdStorageService.ToDto(entity));
     }
 
-    // DELETE /api/ads/{id} — requiere X-Admin-Key
+    // DELETE /api/ads/{id} — requiere sesión de administrador de plataforma y CSRF.
     [Function("DeleteAd")]
     public async Task<IActionResult> DeleteAd(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "ads/{id}")] HttpRequest req,
         string id)
     {
-        if (!AdminAuthHelper.IsValidAdminKey(req))
-            return new UnauthorizedResult();
+        await authorizer.RequirePlatformAdminAsync(req);
 
         var ok = await adService.DeleteAsync(id);
         return ok ? new NoContentResult() : new NotFoundResult();

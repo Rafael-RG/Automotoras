@@ -38,7 +38,7 @@ const ProductDetailScreen = () => {
     description: vehicle
       ? `${vehicle.year} ${vehicle.brand} ${vehicle.model} con ${vehicle.mileage?.toLocaleString('es-UY')} km. USD ${vehicle.price?.toLocaleString('es-UY')}.${dealership ? ` Vendido por ${dealership.name} en ${dealership.city}.` : ''} Contactalo en RedAutos.`
       : '',
-    image: vehicle?.images?.[0] || undefined,
+    image: vehicle?.imageUrls?.[0] || vehicle?.imageUrl || undefined,
     url: `/product/${brand}/${id}`,
     type: 'product',
   });
@@ -95,7 +95,7 @@ const ProductDetailScreen = () => {
           : 'https://schema.org/SoldOut',
         seller: dealership ? { '@type': 'AutoDealer', name: dealership.name, address: dealership.city } : undefined,
       },
-      image: vehicle.images?.[0] || undefined,
+      image: vehicle.imageUrls?.[0] || vehicle.imageUrl || undefined,
       url: `https://redautos.com.uy/product/${vehicle.brand}/${vehicle.id}`,
     };
     const el = document.createElement('script');

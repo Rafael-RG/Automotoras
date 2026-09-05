@@ -8,6 +8,7 @@ public class VehicleStorageService
 {
     private readonly TableClient _tableClient;
     private const string TableName = "Vehicles";
+    public const int MaxImagesPerVehicle = 10;
 
     public VehicleStorageService(TableServiceClient tableServiceClient)
     {
@@ -17,6 +18,7 @@ public class VehicleStorageService
 
     public async Task<IEnumerable<VehicleEntity>> GetAllAsync(string? brand = null)
     {
+        if (!string.IsNullOrEmpty(brand)) ValidateKey(brand, "Marca", 80);
         var vehicles = new List<VehicleEntity>();
 
         var query = string.IsNullOrEmpty(brand)
@@ -29,8 +31,20 @@ public class VehicleStorageService
         return vehicles;
     }
 
+    public async Task<IEnumerable<VehicleEntity>> GetByDealershipAsync(string dealershipId)
+    {
+        ValidateKey(dealershipId, "Automotora");
+        var vehicles = new List<VehicleEntity>();
+        // This filter is sent to Table Storage, not applied to the entire public catalog in memory.
+        await foreach (var vehicle in _tableClient.QueryAsync<VehicleEntity>(v => v.DealershipId == dealershipId))
+            vehicles.Add(vehicle);
+        return vehicles;
+    }
+
     public async Task<VehicleEntity?> GetByIdAsync(string brand, string id)
     {
+        ValidateKey(brand, "Marca", 80);
+        ValidateKey(id, "Vehículo");
         try
         {
             var response = await _tableClient.GetEntityAsync<VehicleEntity>(brand, id);
@@ -44,10 +58,9 @@ public class VehicleStorageService
 
     public async Task<VehicleEntity> CreateAsync(CreateVehicleRequest request)
     {
-        // Use ImageUrls array if provided (preferred), else fall back to ImageUrl string
-        var urls = request.ImageUrls != null && request.ImageUrls.Length > 0
-            ? request.ImageUrls
-            : (!string.IsNullOrEmpty(request.ImageUrl) ? new[] { request.ImageUrl } : Array.Empty<string>());
+        ValidateRequest(request);
+        // URL ownership belongs to the HTTP boundary; trusted seed calls may still use placeholders.
+        var urls = GetRequestedImageUrls(request);
 
         var entity = new VehicleEntity
         {
@@ -62,18 +75,18 @@ public class VehicleStorageService
             Fuel = request.Fuel,
             BodyType = request.BodyType,
             DealershipId = request.DealershipId,
-            Description = request.Description,
+            Description = request.Description ?? string.Empty,
             ImageUrl = urls.Length > 0 ? urls[0] : string.Empty,
             ImageUrlsJson = urls.Length > 0 ? string.Join('|', urls) : string.Empty,
-            IsAvailable = request.IsAvailable,
+            IsAvailable = !request.IsSold && request.IsAvailable,
             IsSold = request.IsSold,
             SoldAt = request.IsSold ? DateTime.UtcNow.ToString("yyyy-MM-dd") : string.Empty,
             CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd"),
-            Color = request.Color,
+            Color = request.Color ?? string.Empty,
             Doors = request.Doors,
-            Engine = request.Engine,
-            Matricula = request.Matricula,
-            Padron = request.Padron
+            Engine = request.Engine ?? string.Empty,
+            Matricula = request.Matricula ?? string.Empty,
+            Padron = request.Padron ?? string.Empty
         };
 
         await _tableClient.AddEntityAsync(entity);
@@ -82,10 +95,23 @@ public class VehicleStorageService
 
     public async Task<VehicleEntity?> UpdateAsync(string brand, string id, CreateVehicleRequest request)
     {
+        ValidateRequest(request);
         var existing = await GetByIdAsync(brand, id);
         if (existing is null) return null;
 
-        existing.Brand = request.Brand;
+        return await UpdateAsync(existing, request);
+    }
+
+    // HTTP callers pass the snapshot whose dealership was authorized. A later move/edit must fail,
+    // rather than silently re-reading another tenant's entity after the authorization check.
+    public async Task<VehicleEntity> UpdateAsync(VehicleEntity existing, CreateVehicleRequest request)
+    {
+        ValidateRequest(request);
+        if (!string.Equals(request.Brand, existing.PartitionKey, StringComparison.Ordinal) ||
+            !string.Equals(request.Brand, existing.Brand, StringComparison.Ordinal))
+            throw new ApiException(409, "vehicle_brand_immutable",
+                "No se puede cambiar la marca de un vehículo existente: cambiaría su clave y sus enlaces. Conservá la marca original.");
+
         existing.Model = request.Model;
         existing.Year = request.Year;
         existing.Price = request.Price;
@@ -94,12 +120,12 @@ public class VehicleStorageService
         existing.Fuel = request.Fuel;
         existing.BodyType = request.BodyType;
         existing.DealershipId = request.DealershipId;
-        existing.Description = request.Description;
-        existing.Color = request.Color;
+        existing.Description = request.Description ?? string.Empty;
+        existing.Color = request.Color ?? string.Empty;
         existing.Doors = request.Doors;
-        existing.Engine = request.Engine;
-        existing.Matricula = request.Matricula;
-        existing.Padron = request.Padron;
+        existing.Engine = request.Engine ?? string.Empty;
+        if (request.Matricula is not null) existing.Matricula = request.Matricula;
+        if (request.Padron is not null) existing.Padron = request.Padron;
 
         // Sold: mark date when first sold; clear when un-sold
         if (request.IsSold && !existing.IsSold)
@@ -110,51 +136,77 @@ public class VehicleStorageService
         // Sold vehicles are always unavailable
         existing.IsAvailable = request.IsSold ? false : request.IsAvailable;
 
-        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
+        // Images are changed exclusively by the image endpoints, not overwritten by a stale form.
+        try
+        {
+            await _tableClient.UpdateEntityAsync(existing, existing.ETag, TableUpdateMode.Merge);
+        }
+        catch (RequestFailedException ex) when (ex.Status == 412)
+        {
+            throw TableRetry.Conflict();
+        }
         return existing;
     }
 
-    public async Task<bool> IncrementEventAsync(string brand, string id, string eventType)
+    public Task<bool> IncrementEventAsync(string brand, string id, string eventType)
     {
-        var existing = await GetByIdAsync(brand, id);
-        if (existing is null) return false;
+        var normalized = eventType?.ToLowerInvariant();
+        if (normalized is not ("view" or "lead" or "share")) return Task.FromResult(false);
 
-        switch (eventType.ToLowerInvariant())
+        return TableRetry.OnPreconditionFailedAsync(async () =>
         {
-            case "view":  existing.ViewCount++;  break;
-            case "lead":  existing.LeadCount++;  break;
-            case "share": existing.ShareCount++; break;
-            default: return false;
-        }
+            var existing = await GetByIdAsync(brand, id);
+            if (existing is null) return false;
 
-        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
-        return true;
+            switch (normalized)
+            {
+                case "view": existing.ViewCount = IncrementCounter(existing.ViewCount); break;
+                case "lead": existing.LeadCount = IncrementCounter(existing.LeadCount); break;
+                case "share": existing.ShareCount = IncrementCounter(existing.ShareCount); break;
+            }
+
+            await _tableClient.UpdateEntityAsync(existing, existing.ETag, TableUpdateMode.Merge);
+            return true;
+        });
     }
 
-    public async Task<bool> AddImageUrlAsync(string brand, string id, string imageUrl)
+    public Task<bool> AddImageUrlAsync(string brand, string id, string imageUrl, string? expectedDealershipId = null)
     {
-        var existing = await GetByIdAsync(brand, id);
-        if (existing is null) return false;
+        ValidateImageUrls(new[] { imageUrl });
+        return TableRetry.OnPreconditionFailedAsync(async () =>
+        {
+            var existing = await GetByIdAsync(brand, id);
+            if (existing is null) return false;
+            EnsureDealershipUnchanged(existing, expectedDealershipId);
 
-        var urls = ParseImageUrls(existing).ToList();
-        urls.Add(imageUrl);
-        existing.ImageUrlsJson = string.Join('|', urls);
-        existing.ImageUrl = urls[0];
-        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
-        return true;
+            var urls = ParseImageUrls(existing).ToList();
+            if (urls.Contains(imageUrl, StringComparer.Ordinal)) return true;
+            // Check the limit inside the ETag-protected operation, including every retry.
+            if (urls.Count >= MaxImagesPerVehicle)
+                throw ImageLimitExceeded();
+            urls.Add(imageUrl);
+            existing.ImageUrlsJson = string.Join('|', urls);
+            existing.ImageUrl = urls[0];
+            await _tableClient.UpdateEntityAsync(existing, existing.ETag, TableUpdateMode.Merge);
+            return true;
+        });
     }
 
-    public async Task<bool> RemoveImageUrlAsync(string brand, string id, string imageUrl)
+    public Task<bool> RemoveImageUrlAsync(string brand, string id, string imageUrl, string? expectedDealershipId = null)
     {
-        var existing = await GetByIdAsync(brand, id);
-        if (existing is null) return false;
+        return TableRetry.OnPreconditionFailedAsync(async () =>
+        {
+            var existing = await GetByIdAsync(brand, id);
+            if (existing is null) return false;
+            EnsureDealershipUnchanged(existing, expectedDealershipId);
 
-        var urls = ParseImageUrls(existing).ToList();
-        urls.Remove(imageUrl);
-        existing.ImageUrlsJson = string.Join('|', urls);
-        existing.ImageUrl = urls.Count > 0 ? urls[0] : string.Empty;
-        await _tableClient.UpdateEntityAsync(existing, existing.ETag);
-        return true;
+            var urls = ParseImageUrls(existing).ToList();
+            if (!urls.Remove(imageUrl)) return false;
+            existing.ImageUrlsJson = string.Join('|', urls);
+            existing.ImageUrl = urls.Count > 0 ? urls[0] : string.Empty;
+            await _tableClient.UpdateEntityAsync(existing, existing.ETag, TableUpdateMode.Merge);
+            return true;
+        });
     }
 
     public async Task<bool> UpdateImageUrlAsync(string brand, string id, string imageUrl)
@@ -162,14 +214,24 @@ public class VehicleStorageService
 
     public async Task<bool> DeleteAsync(string brand, string id)
     {
+        var existing = await GetByIdAsync(brand, id);
+        return existing is not null && await DeleteAsync(existing);
+    }
+
+    public async Task<bool> DeleteAsync(VehicleEntity existing)
+    {
         try
         {
-            await _tableClient.DeleteEntityAsync(brand, id);
+            await _tableClient.DeleteEntityAsync(existing.PartitionKey, existing.RowKey, existing.ETag);
             return true;
         }
-        catch (RequestFailedException)
+        catch (RequestFailedException ex) when (ex.Status == 404)
         {
             return false;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 412)
+        {
+            throw TableRetry.Conflict();
         }
     }
 
@@ -207,7 +269,7 @@ public class VehicleStorageService
             e.Matricula, e.Padron);
     }
 
-    private static string[] ParseImageUrls(VehicleEntity e)
+    public static string[] ParseImageUrls(VehicleEntity e)
     {
         if (!string.IsNullOrEmpty(e.ImageUrlsJson))
             return e.ImageUrlsJson.Split('|', StringSplitOptions.RemoveEmptyEntries);
@@ -215,4 +277,71 @@ public class VehicleStorageService
             return new[] { e.ImageUrl };
         return Array.Empty<string>();
     }
+
+    public static string[] GetRequestedImageUrls(CreateVehicleRequest request) =>
+        request.ImageUrls is { Length: > 0 } ? request.ImageUrls :
+        !string.IsNullOrEmpty(request.ImageUrl) ? new[] { request.ImageUrl } : Array.Empty<string>();
+
+    public static void ValidateRequest(CreateVehicleRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ValidateKey(request.Brand, "Marca", 80);
+        ValidateKey(request.DealershipId, "Automotora");
+        ValidateText(request.Model, "Modelo", 120, required: true);
+        ValidateText(request.Transmission, "Transmisión", 50, required: true);
+        ValidateText(request.Fuel, "Combustible", 50, required: true);
+        ValidateText(request.BodyType, "Carrocería", 50, required: true);
+        ValidateText(request.Description, "Descripción", 10_000);
+        ValidateText(request.Color, "Color", 80);
+        ValidateText(request.Engine, "Motor", 120);
+        ValidateText(request.Matricula, "Matrícula", 32);
+        ValidateText(request.Padron, "Padrón", 64);
+
+        if (request.Year < 1886 || request.Year > DateTime.UtcNow.Year + 1)
+            throw InvalidVehicle("El año debe estar entre 1886 y el próximo año.");
+        if (!double.IsFinite(request.Price) || request.Price < 0 || request.Price > 1_000_000_000)
+            throw InvalidVehicle("El precio debe ser un número finito entre 0 y 1.000.000.000.");
+        if (request.Mileage < 0 || request.Mileage > 10_000_000)
+            throw InvalidVehicle("El kilometraje debe estar entre 0 y 10.000.000.");
+        if (request.Doors < 0 || request.Doors > 6)
+            throw InvalidVehicle("La cantidad de puertas debe estar entre 0 y 6 (0 si no se especifica).");
+        ValidateImageUrls(GetRequestedImageUrls(request));
+    }
+
+    public static void ValidateKey(string? value, string field, int maxLength = 128)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > maxLength || value != value.Trim() ||
+            value is "." or ".." || value.Any(c => char.IsControl(c) || c is '/' or '\\' or '#' or '?'))
+            throw InvalidVehicle($"{field}: identificador inválido o demasiado largo (máximo {maxLength} caracteres).");
+    }
+
+    public static ApiException ImageLimitExceeded() => new(400, "vehicle_image_limit",
+        $"Se permiten como máximo {MaxImagesPerVehicle} imágenes por vehículo.");
+
+    private static void ValidateText(string? value, string field, int maxLength, bool required = false)
+    {
+        if ((required && string.IsNullOrWhiteSpace(value)) || value?.Length > maxLength || value?.Contains('\0') == true)
+            throw InvalidVehicle($"{field}: valor inválido (máximo {maxLength} caracteres).");
+    }
+
+    private static void ValidateImageUrls(string[] urls)
+    {
+        if (urls.Length > MaxImagesPerVehicle) throw ImageLimitExceeded();
+        if (urls.Any(url => string.IsNullOrWhiteSpace(url) || url.Length > 2048 ||
+                url.Contains('|') || url.Any(char.IsControl) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https")))
+            throw InvalidVehicle("Las URLs de las imágenes deben ser válidas y no superar 2048 caracteres.");
+        if (urls.Distinct(StringComparer.Ordinal).Count() != urls.Length)
+            throw InvalidVehicle("No se puede incluir la misma imagen más de una vez.");
+    }
+
+    private static void EnsureDealershipUnchanged(VehicleEntity entity, string? expectedDealershipId)
+    {
+        if (expectedDealershipId is not null &&
+            !string.Equals(entity.DealershipId, expectedDealershipId, StringComparison.Ordinal))
+            throw TableRetry.Conflict();
+    }
+
+    private static int IncrementCounter(int value) => (int)Math.Clamp((long)value + 1, 0, int.MaxValue);
+    private static ApiException InvalidVehicle(string message) => new(400, "invalid_vehicle", message);
 }

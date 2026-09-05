@@ -13,7 +13,9 @@ Una aplicación web premium para la gestión y exhibición de vehículos de alta
 ## 🛠️ Tecnologías
 
 - React 18
-- React Router 6
+- React Router 7
+- Vite
+- Vitest
 - Tailwind CSS
 - Google Fonts (Manrope & Inter)
 - Material Symbols
@@ -27,9 +29,13 @@ npm install
 # Iniciar servidor de desarrollo
 npm start
 
-# Compilar para producción
+# Compilar para producción (genera dist/)
 npm run build
 ```
+
+## Configuración
+
+La URL del backend se configura con `VITE_API_URL` (por ejemplo, en `.env.production`). Las variables que el navegador puede leer deben comenzar con `VITE_`.
 
 ## 🎨 Estructura del Proyecto
 
@@ -44,16 +50,16 @@ src/
 │   ├── ProductDetailScreen.jsx
 │   ├── RegisterScreen.jsx
 │   └── AdminDashboard.jsx
-├── App.js
-├── index.js
+├── App.jsx
+├── main.jsx
 └── index.css
 ```
 
 ## 🎯 Scripts Disponibles
 
 - `npm start` - Inicia el servidor de desarrollo
-- `npm run build` - Compila la aplicación para producción
-- `npm test` - Ejecuta los tests
+- `npm run build` - Compila la aplicación para producción en `dist/`
+- `npm test` - Ejecuta los tests con Vitest
 
 ## 🌐 Navegación
 

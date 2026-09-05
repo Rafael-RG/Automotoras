@@ -8,15 +8,19 @@ using System.Linq;
 namespace AutomotorasApi.Functions;
 
 /// <summary>
-/// POST /api/seed  →  Carga datos de prueba en Table Storage (solo en Development).
-/// POST /api/seed/clear  →  Elimina todos los datos de prueba.
+/// POST /api/seed  →  Carga datos de prueba en Table Storage (solo Development y administrador de plataforma).
+/// POST /api/seed/clear  →  Elimina todos los datos de prueba bajo las mismas restricciones.
 /// </summary>
-public class SeedFunctions(VehicleStorageService vehicleService, DealershipStorageService dealershipService)
+public class SeedFunctions(
+    VehicleStorageService vehicleService,
+    DealershipStorageService dealershipService,
+    IRequestAuthorizer authorizer)
 {
     [Function("SeedData")]
     public async Task<IActionResult> SeedData(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "seed")] HttpRequest req)
     {
+        await authorizer.RequirePlatformAdminAsync(req);
         if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
             return new ForbidResult();
 
@@ -191,6 +195,7 @@ public class SeedFunctions(VehicleStorageService vehicleService, DealershipStora
     public async Task<IActionResult> ClearData(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "seed/clear")] HttpRequest req)
     {
+        await authorizer.RequirePlatformAdminAsync(req);
         if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
             return new ForbidResult();
 
