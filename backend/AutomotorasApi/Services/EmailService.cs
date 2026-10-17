@@ -8,6 +8,7 @@ namespace AutomotorasApi.Services;
 
 public class EmailService(IConfiguration config)
 {
+    private const string EmailLogoUrl = "https://redautos.com.uy/redautos-email-logo-v2.png";
     private readonly string _host = config["Smtp:Host"] ?? "smtp.hostinger.com";
     private readonly int _port = int.Parse(config["Smtp:Port"] ?? "587");
     private readonly string _user = config["Smtp:User"] ?? "";
@@ -80,10 +81,10 @@ public class EmailService(IConfiguration config)
       <!-- Card -->
       <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""max-width:560px;"">
 
-        <!-- Header rojo -->
+        <!-- Header -->
         <tr>
-          <td style=""background:#D32F2F;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;"">
-            <img src=""https://redautos.com.uy/Logo.png"" alt=""RedAutos"" height=""52"" style=""display:block;margin:0 auto;height:52px;"" />
+          <td style=""background:#141414;border-radius:12px 12px 0 0;border-bottom:4px solid #D32F2F;padding:28px 32px;text-align:center;"">
+            <img src=""{EmailLogoUrl}"" alt=""RedAutos"" width=""244"" height=""52"" style=""display:block;margin:0 auto;width:244px;height:52px;"" />
           </td>
         </tr>
 

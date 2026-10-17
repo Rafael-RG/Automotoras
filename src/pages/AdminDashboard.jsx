@@ -36,7 +36,7 @@ const LocationMapPicker = ({ lat, lng, onChange }) => {
         Ubicación en el mapa
         <span className="ml-2 normal-case tracking-normal font-normal text-gray-500 dark:text-[#E5E2E3]/50">— hacé click para marcar</span>
       </label>
-      <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-[#E5E2E3]/10" style={{height: 260}}>
+      <div className="relative z-0 rounded-lg overflow-hidden border border-gray-200 dark:border-[#E5E2E3]/10" style={{height: 260}}>
         <MapContainer center={center} zoom={hasPin ? 15 : 12} style={{height:'100%',width:'100%'}} key={`${lat},${lng}`}>
           <TileLayer
             url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=cb1_2oah_1_a15a9338220f91742b854dcb"
@@ -1625,7 +1625,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
             paginated.map((v) => (
               <div
                 key={v.id}
-                className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-4 flex items-start gap-4 hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 transition-colors"
+                className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-[#E5E2E3]/10 rounded-lg p-3 sm:p-4 flex items-start gap-3 sm:gap-4 hover:border-gray-200 hover:dark:border-[#E5E2E3]/20 transition-colors"
               >
                 <div className="w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden bg-gray-50 dark:bg-[#0E0E0F] flex-shrink-0 mt-0.5">
                   {v.imageUrl ? (
@@ -1639,7 +1639,7 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-gray-900 dark:text-[#E5E2E3] font-headline font-bold tracking-tight text-sm md:text-base">
@@ -1686,33 +1686,33 @@ const FleetTab = ({ vehicles, dealershipId, dealerships, onRefresh }) => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex-shrink-0 flex items-center gap-2">
+                    <div className="self-start flex-shrink-0 flex items-center gap-1.5 sm:gap-2">
                       <a
                         href={`/product/${v.brand}/${v.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
+                        className="p-1.5 sm:p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
                         title="Ver publicación"
                       >
                         <span className="material-symbols-outlined !text-base">open_in_new</span>
                       </a>
                       <button
                         onClick={() => setQrVehicle(v)}
-                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
+                        className="p-1.5 sm:p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-gray-100 hover:dark:bg-[#E5E2E3]/10 hover:text-gray-900 hover:dark:text-[#E5E2E3] transition-colors"
                         title="Generar QR"
                       >
                         <span className="material-symbols-outlined !text-base">qr_code_2</span>
                       </button>
                       <button
                         onClick={() => openEdit(v)}
-                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
+                        className="p-1.5 sm:p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-[#D32F2F]/20 hover:text-[#D32F2F] transition-colors"
                       >
                         <span className="material-symbols-outlined !text-base">edit</span>
                       </button>
                       <button
                         onClick={() => handleDelete(v)}
                         disabled={deleting === v.id}
-                        className="p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
+                        className="p-1.5 sm:p-2 bg-gray-100 dark:bg-[#E5E2E3]/5 text-gray-500 dark:text-[#E5E2E3]/40 rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-colors disabled:opacity-50"
                       >
                         <span className="material-symbols-outlined !text-base">delete</span>
                       </button>
